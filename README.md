@@ -70,3 +70,15 @@ The admin login uses the existing `User` records in D1. No default admin passwor
 - Confirm that an unauthorised session cannot access protected APIs.
 
 The Campus Confidential application remains a separate Supabase-backed service and is not migrated or merged into this database.
+
+
+### First Super Admin provisioning (only if needed)
+
+The application does not create a default admin account. If the existing D1 database has no active `SUPER_ADMIN`, use the one-time bootstrap route:
+
+1. Add a temporary Cloudflare Worker secret named `ADMIN_BOOTSTRAP_TOKEN` to `campus-radar-v1`. Use a random value of at least 32 characters.
+2. Send a `POST` request to `/api/admin/bootstrap` with header `x-admin-bootstrap-token: <your-token>` and JSON body containing your chosen `name`, `email` and a strong `password` (at least 12 characters).
+3. Sign in at `/admin/login` using those credentials.
+4. Immediately delete `ADMIN_BOOTSTRAP_TOKEN` from the Worker secrets. The route returns 404 when that secret is absent and refuses to create an account if an active Super Admin already exists.
+
+Never put the token or password in source control, a public issue, or a chat message. Do not use this route to create additional admins.
