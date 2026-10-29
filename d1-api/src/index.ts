@@ -45,19 +45,30 @@ export default {
         const limit = Number.isFinite(requestedLimit)
           ? Math.max(1, Math.min(25, Math.floor(requestedLimit)))
           : 10;
+        const contentType = url.searchParams.get("type")?.trim().toUpperCase();
+        const allowedTypes = new Set(["NEWS", "FEATURE", "OPINION", "THE_RADAR"]);
+        if (contentType && !allowedTypes.has(contentType)) {
+          return Response.json({ error: "Invalid content type" }, { status: 400, headers });
+        }
 
-        const result = await env.DB
-          .prepare(`
-            SELECT
-              id, slug, title, excerpt, contentType,
-              authorName, coverImage, publishedAt
-            FROM Story
-            WHERE status = 'PUBLISHED'
-            ORDER BY publishedAt DESC
-            LIMIT ?
-          `)
-          .bind(limit)
-          .all();
+        const query = contentType
+          ? env.DB.prepare(`
+              SELECT id, slug, title, excerpt, contentType,
+                     authorName, coverImage, publishedAt
+              FROM Story
+              WHERE status = 'PUBLISHED' AND contentType = ?
+              ORDER BY publishedAt DESC
+              LIMIT ?
+            `).bind(contentType, limit)
+          : env.DB.prepare(`
+              SELECT id, slug, title, excerpt, contentType,
+                     authorName, coverImage, publishedAt
+              FROM Story
+              WHERE status = 'PUBLISHED'
+              ORDER BY publishedAt DESC
+              LIMIT ?
+            `).bind(limit);
+        const result = await query.all();
 
         return Response.json(
           { stories: result.results, count: result.results.length },
