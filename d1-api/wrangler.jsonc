@@ -1,0 +1,14 @@
+
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "campus-radar-data-api",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-10-28",
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "campus-radar-db",
+      "database_id": "b0602127-f6e1-4791-916b-dbd37017f389"
+    }
+  ]
+}

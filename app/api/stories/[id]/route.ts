@@ -144,62 +144,79 @@ export async function PATCH(
     );
   }
 
-  const story = await prisma.$transaction(async (tx) => {
-    await tx.storyTag.deleteMany({
+  // Update the story's scalar fields first.
+  await prisma.story.update({
+    where: { id },
+    data: {
+      title: data.title,
+      excerpt: data.excerpt,
+      body: data.body,
+      contentType: data.contentType,
+      origin: data.origin,
+      commercialStatus: data.commercialStatus,
+      authorName:
+        user.role === 'REPORTER'
+          ? existingStory.authorName
+          : data.authorName,
+      authorId:
+        user.role === 'REPORTER'
+          ? existingStory.authorId
+          : data.authorId ?? existingStory.authorId,
+      featured:
+        user.role === 'REPORTER'
+          ? existingStory.featured
+          : data.featured,
+      coverImage: data.coverImage,
+      status: data.status,
+      publishedAt:
+        data.status === 'PUBLISHED'
+          ? existingStory.publishedAt ?? new Date()
+          : null,
+    },
+  });
+
+  // D1-compatible relation updates: no interactive transaction.
+  await prisma.storyTag.deleteMany({
+    where: { storyId: id },
+  });
+
+  for (const tag of data.tags) {
+    await prisma.storyTag.create({
+      data: {
+        storyId: id,
+        tag,
+      },
+    });
+  }
+
+  if (data.galleryImages !== undefined) {
+    await prisma.storyImage.deleteMany({
       where: { storyId: id },
     });
 
-    return tx.story.update({
-      where: { id },
-      data: {
-        title: data.title,
-        excerpt: data.excerpt,
-        body: data.body,
-        contentType: data.contentType,
-        origin: data.origin,
-        commercialStatus: data.commercialStatus,
-        authorName:
-          user.role === 'REPORTER'
-            ? existingStory.authorName
-            : data.authorName,
-        authorId:
-          user.role === 'REPORTER'
-            ? existingStory.authorId
-            : data.authorId ?? existingStory.authorId,
-        featured:
-          user.role === 'REPORTER'
-            ? existingStory.featured
-            : data.featured,
-        coverImage: data.coverImage,
-        status: data.status,
-        publishedAt:
-          data.status === 'PUBLISHED'
-            ? existingStory.publishedAt ?? new Date()
-            : null,
-        tags: {
-          create: data.tags.map((tag) => ({ tag })),
+    for (const [index, image] of data.galleryImages.entries()) {
+      await prisma.storyImage.create({
+        data: {
+          storyId: id,
+          url: image.url,
+          mediaId: image.mediaId || null,
+          altText: image.altText || null,
+          caption: image.caption || null,
+          photographer: image.photographer || null,
+          displayOrder: image.displayOrder ?? index,
         },
-        ...(data.galleryImages !== undefined && {
-          images: {
-            deleteMany: {},
-            create: data.galleryImages.map((image, index) => ({
-              url: image.url,
-              mediaId: image.mediaId || null,
-              altText: image.altText || null,
-              caption: image.caption || null,
-              photographer: image.photographer || null,
-              displayOrder: image.displayOrder ?? index,
-            })),
-          },
-        }),
+      });
+    }
+  }
+
+  const story = await prisma.story.findUnique({
+    where: { id },
+    include: {
+      tags: true,
+      images: {
+        orderBy: { displayOrder: 'asc' },
       },
-      include: {
-        tags: true,
-        images: {
-          orderBy: { displayOrder: 'asc' },
-        },
-      },
-    });
+    },
   });
 
   return NextResponse.json({ data: story });
