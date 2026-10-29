@@ -5,51 +5,99 @@ import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { StoryCard } from '@/components/StoryCard';
 import { LatestFeed } from '@/components/LatestFeed';
-import { prisma } from '@/lib/server/prisma';
 
 export const dynamic = 'force-dynamic';
 
-export default async function Home() {
-  const publishedStories = await prisma.story.findMany({
-    where: {
-      status: 'PUBLISHED',
-      contentType: {
-        in: ['NEWS', 'News'],
-      },
-      publishedAt: {
-        not: null,
-      },
-    },
-    orderBy: [
-      { publishedAt: 'desc' },
-      { createdAt: 'desc' },
-    ],
-    take: 8,
-    select: {
-      id: true,
-      slug: true,
-      title: true,
-      excerpt: true,
-      contentType: true,
-      authorName: true,
-      publishedAt: true,
-      origin: true,
-      commercialStatus: true,
-      coverImage: true,
-    },
+const API_BASE_URL =
+  'https://campus-radar-data-api.campusradarfunaab.workers.dev';
+
+type Story = {
+  id: string;
+  slug: string;
+  title: string;
+  excerpt: string | null;
+  contentType: string;
+  authorName: string | null;
+  coverImage: string | null;
+  publishedAt: string | null;
+};
+
+type RadarItem = {
+  id: string;
+  slug: string;
+  title: string;
+  summary: string | null;
+  kind: string;
+  eventDate: string | null;
+  location: string | null;
+  link: string | null;
+  publishedAt: string | null;
+};
+
+type Opportunity = {
+  id: string;
+  slug: string;
+  title: string;
+  organisation: string | null;
+  type: string;
+  description: string | null;
+  deadline: string | null;
+  applicationUrl: string | null;
+};
+
+async function fetchContent<T>(path: string, key: string): Promise<T[]> {
+  try {
+    const response = await fetch(`${API_BASE_URL}${path}`, {
+      cache: 'no-store',
+    });
+
+    if (!response.ok) {
+      console.error(`Campus Radar API returned ${response.status} for ${path}`);
+      return [];
+    }
+
+    const data = (await response.json()) as Record<string, unknown>;
+    const items = data[key];
+
+    return Array.isArray(items) ? (items as T[]) : [];
+  } catch (error) {
+    console.error(`Unable to fetch ${path} from Campus Radar API`, error);
+    return [];
+  }
+}
+
+const formatDate = (value: string | null) => {
+  if (!value) return '';
+
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) return '';
+
+  return date.toLocaleDateString('en-NG', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+    timeZone: 'Africa/Lagos',
   });
+};
+
+export default async function Home() {
+  const [allStories, radarItems, opportunities] = await Promise.all([
+    fetchContent<Story>('/stories?limit=25', 'stories'),
+    fetchContent<RadarItem>('/radar?limit=5', 'items'),
+    fetchContent<Opportunity>('/opportunities?limit=5', 'opportunities'),
+  ]);
+
+  const publishedStories = allStories
+    .filter(
+      (story) =>
+        ['NEWS', 'News'].includes(story.contentType) &&
+        story.publishedAt !== null
+    )
+    .slice(0, 8);
 
   const topStories = publishedStories.slice(0, 3);
   const latestStories = publishedStories.slice(3, 8);
-
-  const formatDate = (date: Date | null) =>
-    date
-      ? date.toLocaleDateString('en-NG', {
-          day: 'numeric',
-          month: 'short',
-          year: 'numeric',
-        })
-      : '';
 
   return (
     <>
@@ -76,9 +124,9 @@ export default async function Home() {
                     id: topStories[0].id,
                     slug: topStories[0].slug,
                     title: topStories[0].title,
-                    excerpt: topStories[0].excerpt,
+                    excerpt: topStories[0].excerpt ?? '',
                     category: 'News',
-                    author: topStories[0].authorName,
+                   author: topStories[0].authorName ?? 'Campus Radar',
                     date: formatDate(topStories[0].publishedAt),
                     readTime: '',
                     origin: 'Editorial',
@@ -91,10 +139,7 @@ export default async function Home() {
               <div className="grid content-start divide-y divide-[var(--line)]">
                 {topStories.slice(1).map((story) => (
                   <article key={story.id} className="py-3 first:pt-0">
-                    <Link
-                      href={`/news/${story.slug}`}
-                      className="group block"
-                    >
+                    <Link href={`/news/${story.slug}`} className="group block">
                       <p className="kicker text-[var(--muted)]">
                         {formatDate(story.publishedAt)}
                       </p>
@@ -160,42 +205,121 @@ export default async function Home() {
           <LatestFeed />
         </section>
 
-        {/* The Radar - Coming Soon */}
+        {/* The Radar */}
         <section className="container py-6">
-          <div className="mb-3 border-b border-[var(--line)] pb-2">
-            <p className="kicker text-[#173B87]">Quick updates</p>
-            <h2 className="text-xl font-black">The Radar</h2>
+          <div className="mb-3 flex items-center justify-between border-b border-[var(--line)] pb-2">
+            <div>
+              <p className="kicker text-[#173B87]">Quick updates</p>
+              <h2 className="text-xl font-black">The Radar</h2>
+            </div>
+            <Link
+              href="/radar"
+              className="text-sm font-bold text-[#173B87] underline underline-offset-4"
+            >
+              View all
+            </Link>
           </div>
 
-          <div className="rounded-lg border border-[var(--line)] bg-[#F8FAFC] px-5 py-6 text-center">
-            <p className="text-sm font-bold text-[#173B87]">
-              Coming Soon
+          {radarItems.length > 0 ? (
+            <div className="divide-y divide-[var(--line)]">
+              {radarItems.map((item) => (
+                <article key={item.id} className="py-3">
+                  <p className="kicker text-[var(--muted)]">
+                    {item.kind} {item.publishedAt ? `· ${formatDate(item.publishedAt)}` : ''}
+                  </p>
+                  <h3 className="mt-1 font-bold leading-snug">
+                    {item.link ? (
+                      <a href={item.link} className="hover:text-[#173B87]">
+                        {item.title}
+                      </a>
+                    ) : (
+                      item.title
+                    )}
+                  </h3>
+                  {item.summary && (
+                    <p className="mt-1 text-sm text-[var(--muted)]">
+                      {item.summary}
+                    </p>
+                  )}
+                  {(item.eventDate || item.location) && (
+                    <p className="mt-1 text-xs text-[var(--muted)]">
+                      {item.eventDate ? formatDate(item.eventDate) : ''}
+                      {item.eventDate && item.location ? ' · ' : ''}
+                      {item.location ?? ''}
+                    </p>
+                  )}
+                </article>
+              ))}
+            </div>
+          ) : (
+            <p className="py-4 text-sm text-[var(--muted)]">
+              Published campus updates will appear here.
             </p>
-            <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-[var(--muted)]">
-              We’re preparing a dedicated space for campus updates,
-              announcements and events. Check back soon.
-            </p>
-          </div>
+          )}
         </section>
 
-        {/* Opportunities - Coming Soon */}
+        {/* Opportunities */}
         <section className="border-y border-[var(--line)] bg-white">
           <div className="container py-6">
-            <div className="mb-3 border-b border-[var(--line)] pb-2">
-              <p className="kicker text-[#173B87]">For students</p>
-              <h2 className="text-xl font-black">Opportunities</h2>
+            <div className="mb-3 flex items-center justify-between border-b border-[var(--line)] pb-2">
+              <div>
+                <p className="kicker text-[#173B87]">For students</p>
+                <h2 className="text-xl font-black">Opportunities</h2>
+              </div>
+              <Link
+                href="/opportunities"
+                className="text-sm font-bold text-[#173B87] underline underline-offset-4"
+              >
+                View all
+              </Link>
             </div>
 
-            <div className="rounded-lg border border-[var(--line)] bg-[#F8FAFC] px-5 py-6 text-center">
-              <p className="text-sm font-bold text-[#173B87]">
-                Coming Soon
+            {opportunities.length > 0 ? (
+              <div className="grid gap-4 sm:grid-cols-2">
+                {opportunities.map((opportunity) => (
+                  <article
+                    key={opportunity.id}
+                    className="rounded-lg border border-[var(--line)] p-4"
+                  >
+                    <p className="kicker text-[#173B87]">
+                      {opportunity.type}
+                    </p>
+                    <h3 className="mt-2 font-bold leading-snug">
+                      {opportunity.title}
+                    </h3>
+                    {opportunity.organisation && (
+                      <p className="mt-1 text-sm text-[var(--muted)]">
+                        {opportunity.organisation}
+                      </p>
+                    )}
+                    {opportunity.description && (
+                      <p className="mt-2 text-sm leading-6 text-[var(--muted)]">
+                        {opportunity.description}
+                      </p>
+                    )}
+                    {opportunity.deadline && (
+                      <p className="mt-3 text-xs font-semibold">
+                        Deadline: {formatDate(opportunity.deadline)}
+                      </p>
+                    )}
+                    {opportunity.applicationUrl && (
+                      <a
+                        href={opportunity.applicationUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="mt-3 inline-block text-sm font-bold text-[#173B87] underline underline-offset-4"
+                      >
+                        View opportunity
+                      </a>
+                    )}
+                  </article>
+                ))}
+              </div>
+            ) : (
+              <p className="py-4 text-sm text-[var(--muted)]">
+                Published opportunities will appear here.
               </p>
-              <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-[var(--muted)]">
-                We’re working on a collection of scholarships,
-                internships, fellowships and other opportunities
-                for FUNAAB students. Check back soon.
-              </p>
-            </div>
+            )}
           </div>
         </section>
 
