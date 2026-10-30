@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getSupabaseAdmin } from '@/lib/server/supabase';
+import { getSupabaseAdmin, toCamelCase } from '@/lib/server/supabase';
 import { slugify } from '@/lib/server/slug';
 import { requireRole } from '@/lib/server/auth';
 import { storySchema } from '@/lib/validation/content';
@@ -24,7 +24,7 @@ export async function GET(request: NextRequest) {
   if (type) query = query.eq('content_type', type);
   const { data, error } = await query;
   if (error) return NextResponse.json({ error: 'Could not load stories' }, { status: 500 });
-  return NextResponse.json({ data: data ?? [] });
+  return NextResponse.json({ data: toCamelCase(data ?? []) });
 }
 
 export async function POST(request: NextRequest) {
@@ -52,5 +52,5 @@ export async function POST(request: NextRequest) {
   if (tags.length) { const r=await db.from('story_tags').insert(tags); if(r.error){await db.from('stories').delete().eq('id',story.id);return NextResponse.json({error:'Could not save story tags'},{status:500});} }
   if (images.length) { const r=await db.from('story_images').insert(images); if(r.error){await db.from('stories').delete().eq('id',story.id);return NextResponse.json({error:'Could not save story images'},{status:500});} }
   const {data:complete}=await db.from('stories').select('*, tags:story_tags(*), images:story_images(*)').eq('id',story.id).single();
-  return NextResponse.json({data:complete??story},{status:201});
+  return NextResponse.json({data:toCamelCase(complete??story)},{status:201});
 }
