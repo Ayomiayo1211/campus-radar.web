@@ -113,7 +113,7 @@ create table public.submissions (
   body text not null,
   source text not null default 'WEBSITE',
   status text not null default 'PENDING',
-  reviewed_by uuid references public.users(id) on delete set null,
+  reviewed_by text,
   reviewed_at timestamptz,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
