@@ -1,29 +1,8 @@
 import { NextResponse } from 'next/server';
-
-import { prisma } from '@/lib/server/prisma';
+import { getSupabaseAdmin } from '@/lib/server/supabase';
 import { requireRole } from '@/lib/server/auth';
-
-export async function GET() {
-  try {
-    await requireRole([
-      'SUPER_ADMIN',
-      'EDITOR',
-      'REPORTER',
-    ]);
-  } catch {
-    return NextResponse.json(
-      { error: 'Unauthorized' },
-      { status: 401 }
-    );
-  }
-
-  const media = await prisma.media.findMany({
-    orderBy: {
-      createdAt: 'desc',
-    },
-  });
-
-  return NextResponse.json({
-    data: media,
-  });
+export async function GET(){
+ try{await requireRole(['SUPER_ADMIN','EDITOR','REPORTER']);}catch{return NextResponse.json({error:'Unauthorized'},{status:401});}
+ const {data,error}=await getSupabaseAdmin().from('media').select('*').order('created_at',{ascending:false});
+ if(error)return NextResponse.json({error:'Could not load media'},{status:500});return NextResponse.json({data:data??[]});
 }
