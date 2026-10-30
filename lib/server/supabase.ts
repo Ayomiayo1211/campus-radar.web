@@ -17,3 +17,11 @@ export function getSupabaseAdmin() {
 
   return client;
 }
+
+export function toCamelCase(value: any): any {
+  if (Array.isArray(value)) return value.map(toCamelCase);
+  if (value && typeof value === 'object' && !(value instanceof Date)) {
+    return Object.fromEntries(Object.entries(value).map(([key, item]) => [key.replace(/_([a-z])/g, (_, c) => c.toUpperCase()), toCamelCase(item)]));
+  }
+  return value;
+}
