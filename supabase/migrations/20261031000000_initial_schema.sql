@@ -134,6 +134,7 @@ create table public.ad_campaigns (
   constraint ad_campaigns_valid_dates check (ends_at >= starts_at)
 );
 
+create index stories_author_id_idx on public.stories(author_id);
 create index stories_status_published_at_idx on public.stories(status, published_at);
 create index stories_content_type_status_idx on public.stories(content_type, status);
 create index story_tags_story_id_idx on public.story_tags(story_id);
