@@ -1,83 +1,17 @@
-
-import { NextRequest, NextResponse } from 'next/server';
-
-import { prisma } from '@/lib/server/prisma';
+import { NextRequest,NextResponse } from 'next/server';
+import { getSupabaseAdmin } from '@/lib/server/supabase';
 import { requireRole } from '@/lib/server/auth';
 import { submissionSchema } from '@/lib/validation/content';
-
-const REVIEW_ROLES = ['SUPER_ADMIN', 'EDITOR'] as const;
-
-export async function GET(request: NextRequest) {
-  try {
-    await requireRole([...REVIEW_ROLES]);
-  } catch {
-    return NextResponse.json(
-      { error: 'Unauthorized' },
-      { status: 401 }
-    );
-  }
-
-  const { searchParams } = new URL(request.url);
-  const status = searchParams.get('status');
-  const limitParam = Number(searchParams.get('limit') ?? 20);
-
-  const limit = Number.isFinite(limitParam)
-    ? Math.min(Math.max(Math.floor(limitParam), 1), 50)
-    : 20;
-
-  const submissions = await prisma.submission.findMany({
-    where: status
-      ? { status: status.trim().toUpperCase() }
-      : undefined,
-    orderBy: { createdAt: 'desc' },
-    take: limit,
-  });
-
-  return NextResponse.json({ data: submissions });
+const REVIEW_ROLES=['SUPER_ADMIN','EDITOR'] as const;
+export async function GET(request:NextRequest){
+ try{await requireRole([...REVIEW_ROLES]);}catch{return NextResponse.json({error:'Unauthorized'},{status:401});}
+ const p=request.nextUrl.searchParams,status=p.get('status'),n=Number(p.get('limit')??20),limit=Number.isFinite(n)?Math.min(Math.max(Math.floor(n),1),50):20;
+ let q=getSupabaseAdmin().from('submissions').select('*').order('created_at',{ascending:false}).limit(limit);if(status)q=q.eq('status',status.trim().toUpperCase());
+ const {data,error}=await q;if(error)return NextResponse.json({error:'Could not load submissions'},{status:500});return NextResponse.json({data:data??[]});
 }
-
-export async function POST(request: NextRequest) {
-  let body: unknown;
-
-  try {
-    body = await request.json();
-  } catch {
-    return NextResponse.json(
-      { error: 'Invalid JSON body' },
-      { status: 400 }
-    );
-  }
-
-  const parsed = submissionSchema.safeParse(body);
-
-  if (!parsed.success) {
-    return NextResponse.json(
-      {
-        error: 'Invalid submission',
-        details: parsed.error.flatten(),
-      },
-      { status: 400 }
-    );
-  }
-
-  const data = parsed.data;
-
-  const submission = await prisma.submission.create({
-    data: {
-      type: data.type,
-      name: data.name,
-      contact: data.contact,
-      title: data.title,
-      body: data.body,
-      status: 'PENDING',
-    },
-  });
-
-  return NextResponse.json(
-    {
-      message: 'Submission received successfully',
-      data: { id: submission.id, status: submission.status },
-    },
-    { status: 201 }
-  );
+export async function POST(request:NextRequest){
+ let body:unknown;try{body=await request.json();}catch{return NextResponse.json({error:'Invalid JSON body'},{status:400});}
+ const parsed=submissionSchema.safeParse(body);if(!parsed.success)return NextResponse.json({error:'Invalid submission',details:parsed.error.flatten()},{status:400});
+ const d=parsed.data;const {data,error}=await getSupabaseAdmin().from('submissions').insert({type:d.type,name:d.name??null,contact:d.contact??null,title:d.title??null,body:d.body,status:'PENDING',source:'WEBSITE'}).select('id,status').single();
+ if(error)return NextResponse.json({error:'Could not save submission'},{status:500});return NextResponse.json({message:'Submission received successfully',data},{status:201});
 }
