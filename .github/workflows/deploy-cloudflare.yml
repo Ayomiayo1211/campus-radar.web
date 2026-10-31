@@ -1,0 +1,35 @@
+name: Deploy Campus Radar
+on:
+  workflow_dispatch:
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm install --no-audit --no-fund
+      - name: Configure Worker secrets
+        env:
+          CF_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CF_ACCOUNT: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          DB_SECRET: ${{ secrets.SUPABASE_SECRET_KEY }}
+          SESSION_SECRET: ${{ secrets.AUTH_SECRET }}
+          CLOUDINARY_URL: ${{ secrets.CLOUDINARY_URL }}
+        run: |
+          test -n "$CF_TOKEN"
+          test -n "$CF_ACCOUNT"
+          test -n "$DB_SECRET"
+          test -n "$SESSION_SECRET"
+          test -n "$CLOUDINARY_URL"
+          printf '%s' "$DB_SECRET" | npx wrangler secret put SUPABASE_SECRET_KEY
+          printf '%s' "$SESSION_SECRET" | npx wrangler secret put AUTH_SECRET
+          printf '%s' "$CLOUDINARY_URL" | npx wrangler secret put CLOUDINARY_URL
+      - name: Build and deploy
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: npm run deploy
