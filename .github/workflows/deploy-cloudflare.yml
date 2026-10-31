@@ -1,8 +1,12 @@
 name: Deploy Campus Radar
 on:
   workflow_dispatch:
+  workflow_run:
+    workflows: [Migrate legacy D1 content to Supabase]
+    types: [completed]
 jobs:
   deploy:
+    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     environment: production
     steps:
