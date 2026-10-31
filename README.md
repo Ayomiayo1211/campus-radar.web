@@ -23,6 +23,10 @@ npm run dev
 
 Set `NEXT_PUBLIC_CONFIDENTIAL_URL` to the real Campus Confidential application URL before launch. Do not hard-code or invent the destination.
 
+## Supabase migration status
+
+The initial PostgreSQL schema is in `supabase/migrations`. The API migration is in progress. Configure `NEXT_PUBLIC_SUPABASE_URL`, `SUPABASE_SECRET_KEY`, and `AUTH_SECRET` in the deployment environment before using the migrated API routes. The secret key is server-only and must never be exposed to browser code. The current custom newsroom session remains in place while user records move to the `public.users` table.
+
 ## Next build stages
 
 1. Content model and database
