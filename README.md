@@ -30,9 +30,8 @@ Public Supabase URL and publishable key are configured in `wrangler.jsonc`. The 
 - `CLOUDFLARE_ACCOUNT_ID`
 - `SUPABASE_SECRET_KEY`
 - `AUTH_SECRET` (at least 32 random characters)
-- `CLOUDINARY_URL`
 
-Run the **Deploy Campus Radar** workflow manually after the secrets are configured. It installs dependencies, writes the server secrets to the Worker, then builds and deploys the OpenNext application.
+Run the **Deploy Campus Radar** workflow manually after the secrets are configured. It installs dependencies, writes the server secrets to the Worker, then builds and deploys the OpenNext application. The `AUTH_SECRET` is generated on the first deployment if it does not already exist.
 
 ## Initial newsroom administrator
 
