@@ -36,9 +36,11 @@ After the migration code is merged, the **Migrate legacy D1 content to Supabase*
 
 Add the GitHub Actions secrets `ADMIN_NAME`, `ADMIN_EMAIL`, and `ADMIN_PASSWORD`. After a successful deployment, the **Bootstrap Campus Radar Super Admin** workflow runs automatically; it can also be run manually. Use a unique password of at least 12 characters. The workflow hashes the password and creates or updates the Super Admin record without exposing credentials in source control.
 
-## Data migration status
+## Cutover sequence
 
-The Supabase schema and media bucket are applied. The application API migration and automatic cutover workflows are in the pending pull request. Existing records in the former Cloudflare D1 database have **not** yet been imported. The migration workflow leaves the source D1 database unchanged, uses stable IDs and deterministic storage paths so interrupted imports can be retried, and verifies imported rows before deployment. Do not delete or reset the D1 database until record counts and image availability have been verified.
+After merge to `master`, the legacy D1 import runs automatically. It imports newsroom records with stable IDs, transfers supported Cloudinary images into Supabase Storage, verifies every imported row, and leaves the source D1 database unchanged. A successful import triggers the Cloudflare deployment; a successful deployment triggers initial Super Admin provisioning when the administrator secrets are configured.
+
+Do not delete or reset the legacy D1 database until the migration and image availability have been checked in GitHub Actions. The workflows can also be run manually from the Actions tab.
 
 ## Verification
 
