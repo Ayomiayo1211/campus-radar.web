@@ -2,10 +2,6 @@
 
 import { FormEvent, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { redirect } from 'next/navigation';
-
-import { getSession } from '@/lib/server/auth';
-
 export default function AdminLoginPage() {
   const router = useRouter();
 
