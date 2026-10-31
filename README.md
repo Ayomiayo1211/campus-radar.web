@@ -39,7 +39,7 @@ After the Worker secrets are configured, run `scripts/bootstrap-admin.mjs` once 
 
 ## Data migration status
 
-The Supabase schema is applied. The application API migration is in progress. Existing records in the former Cloudflare D1 database have **not** yet been imported. The manual migration workflow is provided; do not delete or reset the D1 database until its import and record counts have been verified.
+The Supabase schema is applied. The application API migration is in progress. Existing records in the former Cloudflare D1 database have **not** yet been imported. The manual migration workflow imports the newsroom records, copies supported legacy Cloudinary images into Supabase Storage, and leaves the source D1 database unchanged. It uses stable IDs and deterministic storage paths so interrupted imports can be retried. Do not delete or reset the D1 database until record counts and image availability have been verified.
 
 ## Verification
 
