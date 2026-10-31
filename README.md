@@ -30,7 +30,7 @@ Public Supabase URL and publishable key are configured in `wrangler.jsonc`. The 
 - `CLOUDFLARE_ACCOUNT_ID`
 - `SUPABASE_SECRET_KEY`
 
-First run the **Migrate legacy D1 content to Supabase** workflow. It reads the old D1 database without modifying it and imports the existing newsroom records into Supabase using stable IDs, so a retry does not create duplicate rows. Verify the imported counts before proceeding. Then run the **Deploy Campus Radar** workflow. It installs dependencies, writes the Supabase server secret to the Worker, generates a stable `AUTH_SECRET` on first deployment if needed, then builds and deploys the OpenNext application.
+After the migration code is merged, the **Migrate legacy D1 content to Supabase** workflow runs automatically. It reads the old D1 database without modifying it, imports newsroom records using stable IDs, copies supported Cloudinary images into Supabase Storage, and verifies every imported row. A successful verified migration triggers **Deploy Campus Radar** automatically. The deployment installs locked dependencies, writes the Supabase server secret to the Worker, generates a stable `AUTH_SECRET` on first deployment if needed, then builds and deploys the OpenNext application. Both workflows can also be run manually.
 
 ## Initial newsroom administrator
 
@@ -38,8 +38,8 @@ Add the GitHub Actions secrets `ADMIN_NAME`, `ADMIN_EMAIL`, and `ADMIN_PASSWORD`
 
 ## Data migration status
 
-The Supabase schema and media bucket are applied. The application API migration is implemented in the pending pull request. Existing records in the former Cloudflare D1 database have **not** yet been imported. The manual migration workflow imports the newsroom records, copies supported legacy Cloudinary images into Supabase Storage, and leaves the source D1 database unchanged. It uses stable IDs and deterministic storage paths so interrupted imports can be retried. Do not delete or reset the D1 database until record counts and image availability have been verified.
+The Supabase schema and media bucket are applied. The application API migration and automatic cutover workflows are in the pending pull request. Existing records in the former Cloudflare D1 database have **not** yet been imported. The migration workflow leaves the source D1 database unchanged, uses stable IDs and deterministic storage paths so interrupted imports can be retried, and verifies imported rows before deployment. Do not delete or reset the D1 database until record counts and image availability have been verified.
 
 ## Verification
 
-A GitHub Actions build workflow runs on pull requests and migration-branch pushes. Production deployment and live newsroom testing remain pending until the required account secrets are configured, the D1 content migration is verified, and the initial Super Admin is provisioned.
+A GitHub Actions build workflow runs on pull requests and pushes to `master`. Production deployment and live newsroom testing remain pending until the required account secrets are configured, the D1 content migration is verified, and the initial Super Admin is provisioned.
