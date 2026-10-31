@@ -1,0 +1,30 @@
+name: Bootstrap Campus Radar Super Admin
+
+on:
+  workflow_dispatch:
+
+jobs:
+  bootstrap:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Install dependencies
+        run: npm ci
+      - name: Create or update the initial Super Admin
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: https://wypsdhgrzkvtbfwuwgre.supabase.co
+          SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}
+          ADMIN_NAME: ${{ secrets.ADMIN_NAME }}
+          ADMIN_EMAIL: ${{ secrets.ADMIN_EMAIL }}
+          ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
+        run: |
+          test -n "$SUPABASE_SECRET_KEY" || (echo "Missing SUPABASE_SECRET_KEY" && exit 1)
+          test -n "$ADMIN_NAME" || (echo "Missing ADMIN_NAME" && exit 1)
+          test -n "$ADMIN_EMAIL" || (echo "Missing ADMIN_EMAIL" && exit 1)
+          test -n "$ADMIN_PASSWORD" || (echo "Missing ADMIN_PASSWORD" && exit 1)
+          node scripts/bootstrap-admin.mjs
