@@ -1,5 +1,16 @@
 name: Deploy Campus Radar
 on:
+  push:
+    branches: [master]
+    paths:
+      - 'app/**'
+      - 'lib/**'
+      - 'scripts/bootstrap-admin.mjs'
+      - 'supabase/migrations/**'
+      - 'wrangler.jsonc'
+      - 'package.json'
+      - 'package-lock.json'
+      - '.github/workflows/deploy-cloudflare.yml'
   workflow_dispatch:
   workflow_run:
     workflows: [Migrate legacy D1 content to Supabase]
