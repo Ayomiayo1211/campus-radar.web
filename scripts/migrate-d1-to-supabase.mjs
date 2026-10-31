@@ -143,14 +143,13 @@ async function migrateLegacyImage(value) {
   if (parsed.protocol !== 'https:' || parsed.hostname !== 'res.cloudinary.com') return value;
   if (migratedImageUrls.has(value)) return migratedImageUrls.get(value);
   const response = await fetch(value);
-  if (!response.ok) { console.warn(`Could not download legacy image (${response.status}); keeping original URL: ${value}`); return value; }
+  if (!response.ok) throw new Error(`Could not download legacy image (${response.status}): ${value}`);
   const contentType = (response.headers.get('content-type') || '').split(';')[0].toLowerCase();
   const extensionByType = { 'image/jpeg': 'jpg', 'image/png': 'png', 'image/webp': 'webp', 'image/gif': 'gif' };
   const extension = extensionByType[contentType];
   const bytes = new Uint8Array(await response.arrayBuffer());
   if (!extension || !bytes.length || bytes.length > 10 * 1024 * 1024) {
-    console.warn(`Legacy image is unsupported or exceeds 10 MB; keeping original URL: ${value}`);
-    return value;
+    throw new Error(`Legacy image is unsupported or exceeds 10 MB: ${value}`);
   }
   const path = `legacy/${await stableId('MediaUrl', value)}.${extension}`;
   const { error } = await supabase.storage.from('campus-radar-media').upload(path, bytes, {
