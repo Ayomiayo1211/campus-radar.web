@@ -19,16 +19,13 @@
 			"service": "campus-radar-v1"
 		}
 	],
+	"vars": {
+		"NEXT_PUBLIC_SUPABASE_URL": "https://wypsdhgrzkvtbfwuwgre.supabase.co",
+		"NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY": "sb_publishable_Ja2_PrzoFxmCsVxIUn9pSg_2znNlnLv"
+	},
 	"images": {
 		// Enable image optimization
 		// see https://opennext.js.org/cloudflare/howtos/image
 		"binding": "IMAGES"
 	},
-	"d1_databases": [
-		{
-			"binding": "campus_radar_db",
-			"database_name": "campus-radar-db",
-			"database_id": "b0602127-f6e1-4791-916b-dbd37017f389"
-		}
-	]
 }
