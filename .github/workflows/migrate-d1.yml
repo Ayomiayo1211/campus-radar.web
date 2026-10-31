@@ -2,6 +2,10 @@ name: Migrate legacy D1 content to Supabase
 
 on:
   workflow_dispatch:
+  push:
+    branches: [master]
+    paths:
+      - scripts/migrate-d1-to-supabase.mjs
 
 jobs:
   migrate:
