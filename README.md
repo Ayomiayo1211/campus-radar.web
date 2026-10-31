@@ -26,12 +26,12 @@ The application uses Supabase PostgreSQL for newsroom data and Cloudflare Worker
 
 Public Supabase URL and publishable key are configured in `wrangler.jsonc`. The Cloudflare deployment workflow expects these GitHub Actions secrets in the `production` environment:
 
-- `CLOUDFLARE_API_TOKEN`
+- `CLOUDFLARE_API_TOKEN` (Workers Scripts:Edit and D1:Edit permissions on the Campus Radar account)
 - `CLOUDFLARE_ACCOUNT_ID`
 - `SUPABASE_SECRET_KEY`
 - `AUTH_SECRET` (at least 32 random characters)
 
-Run the **Deploy Campus Radar** workflow manually after the secrets are configured. It installs dependencies, writes the server secrets to the Worker, then builds and deploys the OpenNext application. The `AUTH_SECRET` is generated on the first deployment if it does not already exist.
+First run the **Migrate legacy D1 content to Supabase** workflow. It reads the old D1 database without modifying it and imports the existing newsroom records into Supabase using stable IDs, so a retry does not create duplicate rows. Verify the imported counts before proceeding. Then run the **Deploy Campus Radar** workflow. It installs dependencies, writes the Supabase server secret to the Worker, generates a stable `AUTH_SECRET` on first deployment if needed, then builds and deploys the OpenNext application.
 
 ## Initial newsroom administrator
 
@@ -39,7 +39,7 @@ After the Worker secrets are configured, run `scripts/bootstrap-admin.mjs` once 
 
 ## Data migration status
 
-The Supabase schema is applied. The application API migration is in progress. Existing records in the former Cloudflare D1 database have **not** yet been imported; do not delete or reset the D1 database until its contents have been inspected, exported, imported and verified in Supabase.
+The Supabase schema is applied. The application API migration is in progress. Existing records in the former Cloudflare D1 database have **not** yet been imported. The manual migration workflow is provided; do not delete or reset the D1 database until its import and record counts have been verified.
 
 ## Verification
 
