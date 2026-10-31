@@ -5,39 +5,29 @@ import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { StoryCard } from '@/components/StoryCard';
 import { LatestFeed } from '@/components/LatestFeed';
-import { prisma } from '@/lib/server/prisma';
+import { getSupabaseAdmin } from '@/lib/server/supabase';
 
 export const dynamic = 'force-dynamic';
 
 export default async function Home() {
-  const publishedStories = await prisma.story.findMany({
-    where: {
-      status: 'PUBLISHED',
-      contentType: {
-        in: ['NEWS', 'News'],
-      },
-      publishedAt: {
-        not: null,
-      },
-    },
-    orderBy: [
-      { publishedAt: 'desc' },
-      { createdAt: 'desc' },
-    ],
-    take: 8,
-    select: {
-      id: true,
-      slug: true,
-      title: true,
-      excerpt: true,
-      contentType: true,
-      authorName: true,
-      publishedAt: true,
-      origin: true,
-      commercialStatus: true,
-      coverImage: true,
-    },
-  });
+  const { data: rows, error } = await getSupabaseAdmin()
+    .from('stories')
+    .select('id,slug,title,excerpt,content_type,author_name,published_at,origin,commercial_status,cover_image')
+    .eq('status', 'PUBLISHED')
+    .in('content_type', ['NEWS', 'News'])
+    .not('published_at', 'is', null)
+    .order('published_at', { ascending: false })
+    .order('created_at', { ascending: false })
+    .limit(8);
+
+  if (error) console.error('Home page stories query failed:', error.message);
+  const publishedStories = (rows ?? []).map((story) => ({
+    id: story.id, slug: story.slug, title: story.title, excerpt: story.excerpt,
+    contentType: story.content_type, authorName: story.author_name,
+    publishedAt: story.published_at ? new Date(story.published_at) : null,
+    origin: story.origin, commercialStatus: story.commercial_status,
+    coverImage: story.cover_image,
+  }));
 
   const topStories = publishedStories.slice(0, 3);
   const latestStories = publishedStories.slice(3, 8);
