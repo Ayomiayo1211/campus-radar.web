@@ -166,6 +166,7 @@ const legacyImageUrls = new Set([
   ...source.Story.map(row => row.coverImage),
   ...source.StoryImage.map(row => row.url),
   ...source.RadarItem.map(row => row.coverImage),
+  ...source.AdCampaign.map(row => row.creativeUrl),
 ].filter(value => typeof value === 'string' && value.startsWith('https://res.cloudinary.com/')));
 for (const oldUrl of legacyImageUrls) await migrateLegacyImage(oldUrl);
 
@@ -198,6 +199,13 @@ for (const old of source.RadarItem) {
   if (nextUrl) {
     const { error } = await supabase.from('radar_items').update({ cover_image: nextUrl }).eq('id', ids.RadarItem.get(String(old.id)));
     if (error) throw new Error(`Could not update migrated Radar cover: ${error.message}`);
+  }
+}
+for (const old of source.AdCampaign) {
+  const nextUrl = migratedImageUrls.get(old.creativeUrl);
+  if (nextUrl) {
+    const { error } = await supabase.from('ad_campaigns').update({ creative_url: nextUrl }).eq('id', ids.AdCampaign.get(String(old.id)));
+    if (error) throw new Error(`Could not update migrated campaign creative: ${error.message}`);
   }
 }
 console.log(`Legacy Cloudinary images migrated to Supabase Storage: ${migratedImageUrls.size}`);
