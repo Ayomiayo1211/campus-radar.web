@@ -11,7 +11,7 @@ export async function GET() {
  const db=getSupabaseAdmin();
  const [{data:users,error},{data:invitations,error:inviteError}]=await Promise.all([
   db.from('users').select('id,name,email,role,is_active,created_at').order('created_at',{ascending:true}),
-  db.from('admin_invitations').select('id,email,role,expires_at,created_at').is('accepted_at',null).is('revoked_at',null).gt('expires_at',new Date().toISOString()).order('created_at',{ascending:false})
+  (db as any).from('admin_invitations').select('id,email,role,expires_at,created_at').is('accepted_at',null).is('revoked_at',null).gt('expires_at',new Date().toISOString()).order('created_at',{ascending:false})
  ]);
  if(error||inviteError)return NextResponse.json({error:'Could not load account management data'},{status:500});
  return NextResponse.json({users:(users??[]).map(safe),invitations:invitations??[]});
