@@ -2,38 +2,46 @@
 
 Campus Radar is a student-focused media and information platform for the Federal University of Agriculture, Abeokuta (FUNAAB).
 
-## Current direction
+## Product structure
 
 - Newsroom-led editorial content
-- The Radar as the campus pulse for events, updates, announcements and useful information
+- The Radar for campus updates, events, announcements and campus life
 - Opportunities as a structured information type
-- Campus Confidential as a separate anonymous reporting application
 - Podcast as a distribution hub linking to listening platforms
 - Commercial content distinguished from editorial content
-- No public admin login or admin navigation
+- Campus Confidential remains a separate application; set its real URL through `NEXT_PUBLIC_CONFIDENTIAL_URL`
 
-## Run locally
+## Local development
 
 ```bash
 npm install
 npm run dev
-```
+``
 
-## Confidential integration
+Copy `.env.example` to `.env.local` and set the server-only values before testing protected API routes. Never expose `SUPABASE_SECRET_KEY` or `AUTH_SECRET` in browser code or commit their values.
 
-Set `NEXT_PUBLIC_CONFIDENTIAL_URL` to the real Campus Confidential application URL before launch. Do not hard-code or invent the destination.
+## Backend and deployment
 
-## Supabase migration status
+The application uses Supabase PostgreSQL for newsroom data and Cloudflare Workers (OpenNext) for hosting. The schema migrations are in `supabase/migrations`. Row-level security is enabled on the application tables; direct client table privileges are revoked. Application data access is server-side through the Supabase secret key.
 
-The initial PostgreSQL schema is in `supabase/migrations`. The API migration is in progress. Configure `NEXT_PUBLIC_SUPABASE_URL`, `SUPABASE_SECRET_KEY`, and `AUTH_SECRET` in the deployment environment before using the migrated API routes. The secret key is server-only and must never be exposed to browser code. The current custom newsroom session remains in place while user records move to the `public.users` table.
+Public Supabase URL and publishable key are configured in `wrangler.jsonc`. The Cloudflare deployment workflow expects these GitHub Actions secrets in the `production` environment:
 
-## Next build stages
+- `CLOUDFLARE_API_TOKEN` (Workers Scripts:Edit and D1:Edit permissions on the Campus Radar account)
+- `CLOUDFLARE_ACCOUNT_ID`
+- `SUPABASE_SECRET_KEY`
 
-1. Content model and database
-2. Separate admin/newsroom application
-3. Authentication and roles
-4. Editorial workflow and moderation
-5. Media storage
-6. Public submissions
-7. Advertising/promoted/sponsored content management
-8. Production deployment
+After the migration code is merged, the **Migrate legacy D1 content to Supabase** workflow runs automatically. It reads the old D1 database without modifying it, imports newsroom records using stable IDs, copies supported Cloudinary images into Supabase Storage, and verifies every imported row. A successful verified migration triggers **Deploy Campus Radar** automatically. The deployment installs locked dependencies, writes the Supabase server secret to the Worker, generates a stable `AUTH_SECRET` on first deployment if needed, then builds and deploys the OpenNext application. Both workflows can also be run manually.
+
+## Initial newsroom administrator
+
+Add the GitHub Actions secrets `ADMIN_NAME`, `ADMIN_EMAIL`, and `ADMIN_PASSWORD`. After a successful deployment, the **Bootstrap Campus Radar Super Admin** workflow runs automatically; it can also be run manually. Use a unique password of at least 12 characters. The workflow hashes the password and creates or updates the Super Admin record without exposing credentials in source control.
+
+## Cutover sequence
+
+After merge to `master`, the legacy D1 import runs automatically. It imports newsroom records with stable IDs, transfers supported Cloudinary images into Supabase Storage, verifies every imported row, and leaves the source D1 database unchanged. A successful import triggers the Cloudflare deployment; a successful deployment triggers initial Super Admin provisioning when the administrator secrets are configured.
+
+Do not delete or reset the legacy D1 database until the migration and image availability have been checked in GitHub Actions. The workflows can also be run manually from the Actions tab.
+
+## Verification
+
+A GitHub Actions build workflow runs on pull requests and pushes to `master`. Production deployment and live newsroom testing remain pending until the required account secrets are configured, the D1 content migration is verified, and the initial Super Admin is provisioned.

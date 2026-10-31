@@ -1,0 +1,36 @@
+name: Deploy Campus Radar
+on:
+  workflow_dispatch:
+  workflow_run:
+    workflows: [Migrate legacy D1 content to Supabase]
+    types: [completed]
+jobs:
+  deploy:
+    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Configure Worker secrets
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          DB_SECRET: ${{ secrets.SUPABASE_SECRET_KEY }}
+        run: |
+          test -n "$CLOUDFLARE_API_TOKEN"
+          test -n "$CLOUDFLARE_ACCOUNT_ID"
+          test -n "$DB_SECRET"
+          printf '%s' "$DB_SECRET" | npx wrangler secret put SUPABASE_SECRET_KEY
+          if ! npx wrangler secret list | grep -q 'AUTH_SECRET'; then
+            openssl rand -hex 32 | npx wrangler secret put AUTH_SECRET
+          fi
+      - name: Build and deploy
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: npm run deploy

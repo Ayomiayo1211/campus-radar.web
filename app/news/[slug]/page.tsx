@@ -1,7 +1,7 @@
 
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { prisma } from '@/lib/server/prisma';
+import { getSupabaseAdmin } from '@/lib/server/supabase';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 
@@ -16,33 +16,24 @@ export default async function ArticlePage({
 }: ArticlePageProps) {
   const { slug } = await params;
 
-  const story = await prisma.story.findFirst({
-    where: {
-      slug,
-      status: 'PUBLISHED',
-    },
-    select: {
-      title: true,
-      excerpt: true,
-      body: true,
-      authorName: true,
-      publishedAt: true,
-      coverImage: true,
-      contentType: true,
-      images: {
-        orderBy: {
-          displayOrder: 'asc',
-        },
-        select: {
-          id: true,
-          url: true,
-          altText: true,
-          caption: true,
-          photographer: true,
-        },
-      },
-    },
-  });
+  const { data: row, error } = await getSupabaseAdmin()
+    .from('stories')
+    .select('title,excerpt,body,author_name,published_at,cover_image,content_type,images:story_images(id,url,alt_text,caption,photographer,display_order)')
+    .eq('slug', slug)
+    .eq('status', 'PUBLISHED')
+    .maybeSingle();
+  if (error) console.error('Article query failed:', error.message);
+  const story = row ? {
+    title: row.title, excerpt: row.excerpt, body: row.body,
+    authorName: row.author_name,
+    publishedAt: row.published_at ? new Date(row.published_at) : null,
+    coverImage: row.cover_image, contentType: row.content_type,
+    images: (row.images ?? []).map((image) => ({
+      id: image.id, url: image.url, altText: image.alt_text,
+      caption: image.caption, photographer: image.photographer,
+      displayOrder: image.display_order,
+    })).sort((a, b) => a.displayOrder - b.displayOrder),
+  } : null;
 
   if (!story) {
     notFound();

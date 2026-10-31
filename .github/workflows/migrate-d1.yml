@@ -1,0 +1,32 @@
+name: Migrate legacy D1 content to Supabase
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [master]
+    paths:
+      - scripts/migrate-d1-to-supabase.mjs
+
+jobs:
+  migrate:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Import existing D1 records into Supabase
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          D1_DATABASE_ID: b0602127-f6e1-4791-916b-dbd37017f389
+          NEXT_PUBLIC_SUPABASE_URL: https://wypsdhgrzkvtbfwuwgre.supabase.co
+          SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}
+        run: |
+          test -n "$CLOUDFLARE_API_TOKEN" || (echo "Missing CLOUDFLARE_API_TOKEN" && exit 1)
+          test -n "$CLOUDFLARE_ACCOUNT_ID" || (echo "Missing CLOUDFLARE_ACCOUNT_ID" && exit 1)
+          test -n "$SUPABASE_SECRET_KEY" || (echo "Missing SUPABASE_SECRET_KEY" && exit 1)
+          node scripts/migrate-d1-to-supabase.mjs

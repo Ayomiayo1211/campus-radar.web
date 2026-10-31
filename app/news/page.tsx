@@ -1,29 +1,24 @@
 
 import Link from 'next/link';
-import { prisma } from '@/lib/server/prisma';
+import { getSupabaseAdmin } from '@/lib/server/supabase';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 
 export const dynamic = 'force-dynamic';
 
 export default async function NewsPage() {
-  const stories = await prisma.story.findMany({
-    where: {
-      status: 'PUBLISHED',
-      contentType: 'NEWS',
-    },
-    orderBy: {
-      publishedAt: 'desc',
-    },
-    select: {
-      id: true,
-      slug: true,
-      title: true,
-      excerpt: true,
-      authorName: true,
-      publishedAt: true,
-    },
-  });
+  const { data: rows, error } = await getSupabaseAdmin()
+    .from('stories')
+    .select('id,slug,title,excerpt,author_name,published_at')
+    .eq('status', 'PUBLISHED')
+    .eq('content_type', 'NEWS')
+    .order('published_at', { ascending: false });
+  if (error) console.error('News page query failed:', error.message);
+  const stories = (rows ?? []).map((story) => ({
+    ...story,
+    authorName: story.author_name,
+    publishedAt: story.published_at ? new Date(story.published_at) : null,
+  }));
 
   return (
     <>

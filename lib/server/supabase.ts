@@ -1,6 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
+import type { Database } from '@/lib/server/database.types';
 
-let client: ReturnType<typeof createClient> | undefined;
+let client: ReturnType<typeof createClient<Database>> | undefined;
 
 /** Server-only database client. The secret key bypasses RLS and must never reach browser code. */
 export function getSupabaseAdmin() {
@@ -11,7 +12,7 @@ export function getSupabaseAdmin() {
     throw new Error('Supabase server configuration is missing');
   }
 
-  client ??= createClient(url, secretKey, {
+  client ??= createClient<Database>(url, secretKey, {
     auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false },
   });
 

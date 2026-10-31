@@ -1,0 +1,27 @@
+name: Campus Radar CI
+
+on:
+  pull_request:
+    branches: [master]
+  push:
+    branches: [master]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Install locked dependencies
+        run: npm ci
+      - name: Check migration scripts
+        run: node --check scripts/bootstrap-admin.mjs && node --check scripts/migrate-d1-to-supabase.mjs
+      - name: Build Next.js application
+        run: npm run build
+      - name: Validate Cloudflare OpenNext build
+        run: npx opennextjs-cloudflare build

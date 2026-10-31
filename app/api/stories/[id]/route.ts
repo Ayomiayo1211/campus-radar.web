@@ -1,241 +1,29 @@
-
 import { NextRequest, NextResponse } from 'next/server';
-
-import { prisma } from '@/lib/server/prisma';
+import { getSupabaseAdmin, toCamelCase } from '@/lib/server/supabase';
 import { requireRole } from '@/lib/server/auth';
 import { storySchema } from '@/lib/validation/content';
-
-type RouteContext = {
-  params: Promise<{
-    id: string;
-  }>;
-};
-
-const STORY_ROLES = ['SUPER_ADMIN', 'EDITOR', 'REPORTER'] as const;
-
-export async function GET(
-  _request: NextRequest,
-  { params }: RouteContext
-) {
-  const { id } = await params;
-
-  const story = await prisma.story.findUnique({
-    where: { id },
-    include: {
-      tags: true,
-      images: {
-        orderBy: { displayOrder: 'asc' },
-      },
-      author: {
-        select: { id: true, name: true },
-      },
-    },
-  });
-
-  if (!story) {
-    return NextResponse.json(
-      { error: 'Story not found' },
-      { status: 404 }
-    );
-  }
-
-  if (story.status !== 'PUBLISHED') {
-    let user;
-
-    try {
-      user = await requireRole([...STORY_ROLES]);
-    } catch {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
-    }
-
-    if (
-      user.role === 'REPORTER' &&
-      story.authorId !== user.id
-    ) {
-      return NextResponse.json(
-        { error: 'You cannot access this story' },
-        { status: 403 }
-      );
-    }
-  }
-
-  return NextResponse.json({ data: story });
+type RouteContext={params:Promise<{id:string}>};
+const ROLES=['SUPER_ADMIN','EDITOR','REPORTER'] as const;
+export async function GET(_request:NextRequest,{params}:RouteContext){
+ const {id}=await params;const db=getSupabaseAdmin();
+ const {data:story,error}=await db.from('stories').select('*,tags:story_tags(*),images:story_images(*),author:users(id,name)').eq('id',id).maybeSingle();
+ if(error)return NextResponse.json({error:'Could not load story'},{status:500});if(!story)return NextResponse.json({error:'Story not found'},{status:404});
+ if(story.status!=='PUBLISHED'){let user;try{user=await requireRole([...ROLES]);}catch{return NextResponse.json({error:'Unauthorized'},{status:401});}if(user.role==='REPORTER'&&story.author_id!==user.id)return NextResponse.json({error:'You cannot access this story'},{status:403});}
+ return NextResponse.json({data:toCamelCase(story)});
 }
-
-export async function PATCH(
-  request: NextRequest,
-  { params }: RouteContext
-) {
-  const { id } = await params;
-
-  let user;
-
-  try {
-    user = await requireRole([...STORY_ROLES]);
-  } catch {
-    return NextResponse.json(
-      { error: 'Unauthorized' },
-      { status: 401 }
-    );
-  }
-
-  const existingStory = await prisma.story.findUnique({
-    where: { id },
-  });
-
-  if (!existingStory) {
-    return NextResponse.json(
-      { error: 'Story not found' },
-      { status: 404 }
-    );
-  }
-
-  if (user.role === 'REPORTER') {
-    if (existingStory.authorId !== user.id) {
-      return NextResponse.json(
-        { error: 'You can only edit your own stories' },
-        { status: 403 }
-      );
-    }
-
-    if (!['DRAFT', 'REVIEW'].includes(existingStory.status)) {
-      return NextResponse.json(
-        { error: 'Only draft or review stories can be edited' },
-        { status: 403 }
-      );
-    }
-  }
-
-  let body: unknown;
-
-  try {
-    body = await request.json();
-  } catch {
-    return NextResponse.json(
-      { error: 'Invalid JSON body' },
-      { status: 400 }
-    );
-  }
-
-  const parsed = storySchema.safeParse(body);
-
-  if (!parsed.success) {
-    return NextResponse.json(
-      {
-        error: 'Invalid story',
-        details: parsed.error.flatten(),
-      },
-      { status: 400 }
-    );
-  }
-
-  const data = parsed.data;
-
-  if (
-    user.role === 'REPORTER' &&
-    !['DRAFT', 'REVIEW'].includes(data.status)
-  ) {
-    return NextResponse.json(
-      { error: 'Reporters cannot publish or archive stories' },
-      { status: 403 }
-    );
-  }
-
-  const story = await prisma.$transaction(async (tx) => {
-    await tx.storyTag.deleteMany({
-      where: { storyId: id },
-    });
-
-    return tx.story.update({
-      where: { id },
-      data: {
-        title: data.title,
-        excerpt: data.excerpt,
-        body: data.body,
-        contentType: data.contentType,
-        origin: data.origin,
-        commercialStatus: data.commercialStatus,
-        authorName:
-          user.role === 'REPORTER'
-            ? existingStory.authorName
-            : data.authorName,
-        authorId:
-          user.role === 'REPORTER'
-            ? existingStory.authorId
-            : data.authorId ?? existingStory.authorId,
-        featured:
-          user.role === 'REPORTER'
-            ? existingStory.featured
-            : data.featured,
-        coverImage: data.coverImage,
-        status: data.status,
-        publishedAt:
-          data.status === 'PUBLISHED'
-            ? existingStory.publishedAt ?? new Date()
-            : null,
-        tags: {
-          create: data.tags.map((tag) => ({ tag })),
-        },
-        ...(data.galleryImages !== undefined && {
-          images: {
-            deleteMany: {},
-            create: data.galleryImages.map((image, index) => ({
-              url: image.url,
-              mediaId: image.mediaId || null,
-              altText: image.altText || null,
-              caption: image.caption || null,
-              photographer: image.photographer || null,
-              displayOrder: image.displayOrder ?? index,
-            })),
-          },
-        }),
-      },
-      include: {
-        tags: true,
-        images: {
-          orderBy: { displayOrder: 'asc' },
-        },
-      },
-    });
-  });
-
-  return NextResponse.json({ data: story });
+export async function PATCH(request:NextRequest,{params}:RouteContext){
+ const {id}=await params;let user;try{user=await requireRole([...ROLES]);}catch{return NextResponse.json({error:'Unauthorized'},{status:401});}
+ const db=getSupabaseAdmin();const {data:existing,error:lookupError}=await db.from('stories').select('*').eq('id',id).maybeSingle();
+ if(lookupError)return NextResponse.json({error:'Could not load story'},{status:500});if(!existing)return NextResponse.json({error:'Story not found'},{status:404});
+ if(user.role==='REPORTER'&&(existing.author_id!==user.id||!['DRAFT','REVIEW'].includes(existing.status)))return NextResponse.json({error:'You can only edit your own draft or review stories'},{status:403});
+ let body:unknown;try{body=await request.json();}catch{return NextResponse.json({error:'Invalid JSON body'},{status:400});}
+ const parsed=storySchema.safeParse(body);if(!parsed.success)return NextResponse.json({error:'Invalid story',details:parsed.error.flatten()},{status:400});const d=parsed.data;
+ if(user.role==='REPORTER'&&!['DRAFT','REVIEW'].includes(d.status))return NextResponse.json({error:'Reporters cannot publish or archive stories'},{status:403});
+ const {data:story,error}=await db.from('stories').update({title:d.title,excerpt:d.excerpt,body:d.body,content_type:d.contentType,origin:d.origin,commercial_status:d.commercialStatus,author_name:user.role==='REPORTER'?existing.author_name:d.authorName,author_id:user.role==='REPORTER'?existing.author_id:(d.authorId??existing.author_id),featured:user.role==='REPORTER'?existing.featured:d.featured,cover_image:d.coverImage??null,status:d.status,published_at:d.status==='PUBLISHED'?(existing.published_at??new Date().toISOString()):null,updated_at:new Date().toISOString()}).eq('id',id).select('*').single();
+ if(error||!story)return NextResponse.json({error:'Could not update story'},{status:500});
+ const tagDelete=await db.from('story_tags').delete().eq('story_id',id);if(tagDelete.error)return NextResponse.json({error:'Story saved, but tags could not be updated'},{status:500});
+ if(d.tags.length){const r=await db.from('story_tags').insert(d.tags.map(tag=>({story_id:id,tag})));if(r.error)return NextResponse.json({error:'Story saved, but tags could not be updated'},{status:500});}
+ if(d.galleryImages!==undefined){const del=await db.from('story_images').delete().eq('story_id',id);if(del.error)return NextResponse.json({error:'Story saved, but images could not be updated'},{status:500});if(d.galleryImages.length){const r=await db.from('story_images').insert(d.galleryImages.map((image,index)=>({story_id:id,url:image.url,media_id:image.mediaId||null,alt_text:image.altText||null,caption:image.caption||null,photographer:image.photographer||null,display_order:image.displayOrder??index})));if(r.error)return NextResponse.json({error:'Story saved, but images could not be updated'},{status:500});}}
+ const {data:complete}=await db.from('stories').select('*,tags:story_tags(*),images:story_images(*),author:users(id,name)').eq('id',id).single();return NextResponse.json({data:toCamelCase(complete??story)});
 }
-
-export async function DELETE(
-  _request: NextRequest,
-  { params }: RouteContext
-) {
-  const { id } = await params;
-
-  try {
-    await requireRole(['SUPER_ADMIN', 'EDITOR']);
-  } catch {
-    return NextResponse.json(
-      { error: 'Unauthorized' },
-      { status: 401 }
-    );
-  }
-
-  const story = await prisma.story.findUnique({
-    where: { id },
-  });
-
-  if (!story) {
-    return NextResponse.json(
-      { error: 'Story not found' },
-      { status: 404 }
-    );
-  }
-
-  await prisma.story.delete({
-    where: { id },
-  });
-
-  return NextResponse.json({
-    message: 'Story deleted successfully',
-  });
-}
+export async function DELETE(_request:NextRequest,{params}:RouteContext){const {id}=await params;try{await requireRole(['SUPER_ADMIN','EDITOR']);}catch{return NextResponse.json({error:'Unauthorized'},{status:401});}const {data,error}=await getSupabaseAdmin().from('stories').delete().eq('id',id).select('id').maybeSingle();if(error)return NextResponse.json({error:'Could not delete story'},{status:500});if(!data)return NextResponse.json({error:'Story not found'},{status:404});return NextResponse.json({message:'Story deleted successfully'});}
