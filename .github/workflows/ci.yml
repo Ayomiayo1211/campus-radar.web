@@ -1,0 +1,23 @@
+name: Campus Radar CI
+
+on:
+  pull_request:
+    branches: [master]
+  push:
+    branches: [master, feat/supabase-postgres-migration]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Install dependencies and refresh lockfile
+        run: npm install --no-audit --no-fund
+      - name: Build Next.js application
+        run: npm run build
