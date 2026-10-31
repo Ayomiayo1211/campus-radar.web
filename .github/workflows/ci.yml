@@ -21,3 +21,5 @@ jobs:
         run: npm install --no-audit --no-fund
       - name: Build Next.js application
         run: npm run build
+      - name: Validate Cloudflare OpenNext build
+        run: npx opennextjs-cloudflare build
