@@ -34,7 +34,7 @@ After the migration code is merged, the **Migrate legacy D1 content to Supabase*
 
 ## Initial newsroom administrator
 
-Add the GitHub Actions secrets `ADMIN_NAME`, `ADMIN_EMAIL`, and `ADMIN_PASSWORD`, then run the **Bootstrap Campus Radar Super Admin** workflow once. Use a unique password of at least 12 characters. The workflow hashes the password and creates or updates the Super Admin record without exposing credentials in source control.
+Add the GitHub Actions secrets `ADMIN_NAME`, `ADMIN_EMAIL`, and `ADMIN_PASSWORD`. After a successful deployment, the **Bootstrap Campus Radar Super Admin** workflow runs automatically; it can also be run manually. Use a unique password of at least 12 characters. The workflow hashes the password and creates or updates the Super Admin record without exposing credentials in source control.
 
 ## Data migration status
 
