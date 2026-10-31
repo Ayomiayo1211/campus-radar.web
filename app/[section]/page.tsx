@@ -3,6 +3,7 @@ import {notFound} from 'next/navigation';
 import {Header} from '@/components/Header';
 import {Footer} from '@/components/Footer';
 import {StoryCard} from '@/components/StoryCard';
+import type {Story} from '@/lib/data';
 import {getSupabaseAdmin} from '@/lib/server/supabase';
 
 export const dynamic='force-dynamic';
@@ -20,7 +21,7 @@ export default async function Section({params}:{params:Promise<{section:string}>
  const title=section==='features'?'Features':'Opinion';
  const {data,error}=await getSupabaseAdmin().from('stories').select('id,slug,title,excerpt,author_name,published_at,content_type,origin,commercial_status,cover_image,featured').eq('status','PUBLISHED').eq('content_type',contentType).order('published_at',{ascending:false}).limit(50);
  if(error)console.error(`Could not load ${title} stories:`,error.message);
- const stories=(data??[]).map(s=>({id:s.id,slug:s.slug,title:s.title,excerpt:s.excerpt,category:title,author:s.author_name,date:dateLabel(s.published_at),readTime:'',origin:editorialLabel(s.origin),commercialStatus:editorialLabel(s.commercial_status),image:s.cover_image??undefined,featured:s.featured}));
+ const stories:(Story&{slug:string})[]=(data??[]).map(s=>({id:s.id,slug:s.slug,title:s.title,excerpt:s.excerpt,category:title as Story['category'],author:s.author_name,date:dateLabel(s.published_at),readTime:'',origin:editorialLabel(s.origin) as Story['origin'],commercialStatus:editorialLabel(s.commercial_status) as Story['commercialStatus'],image:s.cover_image??undefined,featured:s.featured}));
  return <Page title={title} kicker="Campus Radar">{stories.length?<div className="grid gap-5 md:grid-cols-2">{stories.map(s=><StoryCard key={s.id} story={s}/>)}</div>:<p className="py-8 text-sm text-[var(--muted)]">No {title.toLowerCase()} have been published yet. Check back soon.</p>}</Page>;
 }
 
