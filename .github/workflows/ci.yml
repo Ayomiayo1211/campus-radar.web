@@ -31,6 +31,8 @@ jobs:
             git commit -m "chore: sync package lockfile [skip ci]"
             git push
           fi
+      - name: Check migration scripts
+        run: node --check scripts/bootstrap-admin.mjs && node --check scripts/migrate-d1-to-supabase.mjs
       - name: Build Next.js application
         run: npm run build
       - name: Validate Cloudflare OpenNext build
