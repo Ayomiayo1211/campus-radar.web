@@ -26,7 +26,7 @@ The application uses Supabase PostgreSQL for newsroom data and Cloudflare Worker
 
 Public Supabase URL and publishable key are configured in `wrangler.jsonc`. The Cloudflare deployment workflow expects these GitHub Actions secrets in the `production` environment:
 
-- `CLOUDFLARE_API_TOKEN` (Workers Scripts:Edit and D1:Read permissions on the Campus Radar account)
+- `CLOUDFLARE_API_TOKEN` (Workers Scripts:Edit and D1:Edit permissions on the Campus Radar account)
 - `CLOUDFLARE_ACCOUNT_ID`
 - `SUPABASE_SECRET_KEY`
 
@@ -34,7 +34,7 @@ First run the **Migrate legacy D1 content to Supabase** workflow. It reads the o
 
 ## Initial newsroom administrator
 
-After the Worker secrets are configured, run `scripts/bootstrap-admin.mjs` once in a trusted environment with `NEXT_PUBLIC_SUPABASE_URL`, `SUPABASE_SECRET_KEY`, `ADMIN_NAME`, `ADMIN_EMAIL`, and `ADMIN_PASSWORD` set. Use a unique password of at least 12 characters. The script hashes the password and creates or updates the Super Admin record; it does not store credentials in the repository.
+Add the GitHub Actions secrets `ADMIN_NAME`, `ADMIN_EMAIL`, and `ADMIN_PASSWORD`, then run the **Bootstrap Campus Radar Super Admin** workflow once. Use a unique password of at least 12 characters. The workflow hashes the password and creates or updates the Super Admin record without exposing credentials in source control.
 
 ## Data migration status
 
