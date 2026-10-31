@@ -14,6 +14,6 @@ export async function POST(request:NextRequest){
  try{await requireRole([...MANAGERS]);}catch{return NextResponse.json({error:'Unauthorized'},{status:401});}
  let body:unknown;try{body=await request.json();}catch{return NextResponse.json({error:'Invalid JSON body'},{status:400});}
  const parsed=opportunitySchema.safeParse(body);if(!parsed.success)return NextResponse.json({error:'Invalid opportunity',details:parsed.error.flatten()},{status:400});
- const d=parsed.data;const {data,error}=await getSupabaseAdmin().from('opportunities').insert({title:d.title,slug:slugify(d.title),organisation:d.organisation,type:d.type,description:d.description,deadline:d.deadline??null,application_url:d.applicationUrl??null,origin:d.origin,commercial_status:d.commercialStatus,status:d.status,published_at:d.status==='PUBLISHED'?new Date().toISOString():null}).select('*').single();
+ const d=parsed.data;const {data,error}=await getSupabaseAdmin().from('opportunities').insert({title:d.title,slug:slugify(d.title),organisation:d.organisation,type:d.type,description:d.description,deadline:d.deadline?.toISOString()??null,application_url:d.applicationUrl??null,origin:d.origin,commercial_status:d.commercialStatus,status:d.status,published_at:d.status==='PUBLISHED'?new Date().toISOString():null}).select('*').single();
  if(error)return NextResponse.json({error:'Could not create opportunity'},{status:500});return NextResponse.json({data:toCamelCase(data)},{status:201});
 }
