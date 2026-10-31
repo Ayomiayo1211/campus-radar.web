@@ -18,7 +18,7 @@ export default async function ArticlePage({
 
   const { data: row, error } = await getSupabaseAdmin()
     .from('stories')
-    .select('title,excerpt,body,author_name,published_at,cover_image,content_type,images:story_images(id,url,alt_text,caption,photographer)')
+    .select('title,excerpt,body,author_name,published_at,cover_image,content_type,images:story_images(id,url,alt_text,caption,photographer,display_order)')
     .eq('slug', slug)
     .eq('status', 'PUBLISHED')
     .maybeSingle();
@@ -31,7 +31,8 @@ export default async function ArticlePage({
     images: (row.images ?? []).map((image) => ({
       id: image.id, url: image.url, altText: image.alt_text,
       caption: image.caption, photographer: image.photographer,
-    })).sort((a, b) => 0),
+      displayOrder: image.display_order,
+    })).sort((a, b) => a.displayOrder - b.displayOrder),
   } : null;
 
   if (!story) {
