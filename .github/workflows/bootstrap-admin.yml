@@ -28,7 +28,8 @@ jobs:
           ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
         run: |
           test -n "$SUPABASE_SECRET_KEY" || (echo "Missing SUPABASE_SECRET_KEY" && exit 1)
-          test -n "$ADMIN_NAME" || (echo "Missing ADMIN_NAME" && exit 1)
-          test -n "$ADMIN_EMAIL" || (echo "Missing ADMIN_EMAIL" && exit 1)
-          test -n "$ADMIN_PASSWORD" || (echo "Missing ADMIN_PASSWORD" && exit 1)
+          if [ -z "$ADMIN_NAME" ] || [ -z "$ADMIN_EMAIL" ] || [ -z "$ADMIN_PASSWORD" ]; then
+            echo "::notice::Admin bootstrap skipped. Add ADMIN_NAME, ADMIN_EMAIL and ADMIN_PASSWORD to the production environment secrets to provision the initial administrator."
+            exit 0
+          fi
           node scripts/bootstrap-admin.mjs
