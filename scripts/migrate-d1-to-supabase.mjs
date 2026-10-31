@@ -40,6 +40,19 @@ const asBool = (value) => value === true || value === 1 || value === '1';
 const asNullable = (value) => value === undefined ? null : value;
 const chunks = (items, size = 100) => Array.from({ length: Math.ceil(items.length / size) }, (_, index) => items.slice(index * size, (index + 1) * size));
 
+
+async function verifyImportedIds(table, rows) {
+  const expected = rows.map(row => row.id);
+  let verified = 0;
+  for (const batch of chunks(expected, 100)) {
+    const { data, error } = await supabase.from(table).select('id').in('id', batch);
+    if (error) throw new Error(`Could not verify imported ${table}: ${error.message}`);
+    verified += data?.length ?? 0;
+  }
+  if (verified !== expected.length) throw new Error(`Import verification failed for ${table}: expected ${expected.length}, found ${verified}`);
+  console.log(`${table}: verified ${verified}/${expected.length}`);
+}
+
 async function importTable(table, rows) {
   if (!rows.length) { console.log(`${table}: 0 records`); return; }
   for (const batch of chunks(rows)) {
@@ -190,4 +203,5 @@ for (const old of source.RadarItem) {
 }
 console.log(`Legacy Cloudinary images migrated to Supabase Storage: ${migratedImageUrls.size}`);
 
-console.log('D1 to Supabase import completed. Source D1 data was read only and has not been modified.');
+for (const [table, rows] of [['users',users],['stories',stories],['story_tags',storyTags],['media',media],['story_images',storyImages],['radar_items',radarItems],['opportunities',opportunities],['submissions',submissions],['ad_campaigns',adCampaigns]]) await verifyImportedIds(table, rows);
+console.log('D1 to Supabase import completed and verified. Source D1 data was read only and has not been modified.');
