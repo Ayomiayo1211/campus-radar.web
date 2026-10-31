@@ -2,7 +2,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 import { cloudinary } from '@/lib/server/cloudinary';
-import { prisma } from '@/lib/server/prisma';
+import { getSupabaseAdmin, toCamelCase } from '@/lib/server/supabase';
 import { requireRole } from '@/lib/server/auth';
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024;
@@ -132,23 +132,23 @@ export async function POST(request: NextRequest) {
       uploadStream.end(buffer);
     });
 
-    const media = await prisma.media.create({
-      data: {
-        publicId: result.public_id,
+    const { data: media, error: mediaError } = await getSupabaseAdmin().from('media').insert({
+        public_id: result.public_id,
         url: result.url,
-        secureUrl: result.secure_url,
-        resourceType: result.resource_type,
+        secure_url: result.secure_url,
+        resource_type: result.resource_type,
         format: result.format,
         width: result.width,
         height: result.height,
         bytes: result.bytes,
-        originalName: file.name.slice(0, 255),
+        original_name: file.name.slice(0, 255),
         folder: 'campus-radar',
-      },
-    });
+      }).select('*').single();
+
+    if (mediaError || !media) throw new Error('Could not save media record');
 
     return NextResponse.json(
-      { data: media },
+      { data: toCamelCase(media) },
       { status: 201 }
     );
   } catch (error) {
