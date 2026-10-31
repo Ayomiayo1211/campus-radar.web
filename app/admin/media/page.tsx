@@ -74,10 +74,10 @@ export default function MediaPage() {
       });
 
       const result = (await response.json()) as {
-  error?: string;
-  message?: string;
-  data: Media[];
-};
+        error?: string;
+        message?: string;
+        data?: Media;
+      };
 
       if (!response.ok) {
         throw new Error(
@@ -85,10 +85,8 @@ export default function MediaPage() {
         );
       }
 
-      setMedia((current) => [
-        ...result.data,
-        ...current,
-      ]);
+      if (!result.data) throw new Error('Upload completed without returning media details');
+      setMedia((current) => [result.data!, ...current]);
     } catch (error) {
       setError(
         error instanceof Error
