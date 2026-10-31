@@ -16,7 +16,6 @@
     "@opennextjs/cloudflare": "^1.20.14",
     "bcryptjs": "^3.0.3",
     "browser-image-compression": "^2.0.2",
-    "cloudinary": "^2.11.0",
     "jose": "^6.2.12",
     "lucide-react": "^0.468.0",
     "next": "^15.5.28",
@@ -38,9 +37,6 @@
     "wrangler": "^4.154.0"
   },
   "allowScripts": {
-    "@prisma/client@6.19.3": true,
-    "@prisma/engines@6.19.3": true,
-    "prisma@6.19.3": true,
     "esbuild@0.28.2": true,
     "workerd@1.20261023.1": true
   }
