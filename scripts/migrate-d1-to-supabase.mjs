@@ -121,4 +121,73 @@ await importTable('radar_items', radarItems);
 await importTable('opportunities', opportunities);
 await importTable('submissions', submissions);
 await importTable('ad_campaigns', adCampaigns);
+
+const migratedImageUrls = new Map();
+async function migrateLegacyImage(value) {
+  if (typeof value !== 'string' || !value) return value;
+  let parsed;
+  try { parsed = new URL(value); } catch { return value; }
+  if (parsed.protocol !== 'https:' || parsed.hostname !== 'res.cloudinary.com') return value;
+  if (migratedImageUrls.has(value)) return migratedImageUrls.get(value);
+  const response = await fetch(value);
+  if (!response.ok) { console.warn(`Could not download legacy image (${response.status}); keeping original URL: ${value}`); return value; }
+  const contentType = (response.headers.get('content-type') || '').split(';')[0].toLowerCase();
+  const extensionByType = { 'image/jpeg': 'jpg', 'image/png': 'png', 'image/webp': 'webp', 'image/gif': 'gif' };
+  const extension = extensionByType[contentType];
+  const bytes = new Uint8Array(await response.arrayBuffer());
+  if (!extension || !bytes.length || bytes.length > 10 * 1024 * 1024) {
+    console.warn(`Legacy image is unsupported or exceeds 10 MB; keeping original URL: ${value}`);
+    return value;
+  }
+  const path = `legacy/${await stableId('MediaUrl', value)}.${extension}`;
+  const { error } = await supabase.storage.from('campus-radar-media').upload(path, bytes, {
+    contentType, cacheControl: '31536000', upsert: true,
+  });
+  if (error) throw new Error(`Could not migrate legacy image ${value}: ${error.message}`);
+  const { data } = supabase.storage.from('campus-radar-media').getPublicUrl(path);
+  migratedImageUrls.set(value, data.publicUrl);
+  return data.publicUrl;
+}
+
+const legacyImageUrls = new Set([
+  ...source.Media.flatMap(row => [row.secureUrl, row.url]),
+  ...source.Story.map(row => row.coverImage),
+  ...source.StoryImage.map(row => row.url),
+  ...source.RadarItem.map(row => row.coverImage),
+].filter(value => typeof value === 'string' && value.startsWith('https://res.cloudinary.com/')));
+for (const oldUrl of legacyImageUrls) await migrateLegacyImage(oldUrl);
+
+for (const old of source.Media) {
+  const newUrl = migratedImageUrls.get(old.secureUrl) || migratedImageUrls.get(old.url);
+  if (!newUrl) continue;
+  const id = ids.Media.get(String(old.id));
+  const path = new URL(newUrl).pathname.split('/').slice(-2).join('/');
+  const { error } = await supabase.from('media').update({
+    public_id: path, url: newUrl, secure_url: newUrl, format: path.split('.').pop(), folder: 'legacy',
+  }).eq('id', id);
+  if (error) throw new Error(`Could not update migrated media metadata: ${error.message}`);
+}
+for (const old of source.StoryImage) {
+  const nextUrl = migratedImageUrls.get(old.url);
+  if (nextUrl) {
+    const { error } = await supabase.from('story_images').update({ url: nextUrl }).eq('id', ids.StoryImage.get(String(old.id)));
+    if (error) throw new Error(`Could not update migrated story image: ${error.message}`);
+  }
+}
+for (const old of source.Story) {
+  const nextUrl = migratedImageUrls.get(old.coverImage);
+  if (nextUrl) {
+    const { error } = await supabase.from('stories').update({ cover_image: nextUrl }).eq('id', ids.Story.get(String(old.id)));
+    if (error) throw new Error(`Could not update migrated story cover: ${error.message}`);
+  }
+}
+for (const old of source.RadarItem) {
+  const nextUrl = migratedImageUrls.get(old.coverImage);
+  if (nextUrl) {
+    const { error } = await supabase.from('radar_items').update({ cover_image: nextUrl }).eq('id', ids.RadarItem.get(String(old.id)));
+    if (error) throw new Error(`Could not update migrated Radar cover: ${error.message}`);
+  }
+}
+console.log(`Legacy Cloudinary images migrated to Supabase Storage: ${migratedImageUrls.size}`);
+
 console.log('D1 to Supabase import completed. Source D1 data was read only and has not been modified.');
