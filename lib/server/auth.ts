@@ -1,4 +1,5 @@
 import { cookies } from 'next/headers';
+import { getCloudflareContext } from '@opennextjs/cloudflare';
 import { jwtVerify, SignJWT } from 'jose';
 
 import { getSupabaseAdmin } from '@/lib/server/supabase';
@@ -9,8 +10,26 @@ const SESSION_DURATION = 60 * 60 * 24 * 7;
 type SessionPayload = { userId: string; role: string };
 
 function getSecret() {
-  const secret = process.env.AUTH_SECRET;
-  if (!secret || secret.length < 32) throw new Error('AUTH_SECRET must be configured with at least 32 characters');
+  // Prefer the runtime Worker secret binding. OpenNext exposes these through
+  // getCloudflareContext().env; process.env remains a fallback for local/dev.
+  let workerSecret: string | undefined;
+  try {
+    workerSecret = (getCloudflareContext().env as unknown as { AUTH_SECRET?: string }).AUTH_SECRET;
+  } catch {
+    // getCloudflareContext may be unavailable outside the Worker runtime.
+  }
+
+  const processSecret = process.env.AUTH_SECRET;
+  const secret = [workerSecret, processSecret].find(
+    (value): value is string => typeof value === 'string' && value.length >= 32,
+  );
+
+  if (!secret) {
+    throw new Error(
+      `AUTH_SECRET is unavailable or shorter than 32 characters (Worker binding length: ${workerSecret?.length ?? 0}; process.env length: ${processSecret?.length ?? 0})`,
+    );
+  }
+
   return new TextEncoder().encode(secret);
 }
 
