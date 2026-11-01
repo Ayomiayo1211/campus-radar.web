@@ -3,7 +3,16 @@ import bcrypt from 'bcryptjs';
 import { getSupabaseAdmin } from '@/lib/server/supabase';
 import { createSession } from '@/lib/server/auth';
 
+function describeError(error: unknown) {
+  if (error instanceof Error) {
+    return { name: error.name, message: error.message, stack: error.stack };
+  }
+  return { name: typeof error, message: String(error) };
+}
+
 export async function POST(request: NextRequest) {
+  let phase = 'request parsing';
+
   try {
     let body: unknown;
     try {
@@ -28,30 +37,44 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Invalid email or password' }, { status: 401 });
     }
 
-    const { data: user, error } = await getSupabaseAdmin()
+    phase = 'Supabase client initialization';
+    const supabase = getSupabaseAdmin();
+
+    phase = 'Supabase user lookup';
+    const { data: user, error } = await supabase
       .from('users')
       .select('id,name,email,password_hash,role,is_active')
       .eq('email', email)
       .maybeSingle();
 
     if (error) {
-      console.error('Admin login database query failed:', error.message);
+      console.error('Admin login database query failed', JSON.stringify({
+        phase,
+        name: error.name,
+        message: error.message,
+        code: error.code,
+        details: error.details,
+        hint: error.hint,
+      }));
       return NextResponse.json({ error: 'Login service is temporarily unavailable. Please retry.' }, { status: 503 });
     }
     if (!user) return NextResponse.json({ error: 'Invalid email or password' }, { status: 401 });
 
+    phase = 'password verification';
     const matches = await bcrypt.compare(password, user.password_hash);
     if (!matches || !user.is_active) {
       return NextResponse.json({ error: 'Invalid email or password' }, { status: 401 });
     }
 
+    phase = 'session creation';
     await createSession(user.id, user.role);
+
     return NextResponse.json({
       message: 'Login successful',
       user: { id: user.id, name: user.name, email: user.email, role: user.role },
     });
   } catch (error) {
-    console.error('Admin login handler failed:', error);
+    console.error('Admin login failed', JSON.stringify({ phase, ...describeError(error) }));
     return NextResponse.json({ error: 'Login service is temporarily unavailable. Please retry.' }, { status: 500 });
   }
 }
