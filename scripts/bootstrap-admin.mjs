@@ -7,7 +7,9 @@ const name = process.env.ADMIN_NAME?.trim();
 const email = process.env.ADMIN_EMAIL?.trim().toLowerCase();
 const password = process.env.ADMIN_PASSWORD;
 if (!url || !secret || !name || !email || !password) throw new Error('Set Supabase URL, server secret, and ADMIN_NAME, ADMIN_EMAIL, ADMIN_PASSWORD in your private environment.');
-if (name.length < 2 || password.length < 12 || password.length > 128 || !/^\\S+@\\S+\\.\\S+$/.test(email)) throw new Error('Invalid admin details. Password must be 12–128 characters.');
+if (name.length < 2) throw new Error('Invalid ADMIN_NAME. Use at least 2 characters.');
+if (password.length < 12 || password.length > 128) throw new Error('Invalid ADMIN_PASSWORD. It must be 12–128 characters.');
+if (!/^\S+@\S+\.\S+$/.test(email)) throw new Error('Invalid ADMIN_EMAIL. Use a valid email address.');
 
 const db = createClient(url, secret, { auth: { persistSession: false, autoRefreshToken: false } });
 const { data: masters, error: masterLookupError } = await db.from('users').select('id').eq('role', 'SUPER_ADMIN');
