@@ -75,6 +75,12 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     console.error('Admin login failed', JSON.stringify({ phase, ...describeError(error) }));
-    return NextResponse.json({ error: 'Login service is temporarily unavailable. Please retry.' }, { status: 500 });
+    const diagnostic = error instanceof Error
+      ? { phase, name: error.name, message: error.message }
+      : { phase, name: typeof error, message: String(error) };
+    return NextResponse.json({
+      error: 'Login service is temporarily unavailable. Please retry.',
+      diagnostic,
+    }, { status: 500 });
   }
 }
