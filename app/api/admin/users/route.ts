@@ -2,15 +2,10 @@ import { NextRequest, NextResponse } from 'next/server';
 import { randomBytes, createHash } from 'node:crypto';
 import { getSupabaseAdmin } from '@/lib/server/supabase';
 import { requireRole } from '@/lib/server/auth';
+import { sendGmailMessage } from '@/lib/server/gmail';
 const ROLES = ['EDITOR', 'REPORTER'] as const;
 const authError = (e: unknown) => e instanceof Error && e.message === 'Forbidden' ? NextResponse.json({error:'Master Admin access required'},{status:403}) : NextResponse.json({error:'Authentication required'},{status:401});
 const safe = (u: any) => ({id:u.id,name:u.name,email:u.email,role:u.role,isActive:u.is_active,createdAt:u.created_at});
-function getEmailConfig() {
-  return {
-    apiKey: process.env.RESEND_API_KEY,
-    from: process.env.EMAIL_FROM,
-  };
-}
 export async function GET() {
  try { await requireRole(['SUPER_ADMIN']); } catch(e) { return authError(e); }
  const db=getSupabaseAdmin();
@@ -36,16 +31,18 @@ export async function POST(request:NextRequest) {
  if(revokeError)return NextResponse.json({error:'Could not replace previous invitation'},{status:500});
  const {data:invite,error:insertError}=await (db as any).from('admin_invitations').insert({email,role,token_hash:tokenHash,invited_by:actor.id,expires_at:expiresAt}).select('id').single();
  if(insertError||!invite)return NextResponse.json({error:'Could not create invitation'},{status:500});
- const {apiKey,from}=getEmailConfig();
- if(!apiKey||!from){await (db as any).from('admin_invitations').update({revoked_at:new Date().toISOString()}).eq('id',invite.id);return NextResponse.json({error:'Invitation email is not configured. Contact the system administrator.'},{status:503});}
  const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL || request.nextUrl.origin).replace(/\\/$/, '');
  const link=`${siteUrl}/admin/accept-invitation?token=${encodeURIComponent(token)}`;
- const sent=await fetch('https://api.resend.com/emails',{method:'POST',headers:{Authorization:`Bearer ${apiKey}`,'Content-Type':'application/json'},body:JSON.stringify({from,to:[email],subject:'Your Campus Radar newsroom invitation',html:`<div style="font-family:Arial,sans-serif;line-height:1.6;color:#171717"><h2>Campus Radar newsroom invitation</h2><p>You have been invited as a <strong>${role==='EDITOR'?'Editor':'Reporter'}</strong>.</p><p>Use this secure link to create your account password. It expires in 48 hours and can only be used once.</p><p><a href="${link}" style="display:inline-block;padding:12px 18px;background:#111;color:#fff;text-decoration:none;border-radius:6px">Create your account</a></p><p>If you were not expecting this invitation, ignore this email.</p></div>`})});
- if(!sent.ok){
-  const resendError=await sent.text();
-  console.error(`[admin invitation] Resend rejected request (HTTP ${sent.status}): ${resendError.slice(0,1000)}`);
+ try {
+  await sendGmailMessage({
+   to: email,
+   subject: 'Your Campus Radar newsroom invitation',
+   html: `<div style="font-family:Arial,sans-serif;line-height:1.6;color:#171717"><h2>Campus Radar newsroom invitation</h2><p>You have been invited as a <strong>${role==='EDITOR'?'Editor':'Reporter'}</strong>.</p><p>Use this secure link to create your account password. It expires in 48 hours and can only be used once.</p><p><a href="${link}" style="display:inline-block;padding:12px 18px;background:#111;color:#fff;text-decoration:none;border-radius:6px">Create your account</a></p><p>If you were not expecting this invitation, ignore this email.</p></div>`,
+  });
+ } catch(error) {
+  console.error('[admin invitation] Gmail delivery failed:', error instanceof Error ? error.message : 'Unknown error');
   await (db as any).from('admin_invitations').update({revoked_at:new Date().toISOString()}).eq('id',invite.id);
-  return NextResponse.json({error:'Invitation email could not be sent. Check email service configuration.'},{status:502});
+  return NextResponse.json({error:'Invitation email could not be sent. Check Gmail API configuration.'},{status:502});
  }
  return NextResponse.json({message:`Invitation sent to ${email}`},{status:201});
 }
