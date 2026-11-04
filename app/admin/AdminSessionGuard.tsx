@@ -28,7 +28,7 @@ export default function AdminSessionGuard({ children }: { children: React.ReactN
         return;
       }
       if (response.ok) {
-        const result = await response.json().catch(() => null);
+        const result = await response.json().catch((): null => null) as { authenticated?: boolean } | null;
         if (result?.authenticated === false) {
           router.replace('/admin/login?reason=session-expired');
           return;
