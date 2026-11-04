@@ -1,14 +1,9 @@
-import AdminNav from './AdminNav';
+import AdminSessionGuard from './AdminSessionGuard';
 
 export default function AdminLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  return (
-    <>
-      <AdminNav />
-      {children}
-    </>
-  );
+  return <AdminSessionGuard>{children}</AdminSessionGuard>;
 }
