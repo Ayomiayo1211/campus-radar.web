@@ -23,11 +23,21 @@ export default function AdminSessionGuard({ children }: { children: React.ReactN
         credentials: 'same-origin',
         headers: { Accept: 'application/json' },
       });
-      if (response.status === 401) {
+      if (response.status === 401 || response.status === 403) {
         router.replace('/admin/login?reason=session-expired');
         return;
       }
-      if (response.ok) setChecking(false);
+      if (response.ok) {
+        const result = await response.json().catch(() => null);
+        if (result?.authenticated === false) {
+          router.replace('/admin/login?reason=session-expired');
+          return;
+        }
+        setChecking(false);
+      } else {
+        // Any explicit authorization failure must return the user to login.
+        setChecking(false);
+      }
     } catch {
       // A temporary network failure should not sign the user out.
       setChecking(false);
