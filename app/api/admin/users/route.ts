@@ -1,11 +1,24 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { randomBytes, createHash } from 'node:crypto';
+import { getCloudflareContext } from '@opennextjs/cloudflare';
 import { getSupabaseAdmin } from '@/lib/server/supabase';
 import { requireRole } from '@/lib/server/auth';
 const ROLES = ['EDITOR', 'REPORTER'] as const;
 const APP_URL = 'https://campus-radar-v1.campusradarfunaab.workers.dev';
 const authError = (e: unknown) => e instanceof Error && e.message === 'Forbidden' ? NextResponse.json({error:'Master Admin access required'},{status:403}) : NextResponse.json({error:'Authentication required'},{status:401});
 const safe = (u: any) => ({id:u.id,name:u.name,email:u.email,role:u.role,isActive:u.is_active,createdAt:u.created_at});
+function getEmailConfig() {
+  let workerEnv: { RESEND_API_KEY?: string; EMAIL_FROM?: string } = {};
+  try {
+    workerEnv = getCloudflareContext().env as unknown as typeof workerEnv;
+  } catch {
+    // Local development may not have a Cloudflare runtime context.
+  }
+  return {
+    apiKey: workerEnv.RESEND_API_KEY || process.env.RESEND_API_KEY,
+    from: workerEnv.EMAIL_FROM || process.env.EMAIL_FROM,
+  };
+}
 export async function GET() {
  try { await requireRole(['SUPER_ADMIN']); } catch(e) { return authError(e); }
  const db=getSupabaseAdmin();
@@ -20,7 +33,7 @@ export async function POST(request:NextRequest) {
  let actor; try { actor=await requireRole(['SUPER_ADMIN']); } catch(e) { return authError(e); }
  let body:any; try { body=await request.json(); } catch { return NextResponse.json({error:'Invalid request body'},{status:400}); }
  const email=typeof body?.email==='string'?body.email.trim().toLowerCase():'', role=body?.role;
- if(!/^\S+@\S+\.\S+$/.test(email)||email.length>254||!ROLES.includes(role))return NextResponse.json({error:'Provide a valid email address and role'},{status:400});
+ if(!/^\\S+@\\S+\\.\\S+$/.test(email)||email.length>254||!ROLES.includes(role))return NextResponse.json({error:'Provide a valid email address and role'},{status:400});
  const db=getSupabaseAdmin();
  const {data:existing,error:lookupError}=await db.from('users').select('id').eq('email',email).maybeSingle();
  if(lookupError)return NextResponse.json({error:'Could not verify email address'},{status:500});
@@ -31,11 +44,16 @@ export async function POST(request:NextRequest) {
  if(revokeError)return NextResponse.json({error:'Could not replace previous invitation'},{status:500});
  const {data:invite,error:insertError}=await (db as any).from('admin_invitations').insert({email,role,token_hash:tokenHash,invited_by:actor.id,expires_at:expiresAt}).select('id').single();
  if(insertError||!invite)return NextResponse.json({error:'Could not create invitation'},{status:500});
- const apiKey=process.env.RESEND_API_KEY, from=process.env.EMAIL_FROM;
+ const {apiKey,from}=getEmailConfig();
  if(!apiKey||!from){await (db as any).from('admin_invitations').update({revoked_at:new Date().toISOString()}).eq('id',invite.id);return NextResponse.json({error:'Invitation email is not configured. Contact the system administrator.'},{status:503});}
  const link=`${APP_URL}/admin/accept-invitation?token=${encodeURIComponent(token)}`;
  const sent=await fetch('https://api.resend.com/emails',{method:'POST',headers:{Authorization:`Bearer ${apiKey}`,'Content-Type':'application/json'},body:JSON.stringify({from,to:[email],subject:'Your Campus Radar newsroom invitation',html:`<div style="font-family:Arial,sans-serif;line-height:1.6;color:#171717"><h2>Campus Radar newsroom invitation</h2><p>You have been invited as a <strong>${role==='EDITOR'?'Editor':'Reporter'}</strong>.</p><p>Use this secure link to create your account password. It expires in 48 hours and can only be used once.</p><p><a href="${link}" style="display:inline-block;padding:12px 18px;background:#111;color:#fff;text-decoration:none;border-radius:6px">Create your account</a></p><p>If you were not expecting this invitation, ignore this email.</p></div>`})});
- if(!sent.ok){await (db as any).from('admin_invitations').update({revoked_at:new Date().toISOString()}).eq('id',invite.id);return NextResponse.json({error:'Invitation email could not be sent. Check email service configuration.'},{status:502});}
+ if(!sent.ok){
+  const resendError=await sent.text();
+  console.error(`[admin invitation] Resend rejected request (HTTP ${sent.status}): ${resendError.slice(0,1000)}`);
+  await (db as any).from('admin_invitations').update({revoked_at:new Date().toISOString()}).eq('id',invite.id);
+  return NextResponse.json({error:'Invitation email could not be sent. Check email service configuration.'},{status:502});
+ }
  return NextResponse.json({message:`Invitation sent to ${email}`},{status:201});
 }
 export async function PATCH(request:NextRequest) {
