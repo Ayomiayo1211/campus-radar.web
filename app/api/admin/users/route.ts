@@ -20,7 +20,7 @@ export async function POST(request:NextRequest) {
  let actor; try { actor=await requireRole(['SUPER_ADMIN']); } catch(e) { return authError(e); }
  let body:any; try { body=await request.json(); } catch { return NextResponse.json({error:'Invalid request body'},{status:400}); }
  const email=typeof body?.email==='string'?body.email.trim().toLowerCase():'', role=body?.role;
- if(!/^\\S+@\\S+\\.\\S+$/.test(email)||email.length>254||!ROLES.includes(role))return NextResponse.json({error:'Provide a valid email address and role'},{status:400});
+ if(!/^\S+@\S+\.\S+$/.test(email)||email.length>254||!ROLES.includes(role))return NextResponse.json({error:'Provide a valid email address and role'},{status:400});
  const db=getSupabaseAdmin();
  const {data:existing,error:lookupError}=await db.from('users').select('id').eq('email',email).maybeSingle();
  if(lookupError)return NextResponse.json({error:'Could not verify email address'},{status:500});
@@ -31,7 +31,7 @@ export async function POST(request:NextRequest) {
  if(revokeError)return NextResponse.json({error:'Could not replace previous invitation'},{status:500});
  const {data:invite,error:insertError}=await (db as any).from('admin_invitations').insert({email,role,token_hash:tokenHash,invited_by:actor.id,expires_at:expiresAt}).select('id').single();
  if(insertError||!invite)return NextResponse.json({error:'Could not create invitation'},{status:500});
- const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL || request.nextUrl.origin).replace(/\\/$/, '');
+ const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL || request.nextUrl.origin).replace(/\/$/, '');
  const link=`${siteUrl}/admin/accept-invitation?token=${encodeURIComponent(token)}`;
  try {
   await sendGmailMessage({
