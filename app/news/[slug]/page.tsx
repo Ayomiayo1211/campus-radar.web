@@ -1,9 +1,10 @@
-
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import type { Metadata } from 'next';
 import { getSupabaseAdmin } from '@/lib/server/supabase';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
+import { ArticleShare } from '@/components/ArticleShare';
 
 export const dynamic = 'force-dynamic';
 
@@ -11,41 +12,74 @@ type ArticlePageProps = {
   params: Promise<{ slug: string }>;
 };
 
-export default async function ArticlePage({
-  params,
-}: ArticlePageProps) {
-  const { slug } = await params;
-
-  const { data: row, error } = await getSupabaseAdmin()
+async function getPublishedStory(slug: string) {
+  const { data, error } = await getSupabaseAdmin()
     .from('stories')
     .select('title,excerpt,body,author_name,published_at,cover_image,content_type,images:story_images(id,url,alt_text,caption,photographer,display_order)')
     .eq('slug', slug)
     .eq('status', 'PUBLISHED')
     .maybeSingle();
+
   if (error) console.error('Article query failed:', error.message);
-  const story = row ? {
-    title: row.title, excerpt: row.excerpt, body: row.body,
+  return data;
+}
+
+export async function generateMetadata({ params }: ArticlePageProps): Promise<Metadata> {
+  const { slug } = await params;
+  const story = await getPublishedStory(slug);
+  if (!story) return { title: 'Article not found | Campus Radar' };
+
+  const title = story.title;
+  const description = story.excerpt || `Read ${title} on Campus Radar.`;
+  const canonical = `/news/${slug}`;
+  const images = story.cover_image ? [{ url: story.cover_image, alt: title }] : [];
+
+  return {
+    title: `${title} | Campus Radar`,
+    description,
+    alternates: { canonical },
+    openGraph: {
+      type: 'article',
+      title,
+      description,
+      url: canonical,
+      siteName: 'Campus Radar',
+      publishedTime: story.published_at || undefined,
+      authors: story.author_name ? [story.author_name] : undefined,
+      images,
+    },
+    twitter: {
+      card: images.length ? 'summary_large_image' : 'summary',
+      title,
+      description,
+      images: images.map((image) => image.url),
+    },
+  };
+}
+
+export default async function ArticlePage({ params }: ArticlePageProps) {
+  const { slug } = await params;
+  const row = await getPublishedStory(slug);
+
+  if (!row) notFound();
+
+  const story = {
+    title: row.title,
+    excerpt: row.excerpt,
+    body: row.body,
     authorName: row.author_name,
     publishedAt: row.published_at ? new Date(row.published_at) : null,
-    coverImage: row.cover_image, contentType: row.content_type,
+    coverImage: row.cover_image,
+    contentType: row.content_type,
     images: (row.images ?? []).map((image) => ({
-      id: image.id, url: image.url, altText: image.alt_text,
-      caption: image.caption, photographer: image.photographer,
+      id: image.id,
+      url: image.url,
+      altText: image.alt_text,
+      caption: image.caption,
+      photographer: image.photographer,
       displayOrder: image.display_order,
     })).sort((a, b) => a.displayOrder - b.displayOrder),
-  } : null;
-
-  if (!story) {
-    notFound();
-  }
-
-  const images = story.images as unknown as {
-    id: string;
-    url: string;
-    altText: string | null;
-    caption: string | null;
-    photographer: string | null;
-  }[];
+  };
 
   return (
     <>
@@ -72,24 +106,26 @@ export default async function ArticlePage({
             {story.excerpt}
           </p>
 
-          <div className="my-6 border-y border-[var(--line)] py-3 text-sm text-[var(--muted)]">
-            <span className="font-semibold text-[var(--ink)]">
-              {story.authorName}
-            </span>
-
-            {story.publishedAt && (
-              <span>
-                {' · '}
-                {story.publishedAt.toLocaleDateString('en-NG', {
-                  day: 'numeric',
-                  month: 'long',
-                  year: 'numeric',
-                })}
+          <div className="my-6 space-y-4 border-y border-[var(--line)] py-3">
+            <div className="text-sm text-[var(--muted)]">
+              <span className="font-semibold text-[var(--ink)]">
+                {story.authorName}
               </span>
-            )}
+
+              {story.publishedAt && (
+                <span>
+                  {' · '}
+                  {story.publishedAt.toLocaleDateString('en-NG', {
+                    day: 'numeric',
+                    month: 'long',
+                    year: 'numeric',
+                  })}
+                </span>
+              )}
+            </div>
+            <ArticleShare title={story.title} excerpt={story.excerpt || ''} />
           </div>
 
-          {/* Main cover image */}
           {story.coverImage && (
             <figure className="mb-8">
               <img
@@ -100,15 +136,13 @@ export default async function ArticlePage({
             </figure>
           )}
 
-          {/* Article body */}
           <div className="whitespace-pre-wrap text-base leading-8 text-[var(--ink)]">
             {story.body}
           </div>
 
-          {/* Additional article images */}
-          {images.length > 0 && (
+          {story.images.length > 0 && (
             <div className="mt-8 space-y-8">
-              {images.map((image) => (
+              {story.images.map((image) => (
                 <figure key={image.id}>
                   <img
                     src={image.url}
@@ -120,11 +154,8 @@ export default async function ArticlePage({
                   {(image.caption || image.photographer) && (
                     <figcaption className="mt-2 space-y-1 text-sm leading-6 text-[var(--muted)]">
                       {image.caption && <p>{image.caption}</p>}
-
                       {image.photographer && (
-                        <p className="text-xs">
-                          Photo credit: {image.photographer}
-                        </p>
+                        <p className="text-xs">Photo credit: {image.photographer}</p>
                       )}
                     </figcaption>
                   )}
@@ -132,6 +163,10 @@ export default async function ArticlePage({
               ))}
             </div>
           )}
+
+          <div className="mt-10 border-t border-[var(--line)] pt-6">
+            <ArticleShare title={story.title} excerpt={story.excerpt || ''} />
+          </div>
         </article>
       </main>
 
