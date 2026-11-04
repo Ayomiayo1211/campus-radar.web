@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 type ArticleShareProps = {
   title: string;
@@ -9,12 +9,17 @@ type ArticleShareProps = {
 
 export function ArticleShare({ title, excerpt }: ArticleShareProps) {
   const [copied, setCopied] = useState(false);
+  const [url, setUrl] = useState('');
+
+  useEffect(() => {
+    setUrl(window.location.href);
+  }, []);
 
   async function shareArticle() {
-    const url = window.location.href;
+    const currentUrl = window.location.href;
     if (navigator.share) {
       try {
-        await navigator.share({ title, text: excerpt, url });
+        await navigator.share({ title, text: excerpt, url: currentUrl });
         return;
       } catch (error) {
         if (error instanceof Error && error.name === 'AbortError') return;
@@ -22,15 +27,14 @@ export function ArticleShare({ title, excerpt }: ArticleShareProps) {
     }
 
     try {
-      await navigator.clipboard.writeText(url);
+      await navigator.clipboard.writeText(currentUrl);
       setCopied(true);
       window.setTimeout(() => setCopied(false), 2200);
     } catch {
-      window.prompt('Copy this article link:', url);
+      window.prompt('Copy this article link:', currentUrl);
     }
   }
 
-  const url = typeof window !== 'undefined' ? window.location.href : '';
   const encodedUrl = encodeURIComponent(url);
   const encodedTitle = encodeURIComponent(title);
 
