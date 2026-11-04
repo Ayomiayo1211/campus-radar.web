@@ -39,9 +39,6 @@ jobs:
           test -n "$CLOUDFLARE_ACCOUNT_ID"
           test -n "$DB_SECRET"
           printf '%s' "$DB_SECRET" | npx wrangler secret put SUPABASE_SECRET_KEY
-          if ! npx wrangler secret list | grep -q 'AUTH_SECRET'; then
-            openssl rand -hex 32 | npx wrangler secret put AUTH_SECRET
-          fi
           if [ -n "$RESEND_API_KEY" ]; then printf '%s' "$RESEND_API_KEY" | npx wrangler secret put RESEND_API_KEY; fi
           if [ -n "$EMAIL_FROM" ]; then printf '%s' "$EMAIL_FROM" | npx wrangler secret put EMAIL_FROM; fi
       - name: Build and deploy
