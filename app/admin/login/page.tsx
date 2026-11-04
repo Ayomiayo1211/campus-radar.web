@@ -11,6 +11,13 @@ export default function AdminLoginPage() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [sessionExpired, setSessionExpired] = useState(false);
+
+  useState(() => {
+    if (typeof window !== 'undefined') {
+      setSessionExpired(new URLSearchParams(window.location.search).get('reason') === 'session-expired');
+    }
+  });
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -53,6 +60,11 @@ export default function AdminLoginPage() {
           <p className="text-sm font-medium uppercase tracking-wide text-gray-500">Campus Radar</p>
           <h1 className="mt-2 text-3xl font-bold text-black">Newsroom Login</h1>
           <p className="mt-2 text-gray-600">Sign in to access the newsroom.</p>
+          {sessionExpired && (
+            <div role="alert" className="mt-4 rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">
+              Your session has expired. Please log in again to continue.
+            </div>
+          )}
         </div>
         <form onSubmit={handleSubmit} className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
           {error && <div role="alert" className="mb-5 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">{error}</div>}
