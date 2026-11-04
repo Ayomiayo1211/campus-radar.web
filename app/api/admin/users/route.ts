@@ -33,7 +33,7 @@ export async function POST(request:NextRequest) {
  let actor; try { actor=await requireRole(['SUPER_ADMIN']); } catch(e) { return authError(e); }
  let body:any; try { body=await request.json(); } catch { return NextResponse.json({error:'Invalid request body'},{status:400}); }
  const email=typeof body?.email==='string'?body.email.trim().toLowerCase():'', role=body?.role;
- if(!/^\\S+@\\S+\\.\\S+$/.test(email)||email.length>254||!ROLES.includes(role))return NextResponse.json({error:'Provide a valid email address and role'},{status:400});
+ if(!/^\S+@\S+\.\S+$/.test(email)||email.length>254||!ROLES.includes(role))return NextResponse.json({error:'Provide a valid email address and role'},{status:400});
  const db=getSupabaseAdmin();
  const {data:existing,error:lookupError}=await db.from('users').select('id').eq('email',email).maybeSingle();
  if(lookupError)return NextResponse.json({error:'Could not verify email address'},{status:500});
