@@ -5,7 +5,7 @@ import {hashValue} from '@/lib/server/engagement';
 export async function GET(request:NextRequest) {
   const storyId=request.nextUrl.searchParams.get('storyId')||'';
   if(!/^[0-9a-f-]{36}$/i.test(storyId)) return NextResponse.json({error:'Invalid story'},{status:400});
-  const db=getSupabaseAdmin();
+  const db=getSupabaseAdmin() as any;
   const {data,error}=await db.from('story_comments').select('id,display_name,body,created_at').eq('story_id',storyId).eq('status','PUBLISHED').order('created_at',{ascending:false}).limit(100);
   if(error) return NextResponse.json({error:'Could not load comments'},{status:500});
   return NextResponse.json({data:data??[]});
