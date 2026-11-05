@@ -35,8 +35,9 @@ export async function sendGmailMessage({ to, subject, html }: GmailSendInput) {
 
   const tokenData = await tokenResponse.json() as { access_token?: string; error?: string; error_description?: string };
   if (!tokenResponse.ok || !tokenData.access_token) {
-    console.error('[gmail] OAuth token refresh failed:', tokenData.error || tokenResponse.status);
-    throw new Error('Gmail authentication failed. Check the Google OAuth configuration.');
+    const detail = tokenData.error_description || tokenData.error || `HTTP ${tokenResponse.status}`;
+    console.error('[gmail diagnostic] OAuth refresh failed:', tokenResponse.status, tokenData.error || 'unknown_error', detail);
+    throw new Error(`OAuth refresh failed (${tokenResponse.status}): ${detail}`);
   }
 
   const encodedHtml = Buffer.from(html, 'utf8').toString('base64');
@@ -63,8 +64,8 @@ export async function sendGmailMessage({ to, subject, html }: GmailSendInput) {
 
   if (!sendResponse.ok) {
     const detail = await sendResponse.text();
-    console.error(`[gmail] Message send failed (HTTP ${sendResponse.status}): ${detail.slice(0, 800)}`);
-    throw new Error('Gmail could not send the message. Check the sender account and Gmail API permissions.');
+    console.error(`[gmail diagnostic] Gmail send failed (HTTP ${sendResponse.status}): ${detail.slice(0, 500)}`);
+    throw new Error(`Gmail API send failed (HTTP ${sendResponse.status}): ${detail.slice(0, 500)}`);
   }
 
   return await sendResponse.json() as { id?: string; threadId?: string };
