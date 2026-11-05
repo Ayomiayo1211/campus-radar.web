@@ -5,18 +5,19 @@ import { useEffect, useState } from 'react';
 type ArticleShareProps = {
   title: string;
   excerpt: string;
+  shortCode: string;
 };
 
-export function ArticleShare({ title, excerpt }: ArticleShareProps) {
+export function ArticleShare({ title, excerpt, shortCode }: ArticleShareProps) {
   const [copied, setCopied] = useState(false);
   const [url, setUrl] = useState('');
 
   useEffect(() => {
-    setUrl(window.location.href);
-  }, []);
+    setUrl(shortCode ? new URL(`/s/${shortCode}`, window.location.origin).toString() : window.location.href);
+  }, [shortCode]);
 
   async function shareArticle() {
-    const currentUrl = window.location.href;
+    const currentUrl = shortCode ? new URL(`/s/${shortCode}`, window.location.origin).toString() : window.location.href;
     if (navigator.share) {
       try {
         await navigator.share({ title, text: excerpt, url: currentUrl });
