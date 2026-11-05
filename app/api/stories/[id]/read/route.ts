@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createHash } from 'node:crypto';
 import { getSupabaseAdmin } from '@/lib/server/supabase';
 
 type RouteContext = { params: Promise<{ id: string }> };
@@ -22,7 +21,8 @@ export async function POST(request: NextRequest, { params }: RouteContext) {
     return NextResponse.json({ error: 'Invalid visitor identifier' }, { status: 400 });
   }
 
-  const visitorHash = createHash('sha256').update(visitorId).digest('hex');
+  const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(visitorId));
+  const visitorHash = Array.from(new Uint8Array(digest), (byte) => byte.toString(16).padStart(2, '0')).join('');
   const { data, error } = await getSupabaseAdmin().rpc('record_story_read', {
     p_story_id: id,
     p_visitor_hash: visitorHash,
