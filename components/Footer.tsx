@@ -1,10 +1,12 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
+import { NewsletterSignup } from '@/components/NewsletterSignup';
 
 export function Footer() {
   return (
     <footer className="mt-20 border-t border-[var(--line)] bg-white text-[var(--ink)]">
+      <div className="container pt-10"><NewsletterSignup compact /></div>
       <div className="container grid gap-10 py-12 md:grid-cols-[1.4fr_.7fr_.9fr]">
         <div>
           <Link

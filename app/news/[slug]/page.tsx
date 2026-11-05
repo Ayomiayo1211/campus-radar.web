@@ -6,6 +6,7 @@ import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { ArticleShare } from '@/components/ArticleShare';
 import { ArticleReadTracker } from '@/components/ArticleReadTracker';
+import { ArticleEngagement } from '@/components/ArticleEngagement';
 
 export const dynamic = 'force-dynamic';
 
@@ -180,6 +181,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
               );
             })}
           </div>
+          <ArticleEngagement storyId={story.id} />
           <div className="mt-10 border-t border-[var(--line)] pt-6">
             <ArticleShare title={story.title} excerpt={story.excerpt || ''} shortCode={story.shortCode} />
           </div>
