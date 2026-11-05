@@ -40,7 +40,7 @@ export const storySchema = z.object({
   authorId: z.string().optional(),
   featured: z.boolean().optional().default(false),
   coverImage: z.string().url().optional(),
-  galleryImages: z.array(storyImageSchema).max(30).optional().default([]),
+  galleryImages: z.array(storyImageSchema).max(30).optional(),
   tags: z
     .array(z.string().min(1).max(40))
     .max(10)
