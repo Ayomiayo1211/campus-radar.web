@@ -6,7 +6,7 @@ export async function POST(request:NextRequest){
  const email=String(body.email||'').trim().toLowerCase();
  if(!body.consent)return NextResponse.json({error:'Please confirm that you want to receive Campus Radar updates.'},{status:400});
  if(email.length>254||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))return NextResponse.json({error:'Enter a valid email address.'},{status:400});
- const db=getSupabaseAdmin(),confirmation=makeToken(),unsubscribe=makeToken();
+ const db=getSupabaseAdmin() as any,confirmation=makeToken(),unsubscribe=makeToken();
  const {data:existing}=await db.from('newsletter_subscribers').select('id,status').eq('email_normalized',email).maybeSingle();
  if(existing?.status==='ACTIVE')return NextResponse.json({message:'This email is already subscribed.'});
  const {error}=await db.from('newsletter_subscribers').upsert({email,email_normalized:email,status:'PENDING',consent_source:String(body.source||'website').slice(0,40),confirmation_token_hash:hashValue(confirmation),unsubscribe_token_hash:hashValue(unsubscribe),confirmed_at:null,unsubscribed_at:null},{onConflict:'email_normalized'});
