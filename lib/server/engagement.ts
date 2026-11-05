@@ -18,7 +18,7 @@ export async function sendNewsletterConfirmation(email: string, token: string, o
 }
 export async function sendPublishedStoryNewsletter(story: {id:string;title:string;excerpt:string;slug:string}, origin: string) {
   const {getSupabaseAdmin}=await import('@/lib/server/supabase');
-  const db=getSupabaseAdmin();
+  const db=getSupabaseAdmin() as any;
   const {data:subscribers,error}=await db.from('newsletter_subscribers').select('id,email,unsubscribe_token_hash').eq('status','ACTIVE').limit(5000);
   if(error) throw error;
   if(!subscribers?.length) return;
