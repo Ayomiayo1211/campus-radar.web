@@ -3,14 +3,14 @@ import {useEffect,useState} from 'react';
 type Comment={id:string;display_name:string;body:string;created_at:string};
 export function ArticleEngagement({storyId}:{storyId:string}){
  const [items,setItems]=useState<Comment[]>([]),[name,setName]=useState(''),[email,setEmail]=useState(''),[body,setBody]=useState(''),[subscribe,setSubscribe]=useState(false),[loading,setLoading]=useState(false),[message,setMessage]=useState('');
- async function load(){const r=await fetch(`/api/comments?storyId=${storyId}`);const d=await r.json();if(r.ok)setItems(d.data||[])}
+ async function load(){const r=await fetch(`/api/comments?storyId=${storyId}`);const d=await r.json() as any;if(r.ok)setItems(d.data||[])}
  useEffect(()=>{void load()},[storyId]);
  async function submit(e:React.FormEvent){e.preventDefault();setLoading(true);setMessage('');try{
-  const r=await fetch('/api/comments',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({storyId,displayName:name,email,body,website:''})});const d=await r.json();if(!r.ok)throw new Error(d.error||'Could not submit comment.');
+  const r=await fetch('/api/comments',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({storyId,displayName:name,email,body,website:''})});const d=await r.json() as any;if(!r.ok)throw new Error(d.error||'Could not submit comment.');
   setItems(current=>[d.data,...current]);setBody('');setMessage('Your comment is now published.');
-  if(subscribe){const sr=await fetch('/api/newsletter',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,consent:true,source:'article-comment'})});const sd=await sr.json();setMessage(`Comment published. ${sr.ok?sd.message:sd.error}`)}
+  if(subscribe){const sr=await fetch('/api/newsletter',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,consent:true,source:'article-comment'})});const sd=await sr.json() as any;setMessage(`Comment published. ${sr.ok?sd.message:sd.error}`)}
  }catch(err){setMessage(err instanceof Error?err.message:'Something went wrong.')}finally{setLoading(false)}}
- async function report(id:string){const reason=window.prompt('Why are you reporting this comment?');if(!reason)return;const r=await fetch('/api/comments/report',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({commentId:id,reason})});const d=await r.json();setMessage(d.message||d.error||'Report submitted.')}
+ async function report(id:string){const reason=window.prompt('Why are you reporting this comment?');if(!reason)return;const r=await fetch('/api/comments/report',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({commentId:id,reason})});const d=await r.json() as any;setMessage(d.message||d.error||'Report submitted.')}
  return <section className="mt-12 border-t border-[var(--line)] pt-8" id="comments">
   <h2 className="text-2xl font-bold">Join the conversation <span className="text-base font-normal text-[var(--muted)]">({items.length})</span></h2>
   <p className="mt-2 text-sm text-[var(--muted)]">Comments are published immediately. Keep the discussion respectful.</p>
