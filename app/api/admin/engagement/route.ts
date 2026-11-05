@@ -15,7 +15,7 @@ export async function GET(){
 export async function PATCH(request:NextRequest){
  try{await requireRole(['SUPER_ADMIN','EDITOR'])}catch{return NextResponse.json({error:'Unauthorized'},{status:401})}
  let body:any;try{body=await request.json()}catch{return NextResponse.json({error:'Invalid request'},{status:400})}
- const db=getSupabaseAdmin();
+ const db=getSupabaseAdmin() as any;
  if(body.type==='comment'&&/^[0-9a-f-]{36}$/i.test(String(body.id))&&['PUBLISHED','HIDDEN','DELETED'].includes(body.status)){
   const {error}=await db.from('story_comments').update({status:body.status,updated_at:new Date().toISOString()}).eq('id',body.id);
   if(error)return NextResponse.json({error:'Could not update comment.'},{status:500});
