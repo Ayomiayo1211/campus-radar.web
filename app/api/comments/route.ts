@@ -17,7 +17,7 @@ export async function POST(request:NextRequest) {
   if(body.website) return NextResponse.json({message:'Comment received.'});
   const ip=request.headers.get('cf-connecting-ip')||request.headers.get('x-forwarded-for')?.split(',')[0]?.trim()||'unknown';
   const rateKey=hashValue(ip+'|'+(process.env.AUTH_SECRET||'campus-radar'));
-  const db=getSupabaseAdmin();
+  const db=getSupabaseAdmin() as any;
   const {data:story}=await db.from('stories').select('id').eq('id',storyId).eq('status','PUBLISHED').maybeSingle();
   if(!story) return NextResponse.json({error:'Article is unavailable for comments.'},{status:404});
   const {data:allowed,error:rateError}=await db.rpc('check_comment_rate_limit',{p_rate_key:rateKey});
