@@ -72,6 +72,7 @@ export default function EditStoryPage() {
   const [uploadingImage, setUploadingImage] = useState(false);
 
   const imageInputRef = useRef<HTMLInputElement>(null);
+  const bodyInputRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -246,6 +247,17 @@ export default function EditStoryPage() {
     setUploadingGallery(false);
   }
 
+  function insertGalleryImage(image: GalleryImage) {
+    const textarea = bodyInputRef.current;
+    if (!textarea) return;
+    const marker = `\n\n{{gallery-image:${encodeURIComponent(image.url)}}}\n\n`;
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    textarea.setRangeText(marker, start, end, 'end');
+    setBody(textarea.value);
+    textarea.focus();
+  }
+
   function updateGalleryImage(index: number, field: 'altText' | 'caption' | 'photographer', value: string) {
     setGalleryImages(current => current.map((image, i) => i === index ? { ...image, [field]: value } : image));
   }
@@ -376,7 +388,7 @@ export default function EditStoryPage() {
 
               <div>
                 <label htmlFor="body" className="mb-2 block text-sm font-medium text-gray-900">Story Body</label>
-                <textarea id="body" value={body} onChange={(event) => setBody(event.target.value)} required rows={14} className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm leading-6 outline-none focus:border-black" />
+                <textarea ref={bodyInputRef} id="body" value={body} onChange={(event) => setBody(event.target.value)} required rows={14} className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm leading-6 outline-none focus:border-black" />
               </div>
 
               <div>
@@ -446,7 +458,7 @@ export default function EditStoryPage() {
                   <div key={image.id || image.url} className="rounded-xl border border-gray-200 p-4">
                     <div className="mb-4 flex items-start gap-4">
                       <img src={image.url} alt={image.altText || 'Gallery preview'} className="h-24 w-32 rounded-lg bg-gray-100 object-cover" />
-                      <div className="flex-1"><p className="text-sm font-semibold">Image {index + 1}</p><button type="button" onClick={() => removeGalleryImage(index)} className="mt-3 rounded-md border border-red-200 px-3 py-1.5 text-xs font-medium text-red-600">Remove image</button></div>
+                      <div className="flex-1"><p className="text-sm font-semibold">Image {index + 1}</p><div className="mt-3 flex flex-wrap gap-2"><button type="button" onClick={() => insertGalleryImage(image)} className="rounded-md border border-blue-200 px-3 py-1.5 text-xs font-medium text-blue-700">Insert at cursor</button><button type="button" onClick={() => removeGalleryImage(index)} className="rounded-md border border-red-200 px-3 py-1.5 text-xs font-medium text-red-600">Remove image</button></div></div>
                     </div>
                     <div className="grid gap-3 sm:grid-cols-2">
                       <label className="text-sm font-medium">Caption<input value={image.caption || ''} onChange={event => updateGalleryImage(index, 'caption', event.target.value)} maxLength={500} className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm font-normal" /></label>
