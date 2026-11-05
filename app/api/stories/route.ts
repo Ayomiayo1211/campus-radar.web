@@ -48,7 +48,7 @@ export async function POST(request: NextRequest) {
   }).select('*').single();
   if (error || !story) return NextResponse.json({ error: 'Could not create story' }, { status: 500 });
   const tags = d.tags.map(tag => ({ story_id:story.id, tag }));
-  const images = d.galleryImages.map((image,index) => ({ story_id:story.id, url:image.url, media_id:image.mediaId||null, alt_text:image.altText||null, caption:image.caption||null, photographer:image.photographer||null, display_order:image.displayOrder??index }));
+  const images = (d.galleryImages ?? []).map((image,index) => ({ story_id:story.id, url:image.url, media_id:image.mediaId||null, alt_text:image.altText||null, caption:image.caption||null, photographer:image.photographer||null, display_order:image.displayOrder??index }));
   if (tags.length) { const r=await db.from('story_tags').insert(tags); if(r.error){await db.from('stories').delete().eq('id',story.id);return NextResponse.json({error:'Could not save story tags'},{status:500});} }
   if (images.length) { const r=await db.from('story_images').insert(images); if(r.error){await db.from('stories').delete().eq('id',story.id);return NextResponse.json({error:'Could not save story images'},{status:500});} }
   const {data:complete}=await db.from('stories').select('*, tags:story_tags(*), images:story_images(*)').eq('id',story.id).single();
