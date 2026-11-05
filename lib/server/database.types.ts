@@ -227,6 +227,7 @@ export type Database = {
           origin: string
           published_at: string | null
           slug: string
+          short_code: string
           status: string
           title: string
           updated_at: string
@@ -245,6 +246,7 @@ export type Database = {
           origin: string
           published_at?: string | null
           slug: string
+          short_code: string
           status?: string
           title: string
           updated_at?: string
@@ -263,6 +265,7 @@ export type Database = {
           origin?: string
           published_at?: string | null
           slug?: string
+          short_code?: string
           status?: string
           title?: string
           updated_at?: string
