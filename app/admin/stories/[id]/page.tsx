@@ -24,7 +24,10 @@ type Story = {
   featured: boolean;
   coverImage: string | null;
   authorName: string;
+  images?: GalleryImage[];
 };
+
+type GalleryImage = { id?: string; mediaId?: string | null; url: string; altText: string | null; caption: string | null; photographer: string | null; displayOrder: number; };
 
 type Media = {
   id: string;
@@ -59,6 +62,9 @@ export default function EditStoryPage() {
   const [featured, setFeatured] = useState(false);
   const [authorName, setAuthorName] = useState('');
   const [coverImage, setCoverImage] = useState('');
+  const [galleryImages, setGalleryImages] = useState<GalleryImage[]>([]);
+  const [uploadingGallery, setUploadingGallery] = useState(false);
+  const galleryInputRef = useRef<HTMLInputElement>(null);
 
   const [media, setMedia] = useState<Media[]>([]);
   const [showMediaLibrary, setShowMediaLibrary] = useState(false);
@@ -93,6 +99,7 @@ export default function EditStoryPage() {
         setFeatured(data.featured);
         setAuthorName(data.authorName);
         setCoverImage(data.coverImage || '');
+        setGalleryImages((data.images ?? []).slice().sort((a, b) => a.displayOrder - b.displayOrder));
       } catch (err) {
         if (!cancelled) {
           setError(err instanceof Error ? err.message : 'Something went wrong');
@@ -205,6 +212,48 @@ export default function EditStoryPage() {
     setCoverImage('');
   }
 
+  async function handleGalleryUpload(event: ChangeEvent<HTMLInputElement>) {
+    const files = Array.from(event.target.files ?? []);
+    event.target.value = '';
+    if (!files.length) return;
+    const remaining = 30 - galleryImages.length;
+    const selected = files.slice(0, Math.max(remaining, 0));
+    if (files.length > remaining) setError(`You can add only ${remaining} more image(s). The limit is 30.`);
+    if (!selected.length) return;
+    setUploadingGallery(true);
+    setError('');
+    const failures: string[] = [];
+    for (const file of selected) {
+      try {
+        if (!file.type.startsWith('image/')) throw new Error('Not an image file');
+        const uploadFile = file.size > 8 * 1024 * 1024
+          ? await imageCompression(file, { maxSizeMB: 8, maxWidthOrHeight: 4572, useWebWorker: true, fileType: 'image/jpeg', initialQuality: 0.9 })
+          : file;
+        const formData = new FormData();
+        formData.append('file', uploadFile, uploadFile.name);
+        const response = await fetch('/api/media/upload', { method: 'POST', body: formData });
+        const result = await response.json() as ApiResponse<Media>;
+        if (!response.ok || !result.data) throw new Error(result.error || 'Upload failed');
+        const uploaded = result.data;
+        setGalleryImages(current => current.some(image => image.url === uploaded.secureUrl) ? current : [...current, {
+          mediaId: uploaded.id, url: uploaded.secureUrl, altText: '', caption: '', photographer: '', displayOrder: current.length,
+        }]);
+      } catch (err) {
+        failures.push(`${file.name}: ${err instanceof Error ? err.message : 'Upload failed'}`);
+      }
+    }
+    if (failures.length) setError(failures.join(' | '));
+    setUploadingGallery(false);
+  }
+
+  function updateGalleryImage(index: number, field: 'altText' | 'caption' | 'photographer', value: string) {
+    setGalleryImages(current => current.map((image, i) => i === index ? { ...image, [field]: value } : image));
+  }
+
+  function removeGalleryImage(index: number) {
+    setGalleryImages(current => current.filter((_, i) => i !== index).map((image, displayOrder) => ({ ...image, displayOrder })));
+  }
+
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setSaving(true);
@@ -225,6 +274,7 @@ export default function EditStoryPage() {
           featured,
           authorName,
           coverImage: coverImage || null,
+          galleryImages: galleryImages.map((image, displayOrder) => ({ url: image.url, mediaId: image.mediaId || undefined, altText: image.altText || undefined, caption: image.caption || undefined, photographer: image.photographer || undefined, displayOrder })),
         }),
       });
 
@@ -382,6 +432,32 @@ export default function EditStoryPage() {
             </div>
           </section>
 
+
+          <section className="rounded-xl border border-gray-200 bg-white p-6">
+            <div className="mb-5 flex flex-wrap items-start justify-between gap-4">
+              <div><h2 className="text-lg font-semibold text-black">Article Gallery</h2><p className="mt-1 text-sm text-gray-600">Manage the additional photos displayed with this article. The cover image is separate.</p></div>
+              <span className="rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-700">{galleryImages.length}/30</span>
+            </div>
+            <input ref={galleryInputRef} type="file" accept="image/*" multiple onChange={handleGalleryUpload} className="hidden" />
+            <button type="button" onClick={() => galleryInputRef.current?.click()} disabled={uploadingGallery || galleryImages.length >= 30} className="rounded-lg bg-black px-4 py-3 text-sm font-medium text-white disabled:opacity-50">{uploadingGallery ? 'Uploading images...' : 'Upload Gallery Images'}</button>
+            {galleryImages.length === 0 ? <p className="mt-4 rounded-lg border border-dashed border-gray-300 p-6 text-center text-sm text-gray-500">No additional photos added.</p> : (
+              <div className="mt-5 space-y-4">
+                {galleryImages.map((image, index) => (
+                  <div key={image.id || image.url} className="rounded-xl border border-gray-200 p-4">
+                    <div className="mb-4 flex items-start gap-4">
+                      <img src={image.url} alt={image.altText || 'Gallery preview'} className="h-24 w-32 rounded-lg bg-gray-100 object-cover" />
+                      <div className="flex-1"><p className="text-sm font-semibold">Image {index + 1}</p><button type="button" onClick={() => removeGalleryImage(index)} className="mt-3 rounded-md border border-red-200 px-3 py-1.5 text-xs font-medium text-red-600">Remove image</button></div>
+                    </div>
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      <label className="text-sm font-medium">Caption<input value={image.caption || ''} onChange={event => updateGalleryImage(index, 'caption', event.target.value)} maxLength={500} className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm font-normal" /></label>
+                      <label className="text-sm font-medium">Photographer credit<input value={image.photographer || ''} onChange={event => updateGalleryImage(index, 'photographer', event.target.value)} maxLength={180} className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm font-normal" /></label>
+                      <label className="text-sm font-medium sm:col-span-2">Alt text<input value={image.altText || ''} onChange={event => updateGalleryImage(index, 'altText', event.target.value)} maxLength={300} className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm font-normal" /></label>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </section>
           <section className="rounded-xl border border-gray-200 bg-white p-6">
             <h2 className="mb-6 text-lg font-semibold text-black">Publishing</h2>
             <div className="grid gap-5 md:grid-cols-2">
@@ -435,14 +511,14 @@ export default function EditStoryPage() {
           </section>
 
           <div className="flex flex-wrap justify-between gap-3">
-            <button type="button" onClick={handleDelete} disabled={saving || uploadingImage} className="rounded-lg border border-red-300 px-5 py-3 text-sm font-medium text-red-700 hover:bg-red-50 disabled:opacity-60">
+            <button type="button" onClick={handleDelete} disabled={saving || uploadingImage || uploadingGallery} className="rounded-lg border border-red-300 px-5 py-3 text-sm font-medium text-red-700 hover:bg-red-50 disabled:opacity-60">
               Delete Story
             </button>
             <div className="flex gap-3">
               <button type="button" onClick={() => router.push('/admin/stories')} className="rounded-lg border border-gray-300 px-5 py-3 text-sm font-medium hover:bg-gray-50">
                 Cancel
               </button>
-              <button type="submit" disabled={saving || uploadingImage} className="rounded-lg bg-black px-5 py-3 text-sm font-medium text-white hover:bg-gray-800 disabled:opacity-60">
+              <button type="submit" disabled={saving || uploadingImage || uploadingGallery} className="rounded-lg bg-black px-5 py-3 text-sm font-medium text-white hover:bg-gray-800 disabled:opacity-60">
                 {saving ? 'Saving...' : 'Save Changes'}
               </button>
             </div>
