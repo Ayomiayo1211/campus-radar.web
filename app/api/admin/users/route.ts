@@ -3,6 +3,7 @@ import { randomBytes, createHash } from 'node:crypto';
 import { getSupabaseAdmin } from '@/lib/server/supabase';
 import { requireRole } from '@/lib/server/auth';
 import { sendGmailMessage } from '@/lib/server/gmail';
+import { getCloudflareContext } from '@opennextjs/cloudflare';
 const ROLES = ['EDITOR', 'REPORTER'] as const;
 const authError = (e: unknown) => e instanceof Error && e.message === 'Forbidden' ? NextResponse.json({error:'Master Admin access required'},{status:403}) : NextResponse.json({error:'Authentication required'},{status:401});
 const safe = (u: any) => ({id:u.id,name:u.name,email:u.email,role:u.role,isActive:u.is_active,createdAt:u.created_at});
