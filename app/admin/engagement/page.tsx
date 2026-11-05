@@ -4,7 +4,7 @@ type Comment={id:string;display_name:string;email:string;body:string;status:stri
 type Subscriber={id:string;email:string;status:string;created_at:string};
 export default function EngagementPage(){
  const [comments,setComments]=useState<Comment[]>([]),[subscribers,setSubscribers]=useState<Subscriber[]>([]),[reports,setReports]=useState<any[]>([]),[tab,setTab]=useState<'comments'|'subscribers'>('comments'),[error,setError]=useState(''),[busy,setBusy]=useState('');
- async function load(){setError('');const r=await fetch('/api/admin/engagement');const d=await r.json();if(!r.ok){setError(d.error||'Could not load dashboard');return}setComments(d.comments||[]);setSubscribers(d.subscribers||[]);setReports(d.reports||[])}
+ async function load(){setError('');const r=await fetch('/api/admin/engagement');const d=await r.json() as any;if(!r.ok){setError(d.error||'Could not load dashboard');return}setComments(d.comments||[]);setSubscribers(d.subscribers||[]);setReports(d.reports||[])}
  useEffect(()=>{void load()},[]);
  async function update(type:string,id:string,status:string){setBusy(id);const r=await fetch('/api/admin/engagement',{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({type,id,status})});const d=await r.json();setBusy('');if(!r.ok){setError(d.error||'Update failed');return}await load()}
  function exportCsv(){const rows=[['Email','Status','Subscribed at'],...subscribers.map(s=>[s.email,s.status,s.created_at])];const csv=rows.map(row=>row.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\n');const url=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));const a=document.createElement('a');a.href=url;a.download='campus-radar-subscribers.csv';a.click();URL.revokeObjectURL(url)}
