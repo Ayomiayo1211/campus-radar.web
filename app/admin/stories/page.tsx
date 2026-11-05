@@ -15,6 +15,7 @@ type Story = {
   authorName: string;
   publishedAt: string | null;
   createdAt: string;
+  readCount: number;
 };
 
 type StoriesResponse = {
@@ -148,6 +149,7 @@ export default function StoriesPage() {
                           Created{' '}
                           {new Date(story.createdAt).toLocaleString()}
                         </p>
+                        {story.status === 'PUBLISHED' && <p className="mt-1 font-medium text-gray-700">{Number(story.readCount ?? 0).toLocaleString()} reads</p>}
                       </div>
                     </div>
 
