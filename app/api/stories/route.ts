@@ -41,7 +41,7 @@ export async function POST(request: NextRequest) {
   if (reporter && !['DRAFT', 'REVIEW'].includes(d.status)) return NextResponse.json({ error: 'Reporters can only create drafts or submit stories for review' }, { status: 403 });
   const db = getSupabaseAdmin();
   const { data: story, error } = await db.from('stories').insert({
-    title:d.title, slug:slugify(d.title), excerpt:d.excerpt, body:d.body, content_type:d.contentType,
+    title:d.title, slug:slugify(d.title), short_code:crypto.randomUUID().replace(/-/g, '').slice(0, 8), excerpt:d.excerpt, body:d.body, content_type:d.contentType,
     origin:d.origin, commercial_status:d.commercialStatus, author_name:reporter?user.name:d.authorName,
     author_id:reporter?user.id:(d.authorId??user.id), featured:reporter?false:d.featured,
     cover_image:d.coverImage??null, status:d.status, published_at:d.status==='PUBLISHED'?new Date().toISOString():null,
