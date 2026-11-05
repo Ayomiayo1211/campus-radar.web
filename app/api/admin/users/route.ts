@@ -40,9 +40,10 @@ export async function POST(request:NextRequest) {
    html: `<div style="font-family:Arial,sans-serif;line-height:1.6;color:#171717"><h2>Campus Radar newsroom invitation</h2><p>You have been invited as a <strong>${role==='EDITOR'?'Editor':'Reporter'}</strong>.</p><p>Use this secure link to create your account password. It expires in 48 hours and can only be used once.</p><p><a href="${link}" style="display:inline-block;padding:12px 18px;background:#111;color:#fff;text-decoration:none;border-radius:6px">Create your account</a></p><p>If you were not expecting this invitation, ignore this email.</p></div>`,
   });
  } catch(error) {
-  console.error('[admin invitation] Gmail delivery failed:', error instanceof Error ? error.message : 'Unknown error');
+  const diagnostic = error instanceof Error ? error.message : 'Unknown error';
+  console.error('[admin invitation] Gmail delivery failed:', diagnostic);
   await (db as any).from('admin_invitations').update({revoked_at:new Date().toISOString()}).eq('id',invite.id);
-  return NextResponse.json({error:'Invitation email could not be sent. Check Gmail API configuration.'},{status:502});
+  return NextResponse.json({ error: 'Invitation email could not be sent.', diagnostic: { stage: 'gmail_delivery', message: diagnostic } }, { status: 502 });
  }
  return NextResponse.json({message:`Invitation sent to ${email}`},{status:201});
 }
