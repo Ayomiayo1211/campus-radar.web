@@ -118,6 +118,7 @@ export type Database = {
           organisation: string
           origin: string
           published_at: string | null
+          read_count: number
           slug: string
           status: string
           title: string
@@ -134,6 +135,7 @@ export type Database = {
           organisation: string
           origin: string
           published_at?: string | null
+          read_count?: number
           slug: string
           status?: string
           title: string
@@ -150,6 +152,7 @@ export type Database = {
           organisation?: string
           origin?: string
           published_at?: string | null
+          read_count?: number
           slug?: string
           status?: string
           title?: string
@@ -436,7 +439,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      record_story_read: {
+        Args: { p_story_id: string; p_visitor_hash: string }
+        Returns: number
+      }
     }
     Enums: {
       [_ in never]: never
