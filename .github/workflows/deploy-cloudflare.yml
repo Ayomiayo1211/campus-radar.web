@@ -17,7 +17,12 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
-      - name: Configure Worker secrets
+      - name: Build and deploy Worker
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: npm run deploy
+      - name: Configure Worker secrets after deployment
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
@@ -31,8 +36,3 @@ jobs:
           printf '%s' "$DB_SECRET" | npx wrangler secret put SUPABASE_SECRET_KEY
           if [ -n "$RESEND_API_KEY" ]; then printf '%s' "$RESEND_API_KEY" | npx wrangler secret put RESEND_API_KEY; fi
           if [ -n "$EMAIL_FROM" ]; then printf '%s' "$EMAIL_FROM" | npx wrangler secret put EMAIL_FROM; fi
-      - name: Build and deploy
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-        run: npm run deploy
