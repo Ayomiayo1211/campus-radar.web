@@ -3,6 +3,7 @@ import { getSupabaseAdmin, toCamelCase } from '@/lib/server/supabase';
 import { requireRole } from '@/lib/server/auth';
 import { storySchema } from '@/lib/validation/content';
 import { notifyEditorsOfStorySubmission } from '@/lib/server/story-notifications';
+import { sendPublishedStoryNewsletter } from '@/lib/server/engagement';
 type RouteContext={params:Promise<{id:string}>};
 const ROLES=['SUPER_ADMIN','EDITOR','REPORTER'] as const;
 export async function GET(_request:NextRequest,{params}:RouteContext){
@@ -25,6 +26,7 @@ export async function PATCH(request:NextRequest,{params}:RouteContext){
  const tagDelete=await db.from('story_tags').delete().eq('story_id',id);if(tagDelete.error)return NextResponse.json({error:'Story saved, but tags could not be updated'},{status:500});
  if(d.tags.length){const r=await db.from('story_tags').insert(d.tags.map(tag=>({story_id:id,tag})));if(r.error)return NextResponse.json({error:'Story saved, but tags could not be updated'},{status:500});}
  if(d.galleryImages!==undefined){const del=await db.from('story_images').delete().eq('story_id',id);if(del.error)return NextResponse.json({error:'Story saved, but images could not be updated'},{status:500});if(d.galleryImages.length){const r=await db.from('story_images').insert(d.galleryImages.map((image,index)=>({story_id:id,url:image.url,media_id:image.mediaId||null,alt_text:image.altText||null,caption:image.caption||null,photographer:image.photographer||null,display_order:image.displayOrder??index})));if(r.error)return NextResponse.json({error:'Story saved, but images could not be updated'},{status:500});}}
+ if(existing.status!=='PUBLISHED'&&d.status==='PUBLISHED')await sendPublishedStoryNewsletter(story,request.nextUrl.origin).catch(error=>console.error('[newsletter] Campaign dispatch failed:',error));
  if(user.role==='REPORTER'&&existing.status!=='REVIEW'&&d.status==='REVIEW')await notifyEditorsOfStorySubmission(story,request.nextUrl.origin);
  const {data:complete}=await db.from('stories').select('*,tags:story_tags(*),images:story_images(*),author:users(id,name)').eq('id',id).single();return NextResponse.json({data:toCamelCase(complete??story)});
 }
