@@ -3,6 +3,7 @@ import { getSupabaseAdmin, toCamelCase } from '@/lib/server/supabase';
 import { slugify } from '@/lib/server/slug';
 import { requireRole } from '@/lib/server/auth';
 import { storySchema } from '@/lib/validation/content';
+import { notifyEditorsOfStorySubmission } from '@/lib/server/story-notifications';
 const ALL_ROLES = ['SUPER_ADMIN', 'EDITOR', 'REPORTER'] as const;
 
 export async function GET(request: NextRequest) {
@@ -51,6 +52,9 @@ export async function POST(request: NextRequest) {
   const images = (d.galleryImages ?? []).map((image,index) => ({ story_id:story.id, url:image.url, media_id:image.mediaId||null, alt_text:image.altText||null, caption:image.caption||null, photographer:image.photographer||null, display_order:image.displayOrder??index }));
   if (tags.length) { const r=await db.from('story_tags').insert(tags); if(r.error){await db.from('stories').delete().eq('id',story.id);return NextResponse.json({error:'Could not save story tags'},{status:500});} }
   if (images.length) { const r=await db.from('story_images').insert(images); if(r.error){await db.from('stories').delete().eq('id',story.id);return NextResponse.json({error:'Could not save story images'},{status:500});} }
+  if (reporter && d.status === 'REVIEW') {
+    await notifyEditorsOfStorySubmission(story, request.nextUrl.origin);
+  }
   const {data:complete}=await db.from('stories').select('*, tags:story_tags(*), images:story_images(*)').eq('id',story.id).single();
   return NextResponse.json({data:toCamelCase(complete??story)},{status:201});
 }
