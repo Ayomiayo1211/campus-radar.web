@@ -5,6 +5,7 @@ import { getSupabaseAdmin } from '@/lib/server/supabase';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { ArticleShare } from '@/components/ArticleShare';
+import { ArticleReadTracker } from '@/components/ArticleReadTracker';
 
 export const dynamic = 'force-dynamic';
 
@@ -15,7 +16,7 @@ type ArticlePageProps = {
 async function getPublishedStory(slug: string) {
   const { data, error } = await getSupabaseAdmin()
     .from('stories')
-    .select('title,excerpt,body,author_name,published_at,cover_image,content_type,short_code,images:story_images(id,url,alt_text,caption,photographer,display_order)')
+    .select('id,title,excerpt,body,author_name,published_at,cover_image,content_type,short_code,read_count,images:story_images(id,url,alt_text,caption,photographer,display_order)')
     .eq('slug', slug)
     .eq('status', 'PUBLISHED')
     .maybeSingle();
@@ -64,6 +65,8 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
   if (!row) notFound();
 
   const story = {
+    id: row.id,
+    readCount: Number(row.read_count ?? 0),
     title: row.title,
     excerpt: row.excerpt,
     body: row.body,
@@ -141,7 +144,10 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
                 </span>
               )}
             </div>
-            <ArticleShare title={story.title} excerpt={story.excerpt || ''} shortCode={story.shortCode} />
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <ArticleShare title={story.title} excerpt={story.excerpt || ''} shortCode={story.shortCode} />
+              <span className="text-sm text-[var(--muted)]"><ArticleReadTracker storyId={story.id} initialCount={story.readCount} /></span>
+            </div>
           </div>
 
           {story.coverImage && (
