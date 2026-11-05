@@ -6,17 +6,18 @@ type GmailSendInput = {
   html: string;
 };
 
-function requiredEnv(name: string): string {
-  const value = process.env[name]?.trim();
+function requiredEnv(name: string, cloudflareEnv?: Record<string, unknown>): string {
+  const bindingValue = cloudflareEnv?.[name];
+  const value = (typeof bindingValue === 'string' ? bindingValue : process.env[name])?.trim();
   if (!value) throw new Error(`${name} is not configured`);
   return value;
 }
 
-export async function sendGmailMessage({ to, subject, html }: GmailSendInput) {
-  const clientId = requiredEnv('GMAIL_CLIENT_ID');
-  const clientSecret = requiredEnv('GMAIL_CLIENT_SECRET');
-  const refreshToken = requiredEnv('GMAIL_REFRESH_TOKEN');
-  const senderEmail = requiredEnv('GMAIL_SENDER_EMAIL');
+export async function sendGmailMessage({ to, subject, html, env }: GmailSendInput & { env?: Record<string, unknown> }) {
+  const clientId = requiredEnv('GMAIL_CLIENT_ID', env);
+  const clientSecret = requiredEnv('GMAIL_CLIENT_SECRET', env);
+  const refreshToken = requiredEnv('GMAIL_REFRESH_TOKEN', env);
+  const senderEmail = requiredEnv('GMAIL_SENDER_EMAIL', env);
 
   if (!/^[^\s@]+@gmail\.com$/i.test(senderEmail)) {
     throw new Error('GMAIL_SENDER_EMAIL must be the Gmail account authorised with Google');
