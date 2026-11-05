@@ -73,12 +73,15 @@ export default function StoriesPage() {
             </p>
           </div>
 
+          <div className="flex flex-wrap gap-2">
+          <Link href="/admin/engagement" className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium hover:bg-gray-50">Comments & Newsletter</Link>
           <Link
             href="/admin/stories/new"
             className="rounded-lg bg-black px-4 py-2 text-sm font-medium text-white hover:bg-gray-800"
           >
             New Story
           </Link>
+          </div>
         </div>
 
         {error && (
