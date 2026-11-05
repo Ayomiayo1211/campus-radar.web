@@ -136,13 +136,36 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
             </figure>
           )}
 
-          <div className="whitespace-pre-wrap text-base leading-8 text-[var(--ink)]">
-            {story.body}
+          <div className="text-base leading-8 text-[var(--ink)]">
+            {story.body.split(/(\\{\\{gallery-image:[^}]+\\}\\})/g).map((part, index) => {
+              const match = part.match(/^\\{\\{gallery-image:([^}]+)\\}\\}$/);
+              if (!match) return <span key={index} className="whitespace-pre-wrap">{part}</span>;
+              let imageUrl = '';
+              try { imageUrl = decodeURIComponent(match[1]); } catch { return null; }
+              const image = story.images.find((item) => item.url === imageUrl);
+              if (!image) return null;
+              return (
+                <figure key={index} className="my-8">
+                  <img
+                    src={image.url}
+                    alt={image.altText || image.caption || story.title}
+                    loading="lazy"
+                    className="h-auto max-h-[700px] w-full rounded-xl object-contain"
+                  />
+                  {(image.caption || image.photographer) && (
+                    <figcaption className="mt-2 space-y-1 text-sm leading-6 text-[var(--muted)]">
+                      {image.caption && <p>{image.caption}</p>}
+                      {image.photographer && <p className="text-xs">Photo credit: {image.photographer}</p>}
+                    </figcaption>
+                  )}
+                </figure>
+              );
+            })}
           </div>
 
           {story.images.length > 0 && (
             <div className="mt-8 space-y-8">
-              {story.images.map((image) => (
+              {story.images.filter((image) => !story.body.includes(`{{gallery-image:${encodeURIComponent(image.url)}}}`)).map((image) => (
                 <figure key={image.id}>
                   <img
                     src={image.url}
@@ -150,13 +173,10 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
                     loading="lazy"
                     className="h-auto max-h-[700px] w-full rounded-xl object-contain"
                   />
-
                   {(image.caption || image.photographer) && (
                     <figcaption className="mt-2 space-y-1 text-sm leading-6 text-[var(--muted)]">
                       {image.caption && <p>{image.caption}</p>}
-                      {image.photographer && (
-                        <p className="text-xs">Photo credit: {image.photographer}</p>
-                      )}
+                      {image.photographer && <p className="text-xs">Photo credit: {image.photographer}</p>}
                     </figcaption>
                   )}
                 </figure>
