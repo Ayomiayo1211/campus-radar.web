@@ -137,8 +137,8 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
           )}
 
           <div className="text-base leading-8 text-[var(--ink)]">
-            {story.body.split(/(\\{\\{gallery-image:[^}]+\\}\\})/g).map((part, index) => {
-              const match = part.match(/^\\{\\{gallery-image:([^}]+)\\}\\}$/);
+            {story.body.split(/(\{\{gallery-image:[^}]+\}\})/g).map((part, index) => {
+              const match = part.match(/^\{\{gallery-image:([^}]+)\}\}$/);
               if (!match) return <span key={index} className="whitespace-pre-wrap">{part}</span>;
               let imageUrl = '';
               try { imageUrl = decodeURIComponent(match[1]); } catch { return null; }
