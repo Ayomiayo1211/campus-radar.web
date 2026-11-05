@@ -15,7 +15,7 @@ type ArticlePageProps = {
 async function getPublishedStory(slug: string) {
   const { data, error } = await getSupabaseAdmin()
     .from('stories')
-    .select('title,excerpt,body,author_name,published_at,cover_image,content_type,images:story_images(id,url,alt_text,caption,photographer,display_order)')
+    .select('title,excerpt,body,author_name,published_at,cover_image,content_type,short_code,images:story_images(id,url,alt_text,caption,photographer,display_order)')
     .eq('slug', slug)
     .eq('status', 'PUBLISHED')
     .maybeSingle();
@@ -71,6 +71,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
     publishedAt: row.published_at ? new Date(row.published_at) : null,
     coverImage: row.cover_image,
     contentType: row.content_type,
+    shortCode: row.short_code,
     images: (row.images ?? []).map((image) => ({
       id: image.id,
       url: image.url,
@@ -80,6 +81,23 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
       displayOrder: image.display_order,
     })).sort((a, b) => a.displayOrder - b.displayOrder),
   };
+  const paragraphs = story.body.split(/\n\s*\n/);
+  const manuallyPlacedUrls = new Set(Array.from(story.body.matchAll(/\{\{gallery-image:([^}]+)\}\}/g), (match) => {
+    try { return decodeURIComponent(match[1]); } catch { return ''; }
+  }));
+  const automaticImages = story.images.filter((image) => !manuallyPlacedUrls.has(image.url));
+  const automaticPlacement = new Map<number, typeof automaticImages>();
+  automaticImages.forEach((image, index) => {
+    if (!paragraphs.length) return;
+    const position = Math.min(paragraphs.length - 1, Math.max(0, Math.round(((index + 1) * paragraphs.length) / (automaticImages.length + 1)) - 1));
+    automaticPlacement.set(position, [...(automaticPlacement.get(position) ?? []), image]);
+  });
+  const renderGalleryImage = (image: (typeof story.images)[number], key: string) => (
+    <figure key={key} className="my-8">
+      <img src={image.url} alt={image.altText || image.caption || story.title} loading="lazy" className="h-auto max-h-[700px] w-full rounded-xl object-contain" />
+      {(image.caption || image.photographer) && <figcaption className="mt-2 space-y-1 text-sm leading-6 text-[var(--muted)]">{image.caption && <p>{image.caption}</p>}{image.photographer && <p className="text-xs">Photo credit: {image.photographer}</p>}</figcaption>}
+    </figure>
+  );
 
   return (
     <>
@@ -123,7 +141,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
                 </span>
               )}
             </div>
-            <ArticleShare title={story.title} excerpt={story.excerpt || ''} />
+            <ArticleShare title={story.title} excerpt={story.excerpt || ''} shortCode={story.shortCode} />
           </div>
 
           {story.coverImage && (
@@ -137,55 +155,27 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
           )}
 
           <div className="text-base leading-8 text-[var(--ink)]">
-            {story.body.split(/(\{\{gallery-image:[^}]+\}\})/g).map((part, index) => {
-              const match = part.match(/^\{\{gallery-image:([^}]+)\}\}$/);
-              if (!match) return <span key={index} className="whitespace-pre-wrap">{part}</span>;
-              let imageUrl = '';
-              try { imageUrl = decodeURIComponent(match[1]); } catch { return null; }
-              const image = story.images.find((item) => item.url === imageUrl);
-              if (!image) return null;
+            {paragraphs.map((paragraph, index) => {
+              const marker = paragraph.trim().match(/^\{\{gallery-image:([^}]+)\}\}$/);
+              let manuallyPlacedImage: (typeof story.images)[number] | undefined;
+              if (marker) {
+                try {
+                  const imageUrl = decodeURIComponent(marker[1]);
+                  manuallyPlacedImage = story.images.find((image) => image.url === imageUrl);
+                } catch {
+                  manuallyPlacedImage = undefined;
+                }
+              }
               return (
-                <figure key={index} className="my-8">
-                  <img
-                    src={image.url}
-                    alt={image.altText || image.caption || story.title}
-                    loading="lazy"
-                    className="h-auto max-h-[700px] w-full rounded-xl object-contain"
-                  />
-                  {(image.caption || image.photographer) && (
-                    <figcaption className="mt-2 space-y-1 text-sm leading-6 text-[var(--muted)]">
-                      {image.caption && <p>{image.caption}</p>}
-                      {image.photographer && <p className="text-xs">Photo credit: {image.photographer}</p>}
-                    </figcaption>
-                  )}
-                </figure>
+                <div key={index}>
+                  {marker ? (manuallyPlacedImage ? renderGalleryImage(manuallyPlacedImage, "manual-" + index) : null) : <p className="whitespace-pre-wrap">{paragraph}</p>}
+                  {(automaticPlacement.get(index) ?? []).map((image) => renderGalleryImage(image, "auto-" + image.id))}
+                </div>
               );
             })}
           </div>
-
-          {story.images.length > 0 && (
-            <div className="mt-8 space-y-8">
-              {story.images.filter((image) => !story.body.includes(`{{gallery-image:${encodeURIComponent(image.url)}}}`)).map((image) => (
-                <figure key={image.id}>
-                  <img
-                    src={image.url}
-                    alt={image.altText || image.caption || story.title}
-                    loading="lazy"
-                    className="h-auto max-h-[700px] w-full rounded-xl object-contain"
-                  />
-                  {(image.caption || image.photographer) && (
-                    <figcaption className="mt-2 space-y-1 text-sm leading-6 text-[var(--muted)]">
-                      {image.caption && <p>{image.caption}</p>}
-                      {image.photographer && <p className="text-xs">Photo credit: {image.photographer}</p>}
-                    </figcaption>
-                  )}
-                </figure>
-              ))}
-            </div>
-          )}
-
           <div className="mt-10 border-t border-[var(--line)] pt-6">
-            <ArticleShare title={story.title} excerpt={story.excerpt || ''} />
+            <ArticleShare title={story.title} excerpt={story.excerpt || ''} shortCode={story.shortCode} />
           </div>
         </article>
       </main>
