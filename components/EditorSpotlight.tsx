@@ -49,10 +49,10 @@ export function EditorialSpotlight() {
     }, 20_000);
 
     fetch('/api/spotlight', { cache: 'no-store' })
-      .then((response) => response.ok ? response.json() : null)
+      .then((response) => response.ok ? response.json() as Promise<{ data?: SpotlightStory | null }> : null)
       .then((result) => {
         if (cancelled || !result?.data) return;
-        const nextStory = result.data as SpotlightStory;
+        const nextStory = result.data;
         const key = `campus-radar-spotlight-dismissed-${nextStory.slug}`;
         if (window.sessionStorage.getItem(key) === 'true') return;
         setStory(nextStory);
