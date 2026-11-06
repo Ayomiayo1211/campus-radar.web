@@ -2,6 +2,8 @@
 
 import { FormEvent, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
+import { PasswordInput } from '@/components/PasswordInput';
 
 type LoginResponse = { error?: string; message?: string };
 
@@ -12,9 +14,12 @@ export default function AdminLoginPage() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [sessionExpired, setSessionExpired] = useState(false);
+  const [passwordResetSuccess, setPasswordResetSuccess] = useState(false);
 
   useEffect(() => {
-    setSessionExpired(new URLSearchParams(window.location.search).get('reason') === 'session-expired');
+    const params = new URLSearchParams(window.location.search);
+    setSessionExpired(params.get('reason') === 'session-expired');
+    setPasswordResetSuccess(params.get('password-reset') === 'success');
   }, []);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -58,6 +63,7 @@ export default function AdminLoginPage() {
           <p className="text-sm font-medium uppercase tracking-wide text-gray-500">Campus Radar</p>
           <h1 className="mt-2 text-3xl font-bold text-black">Newsroom Login</h1>
           <p className="mt-2 text-gray-600">Sign in to access the newsroom.</p>
+          {passwordResetSuccess && <div role="status" className="mt-4 rounded-lg border border-green-200 bg-green-50 p-3 text-sm text-green-800">Your password has been reset. Sign in with your new password.</div>}
           {sessionExpired && (
             <div role="alert" className="mt-4 rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">
               Your session has expired. Please log in again to continue.
@@ -71,10 +77,8 @@ export default function AdminLoginPage() {
               <label htmlFor="email" className="mb-2 block text-sm font-medium text-gray-900">Email</label>
               <input id="email" type="email" value={email} onChange={(event) => setEmail(event.target.value)} required autoComplete="username" className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm outline-none focus:border-black" placeholder="admin@campusradar.ng" />
             </div>
-            <div>
-              <label htmlFor="password" className="mb-2 block text-sm font-medium text-gray-900">Password</label>
-              <input id="password" type="password" value={password} onChange={(event) => setPassword(event.target.value)} required autoComplete="current-password" className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm outline-none focus:border-black" placeholder="Enter your password" />
-            </div>
+            <PasswordInput id="password" label="Password" value={password} onChange={setPassword} autoComplete="current-password" placeholder="Enter your password" />
+            <div className="-mt-2 text-right"><Link href="/admin/forgot-password" className="text-sm font-medium text-gray-700 underline underline-offset-4 hover:text-black">Forgot password?</Link></div>
             <button type="submit" disabled={loading} className="w-full rounded-lg bg-black px-4 py-3 text-sm font-medium text-white hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-60">
               {loading ? 'Signing in...' : 'Sign in'}
             </button>
