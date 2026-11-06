@@ -59,7 +59,8 @@ export async function POST(request: NextRequest) {
     });
   } catch (mailError) {
     console.error('[password reset] Email delivery failed:', mailError);
-    return NextResponse.json({ error: 'The reset email could not be sent right now. Please try again later.' }, { status: 502 });
+    await db.from('password_reset_tokens').update({ used_at: new Date().toISOString() }).eq('token_hash', hashValue(token)).is('used_at', null);
+    return NextResponse.json({ message: GENERIC_MESSAGE });
   }
 
   return NextResponse.json({ message: GENERIC_MESSAGE });
