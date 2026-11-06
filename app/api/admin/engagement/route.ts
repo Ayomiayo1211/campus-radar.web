@@ -5,7 +5,7 @@ export async function GET(){
  try{await requireRole(['SUPER_ADMIN','EDITOR'])}catch{return NextResponse.json({error:'Unauthorized'},{status:401})}
  const db=getSupabaseAdmin() as any;
  const [comments,subscribers,reports]=await Promise.all([
-  db.from('story_comments').select('id,story_id,display_name,email,body,status,created_at,story:stories(title)').order('created_at',{ascending:false}).limit(300),
+  db.from('story_comments').select('id,story_id,display_name,email,body,status,created_at,story:stories(title),spotlight:spotlights(title)').order('created_at',{ascending:false}).limit(300),
   db.from('newsletter_subscribers').select('id,email,status,created_at,confirmed_at').order('created_at',{ascending:false}).limit(2000),
   db.from('story_comment_reports').select('id,comment_id,reason,created_at').order('created_at',{ascending:false}).limit(300)
  ]);
