@@ -21,6 +21,10 @@ export async function PATCH(request:NextRequest,{params}:RouteContext){
  let body:unknown;try{body=await request.json();}catch{return NextResponse.json({error:'Invalid JSON body'},{status:400});}
  const parsed=storySchema.safeParse(body);if(!parsed.success)return NextResponse.json({error:'Invalid story',details:parsed.error.flatten()},{status:400});const d=parsed.data;
  if(user.role==='REPORTER'&&!['DRAFT','REVIEW'].includes(d.status))return NextResponse.json({error:'Reporters cannot publish or archive stories'},{status:403});
+ if (user.role !== 'REPORTER' && d.isSpotlight && d.status === 'PUBLISHED') {
+  const clearSpotlight = await db.rpc('set_current_spotlight', { p_story_id: null });
+  if (clearSpotlight.error) return NextResponse.json({ error: 'Could not prepare the new Spotlight selection' }, { status: 500 });
+ }
  const {data:story,error}=await db.from('stories').update({title:d.title,excerpt:d.excerpt,body:d.body,content_type:d.contentType,origin:d.origin,commercial_status:d.commercialStatus,author_name:user.role==='REPORTER'?existing.author_name:d.authorName,author_id:user.role==='REPORTER'?existing.author_id:(d.authorId??existing.author_id),featured:user.role==='REPORTER'?existing.featured:d.featured,is_spotlight:user.role==='REPORTER'?existing.is_spotlight:(d.isSpotlight && d.status==='PUBLISHED'),cover_image:d.coverImage??null,status:d.status,published_at:d.status==='PUBLISHED'?(existing.published_at??new Date().toISOString()):null,updated_at:new Date().toISOString()}).eq('id',id).select('*').single();
  if(error||!story)return NextResponse.json({error:'Could not update story'},{status:500});
  const tagDelete=await db.from('story_tags').delete().eq('story_id',id);if(tagDelete.error)return NextResponse.json({error:'Story saved, but tags could not be updated'},{status:500});
