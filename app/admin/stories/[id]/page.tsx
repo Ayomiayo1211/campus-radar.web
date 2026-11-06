@@ -22,6 +22,7 @@ type Story = {
   commercialStatus: string;
   status: string;
   featured: boolean;
+  isSpotlight: boolean;
   coverImage: string | null;
   authorName: string;
   images?: GalleryImage[];
@@ -60,6 +61,7 @@ export default function EditStoryPage() {
   const [commercialStatus, setCommercialStatus] = useState('EDITORIAL');
   const [status, setStatus] = useState('DRAFT');
   const [featured, setFeatured] = useState(false);
+  const [isSpotlight, setIsSpotlight] = useState(false);
   const [authorName, setAuthorName] = useState('');
   const [coverImage, setCoverImage] = useState('');
   const [galleryImages, setGalleryImages] = useState<GalleryImage[]>([]);
@@ -98,6 +100,7 @@ export default function EditStoryPage() {
         setCommercialStatus(data.commercialStatus);
         setStatus(data.status);
         setFeatured(data.featured);
+        setIsSpotlight(Boolean(data.isSpotlight));
         setAuthorName(data.authorName);
         setCoverImage(data.coverImage || '');
         setGalleryImages((data.images ?? []).slice().sort((a, b) => a.displayOrder - b.displayOrder));
@@ -284,6 +287,7 @@ export default function EditStoryPage() {
           commercialStatus,
           status,
           featured,
+          isSpotlight,
           authorName,
           coverImage: coverImage || null,
           galleryImages: galleryImages.map((image, displayOrder) => ({ url: image.url, mediaId: image.mediaId || undefined, altText: image.altText || undefined, caption: image.caption || undefined, photographer: image.photographer || undefined, displayOrder })),
@@ -519,6 +523,11 @@ export default function EditStoryPage() {
             <label className="mt-6 flex items-center gap-3 text-sm text-gray-900">
               <input type="checkbox" checked={featured} onChange={(event) => setFeatured(event.target.checked)} className="h-4 w-4" />
               Feature this story
+            </label>
+
+            <label className={`mt-4 flex items-start gap-3 rounded-lg border p-4 text-sm ${status === 'PUBLISHED' ? 'border-[#173B87] bg-blue-50' : 'border-gray-200 bg-gray-50'}`}>
+              <input type="checkbox" checked={isSpotlight} onChange={(event) => setIsSpotlight(event.target.checked)} disabled={status !== 'PUBLISHED'} className="mt-0.5 h-4 w-4" />
+              <span><strong className="block text-gray-900">Set as current Campus Radar Spotlight</strong><span className="mt-1 block text-gray-600">This published story will be featured in the homepage Spotlight popup. Selecting it replaces the previous Spotlight.</span>{status !== 'PUBLISHED' && <span className="mt-1 block text-amber-700">Publish this story first to select it as Spotlight.</span>}</span>
             </label>
           </section>
 
