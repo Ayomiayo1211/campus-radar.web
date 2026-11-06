@@ -1,6 +1,5 @@
 
 import Link from 'next/link';
-import { EditorialSpotlight } from '@/components/EditorSpotlight';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { StoryCard } from '@/components/StoryCard';
@@ -44,7 +43,6 @@ export default async function Home() {
   return (
     <>
       <Header />
-      <EditorialSpotlight />
 
       <main>
         {/* Top Stories */}

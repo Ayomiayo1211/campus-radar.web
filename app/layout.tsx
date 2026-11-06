@@ -2,6 +2,7 @@
 import './globals.css';
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
+import { EditorialSpotlight } from '@/components/EditorSpotlight';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -30,7 +31,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={inter.variable}>
-      <body>{children}</body>
+      <body>{children}<EditorialSpotlight /></body>
     </html>
   );
 }
