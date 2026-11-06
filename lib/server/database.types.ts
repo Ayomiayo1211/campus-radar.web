@@ -399,6 +399,54 @@ export type Database = {
         }
         Relationships: []
       }
+      spotlight_edit_history: {
+        Row: {
+          action: string
+          after_snapshot: Json | null
+          before_snapshot: Json | null
+          created_at: string
+          editor_id: string | null
+          editor_name: string
+          id: string
+          spotlight_id: string
+        }
+        Insert: {
+          action: string
+          after_snapshot?: Json | null
+          before_snapshot?: Json | null
+          created_at?: string
+          editor_id?: string | null
+          editor_name: string
+          id?: string
+          spotlight_id: string
+        }
+        Update: {
+          action?: string
+          after_snapshot?: Json | null
+          before_snapshot?: Json | null
+          created_at?: string
+          editor_id?: string | null
+          editor_name?: string
+          id?: string
+          spotlight_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "spotlight_edit_history_editor_id_fkey"
+            columns: ["editor_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "spotlight_edit_history_spotlight_id_fkey"
+            columns: ["spotlight_id"]
+            isOneToOne: false
+            referencedRelation: "spotlights"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       spotlight_submission_links: {
         Row: {
           created_at: string
@@ -440,6 +488,8 @@ export type Database = {
           body: string
           created_at: string
           created_by: string | null
+          editing_locked_at: string | null
+          editing_locked_by: string | null
           excerpt: string
           id: string
           image_url: string | null
@@ -455,6 +505,8 @@ export type Database = {
           body: string
           created_at?: string
           created_by?: string | null
+          editing_locked_at?: string | null
+          editing_locked_by?: string | null
           excerpt: string
           id?: string
           image_url?: string | null
@@ -470,6 +522,8 @@ export type Database = {
           body?: string
           created_at?: string
           created_by?: string | null
+          editing_locked_at?: string | null
+          editing_locked_by?: string | null
           excerpt?: string
           id?: string
           image_url?: string | null
@@ -484,6 +538,13 @@ export type Database = {
           {
             foreignKeyName: "spotlights_created_by_fkey"
             columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "spotlights_editing_locked_by_fkey"
+            columns: ["editing_locked_by"]
             isOneToOne: false
             referencedRelation: "users"
             referencedColumns: ["id"]
@@ -902,7 +963,7 @@ export type Database = {
         Args: { p_password_hash: string; p_token_hash: string }
         Returns: boolean
       }
-      set_current_spotlight: { Args: { p_story_id: string | null }; Returns: boolean }
+      set_current_spotlight: { Args: { p_story_id: string }; Returns: boolean }
     }
     Enums: {
       [_ in never]: never
