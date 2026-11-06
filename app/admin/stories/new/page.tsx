@@ -797,7 +797,7 @@ export default function NewStoryPage() {
                 <select
                   id="status"
                   value={status}
-                  onChange={(event) => setStatus(event.target.value)}
+                  onChange={(event) => { setStatus(event.target.value); if (event.target.value !== 'PUBLISHED') setIsSpotlight(false); }}
                   className="w-full rounded-lg border border-gray-300 bg-white px-4 py-3 text-sm outline-none focus:border-black"
                 >
                   <option value="DRAFT">Draft</option>
