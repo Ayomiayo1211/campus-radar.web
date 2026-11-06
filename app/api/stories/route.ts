@@ -41,7 +41,6 @@ export async function POST(request: NextRequest) {
   const d = parsed.data;
   const reporter = user.role === 'REPORTER';
   if (reporter && d.isSpotlight) return NextResponse.json({ error: 'Only editors can select a Spotlight story' }, { status: 403 });
-  if (d.isSpotlight && d.status !== 'PUBLISHED') return NextResponse.json({ error: 'Publish the story before selecting it as the current Spotlight' }, { status: 400 });
   if (reporter && !['DRAFT', 'REVIEW'].includes(d.status)) return NextResponse.json({ error: 'Reporters can only create drafts or submit stories for review' }, { status: 403 });
   const db = getSupabaseAdmin();
   const { data: story, error } = await db.from('stories').insert({
@@ -53,7 +52,7 @@ export async function POST(request: NextRequest) {
   if (error || !story) return NextResponse.json({ error: 'Could not create story' }, { status: 500 });
   const tags = d.tags.map(tag => ({ story_id:story.id, tag }));
   const images = (d.galleryImages ?? []).map((image,index) => ({ story_id:story.id, url:image.url, media_id:image.mediaId||null, alt_text:image.altText||null, caption:image.caption||null, photographer:image.photographer||null, display_order:image.displayOrder??index }));
-  if (d.isSpotlight) {
+  if (d.isSpotlight && d.status === 'PUBLISHED') {
     const spotlight = await db.rpc('set_current_spotlight', { p_story_id: story.id });
     if (spotlight.error) return NextResponse.json({ error: 'Story was created, but Spotlight selection could not be saved' }, { status: 500 });
   }
