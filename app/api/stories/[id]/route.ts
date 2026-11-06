@@ -32,12 +32,12 @@ export async function GET(_request: NextRequest, { params }: RouteContext) {
   if (story.status !== 'PUBLISHED' && !user) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
-  if (user?.role === 'REPORTER' && story.author_id !== user.id) {
+  if (user?.role === 'REPORTER' && story.status !== 'PUBLISHED' && story.author_id !== user.id) {
     return NextResponse.json({ error: 'You cannot access this story' }, { status: 403 });
   }
 
   const response = toCamelCase(story);
-  if (user) {
+  if (user && (user.role !== 'REPORTER' || story.status !== 'PUBLISHED')) {
     response.currentUserId = user.id;
     response.currentUserRole = user.role;
     response.editingLockedBy = story.editing_locked_by;
@@ -50,6 +50,8 @@ export async function GET(_request: NextRequest, { params }: RouteContext) {
       response.editingLockedByName = null;
     }
   } else {
+    delete response.currentUserId;
+    delete response.currentUserRole;
     delete response.editingLockedBy;
     delete response.editingLockedAt;
   }
