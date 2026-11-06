@@ -3,6 +3,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
 const links = [
   {
@@ -37,11 +38,13 @@ const links = [
 
 export default function AdminNav() {
   const pathname = usePathname();
+  const [canEditSpotlight, setCanEditSpotlight] = useState(false);
+  useEffect(() => { fetch('/api/auth/session', { cache: 'no-store' }).then(r => r.json()).then(j => setCanEditSpotlight(['SUPER_ADMIN','EDITOR'].includes(j.user?.role))).catch(() => setCanEditSpotlight(false)); }, []);
 
   return (
     <nav className="border-b border-gray-200 bg-white">
       <div className="mx-auto flex max-w-6xl gap-6 overflow-x-auto px-6">
-        {links.map((link) => {
+        {links.filter(link => link.href !== '/admin/spotlight' || canEditSpotlight).map((link) => {
           const active =
             pathname === link.href ||
             (link.href !== '/admin' &&
