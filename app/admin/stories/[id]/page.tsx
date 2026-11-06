@@ -285,7 +285,7 @@ export default function EditStoryPage() {
     setLockBusy(true); setError('');
     try {
       const response = await fetch('/api/stories/' + id + '/lock', { method: 'POST' });
-      const result = await response.json();
+      const result = await response.json() as { error?: string };
       if (!response.ok) throw new Error(result.error || 'Could not claim this story');
       window.location.reload();
     } catch (err) { setError(err instanceof Error ? err.message : 'Could not claim this story'); setLockBusy(false); }
@@ -296,7 +296,7 @@ export default function EditStoryPage() {
     setLockBusy(true); setError('');
     try {
       const response = await fetch('/api/stories/' + id + '/lock', { method: 'DELETE' });
-      const result = await response.json();
+      const result = await response.json() as { error?: string };
       if (!response.ok) throw new Error(result.error || 'Could not release this story');
       router.push('/admin/stories'); router.refresh();
     } catch (err) { setError(err instanceof Error ? err.message : 'Could not release this story'); setLockBusy(false); }
