@@ -13,7 +13,6 @@ type Story = {
   contentType: string;
   status: string;
   featured: boolean;
-  isSpotlight: boolean;
   authorName: string;
   publishedAt: string | null;
   createdAt: string;
@@ -133,9 +132,6 @@ export default function StoriesPage() {
                         <span className="rounded-full bg-gray-100 px-3 py-1 text-xs font-medium">
                           {story.status}
                         </span>
-
-                        {story.isSpotlight && <span className="rounded-full bg-[#173B87] px-3 py-1 text-xs font-medium text-white">Spotlight</span>}
-
                         {story.featured && (
                           <span className="rounded-full bg-black px-3 py-1 text-xs font-medium text-white">
                             Featured

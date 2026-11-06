@@ -22,7 +22,6 @@ type Story = {
   commercialStatus: string;
   status: string;
   featured: boolean;
-  isSpotlight: boolean;
   coverImage: string | null;
   authorName: string;
   images?: GalleryImage[];
@@ -61,7 +60,6 @@ export default function EditStoryPage() {
   const [commercialStatus, setCommercialStatus] = useState('EDITORIAL');
   const [status, setStatus] = useState('DRAFT');
   const [featured, setFeatured] = useState(false);
-  const [isSpotlight, setIsSpotlight] = useState(false);
   const [authorName, setAuthorName] = useState('');
   const [coverImage, setCoverImage] = useState('');
   const [galleryImages, setGalleryImages] = useState<GalleryImage[]>([]);
@@ -100,7 +98,6 @@ export default function EditStoryPage() {
         setCommercialStatus(data.commercialStatus);
         setStatus(data.status);
         setFeatured(data.featured);
-        setIsSpotlight(Boolean(data.isSpotlight));
         setAuthorName(data.authorName);
         setCoverImage(data.coverImage || '');
         setGalleryImages((data.images ?? []).slice().sort((a, b) => a.displayOrder - b.displayOrder));
@@ -287,7 +284,6 @@ export default function EditStoryPage() {
           commercialStatus,
           status,
           featured,
-          isSpotlight,
           authorName,
           coverImage: coverImage || null,
           galleryImages: galleryImages.map((image, displayOrder) => ({ url: image.url, mediaId: image.mediaId || undefined, altText: image.altText || undefined, caption: image.caption || undefined, photographer: image.photographer || undefined, displayOrder })),
@@ -511,7 +507,7 @@ export default function EditStoryPage() {
 
               <div>
                 <label htmlFor="status" className="mb-2 block text-sm font-medium text-gray-900">Status</label>
-                <select id="status" value={status} onChange={(event) => { setStatus(event.target.value); if (event.target.value !== 'PUBLISHED') setIsSpotlight(false); }} className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm outline-none focus:border-black">
+                <select id="status" value={status} onChange={(event) => setStatus(event.target.value)} className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm outline-none focus:border-black">
                   <option value="DRAFT">Draft</option>
                   <option value="REVIEW">Review</option>
                   <option value="PUBLISHED">Published</option>
@@ -525,11 +521,7 @@ export default function EditStoryPage() {
               Feature this story
             </label>
 
-            <label className={`mt-4 flex items-start gap-3 rounded-lg border p-4 text-sm ${status === 'PUBLISHED' ? 'border-[#173B87] bg-blue-50' : 'border-gray-200 bg-gray-50'}`}>
-              <input type="checkbox" checked={isSpotlight} onChange={(event) => setIsSpotlight(event.target.checked)} disabled={status !== 'PUBLISHED'} className="mt-0.5 h-4 w-4" />
-              <span><strong className="block text-gray-900">Set as current Campus Radar Spotlight</strong><span className="mt-1 block text-gray-600">This published story will be featured in the homepage Spotlight popup. Selecting it replaces the previous Spotlight.</span>{status !== 'PUBLISHED' && <span className="mt-1 block text-amber-700">Publish this story first to select it as Spotlight.</span>}</span>
-            </label>
-          </section>
+                      </section>
 
           <div className="flex flex-wrap justify-between gap-3">
             <button type="button" onClick={handleDelete} disabled={saving || uploadingImage || uploadingGallery} className="rounded-lg border border-red-300 px-5 py-3 text-sm font-medium text-red-700 hover:bg-red-50 disabled:opacity-60">
