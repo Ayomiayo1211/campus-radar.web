@@ -22,7 +22,7 @@ export async function GET(_request: NextRequest, { params }: RouteContext) {
   const { id } = await params;
   const db = getSupabaseAdmin();
   const { data: story, error } = await db.from('stories')
-    .select('*,tags:story_tags(*),images:story_images(*),author:users(id,name)')
+    .select('*,tags:story_tags(*),images:story_images(*),author:users!stories_author_id_fkey(id,name)')
     .eq('id', id).maybeSingle();
   if (error) return NextResponse.json({ error: 'Could not load story' }, { status: 500 });
   if (!story) return NextResponse.json({ error: 'Story not found' }, { status: 404 });
@@ -49,6 +49,9 @@ export async function GET(_request: NextRequest, { params }: RouteContext) {
     } else {
       response.editingLockedByName = null;
     }
+  } else {
+    delete response.editingLockedBy;
+    delete response.editingLockedAt;
   }
   return NextResponse.json({ data: response });
 }
