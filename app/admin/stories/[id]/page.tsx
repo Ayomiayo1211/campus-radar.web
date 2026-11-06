@@ -22,7 +22,6 @@ type Story = {
   commercialStatus: string;
   status: string;
   featured: boolean;
-  isSpotlight: boolean;
   coverImage: string | null;
   authorName: string;
   images?: GalleryImage[];
