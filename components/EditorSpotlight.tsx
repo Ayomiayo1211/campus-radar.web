@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 
 type SpotlightStory = {
   slug: string;
@@ -37,17 +38,34 @@ function RadarMark() {
   );
 }
 
-export function EditorialSpotlight({ story }: { story: SpotlightStory | null }) {
+export function EditorialSpotlight() {
+  const pathname = usePathname();
+  const [story, setStory] = useState<SpotlightStory | null>(null);
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
-    if (!story) return;
-    const key = `campus-radar-spotlight-dismissed-${story.slug}`;
-    if (window.sessionStorage.getItem(key) === 'true') return;
+    if (pathname.startsWith('/admin')) return;
+    let cancelled = false;
+    const timer = window.setTimeout(() => {
+      if (!cancelled) setVisible(true);
+    }, 20_000);
 
-    const timer = window.setTimeout(() => setVisible(true), 20_000);
-    return () => window.clearTimeout(timer);
-  }, [story]);
+    fetch('/api/spotlight', { cache: 'no-store' })
+      .then((response) => response.ok ? response.json() : null)
+      .then((result) => {
+        if (cancelled || !result?.data) return;
+        const nextStory = result.data as SpotlightStory;
+        const key = `campus-radar-spotlight-dismissed-${nextStory.slug}`;
+        if (window.sessionStorage.getItem(key) === 'true') return;
+        setStory(nextStory);
+      })
+      .catch((error) => console.error('Could not load Campus Radar Spotlight:', error));
+
+    return () => {
+      cancelled = true;
+      window.clearTimeout(timer);
+    };
+  }, []);
 
   function dismiss() {
     if (story) {
