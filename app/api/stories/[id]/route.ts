@@ -39,6 +39,7 @@ export async function GET(_request: NextRequest, { params }: RouteContext) {
   const response = toCamelCase(story);
   if (user) {
     response.currentUserId = user.id;
+    response.currentUserRole = user.role;
     response.editingLockedBy = story.editing_locked_by;
     response.editingLockedAt = story.editing_locked_at;
     if (story.editing_locked_by) {
