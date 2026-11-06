@@ -52,12 +52,12 @@ export async function POST(request: NextRequest) {
   if (error || !story) return NextResponse.json({ error: 'Could not create story' }, { status: 500 });
   const tags = d.tags.map(tag => ({ story_id:story.id, tag }));
   const images = (d.galleryImages ?? []).map((image,index) => ({ story_id:story.id, url:image.url, media_id:image.mediaId||null, alt_text:image.altText||null, caption:image.caption||null, photographer:image.photographer||null, display_order:image.displayOrder??index }));
+  if (tags.length) { const r=await db.from('story_tags').insert(tags); if(r.error){await db.from('stories').delete().eq('id',story.id);return NextResponse.json({error:'Could not save story tags'},{status:500});} }
+  if (images.length) { const r=await db.from('story_images').insert(images); if(r.error){await db.from('stories').delete().eq('id',story.id);return NextResponse.json({error:'Could not save story images'},{status:500});} }
   if (d.isSpotlight && d.status === 'PUBLISHED') {
     const spotlight = await db.rpc('set_current_spotlight', { p_story_id: story.id });
     if (spotlight.error) return NextResponse.json({ error: 'Story was created, but Spotlight selection could not be saved' }, { status: 500 });
   }
-  if (tags.length) { const r=await db.from('story_tags').insert(tags); if(r.error){await db.from('stories').delete().eq('id',story.id);return NextResponse.json({error:'Could not save story tags'},{status:500});} }
-  if (images.length) { const r=await db.from('story_images').insert(images); if(r.error){await db.from('stories').delete().eq('id',story.id);return NextResponse.json({error:'Could not save story images'},{status:500});} }
   if (d.status === 'PUBLISHED') await sendPublishedStoryNewsletter(story, request.nextUrl.origin).catch(error => console.error('[newsletter] Campaign dispatch failed:', error));
   if (reporter && d.status === 'REVIEW') {
     await notifyEditorsOfStorySubmission(story, request.nextUrl.origin);
