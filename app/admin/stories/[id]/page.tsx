@@ -114,7 +114,7 @@ export default function EditStoryPage() {
         setCoverImage(data.coverImage || '');
         setGalleryImages((data.images ?? []).slice().sort((a, b) => a.displayOrder - b.displayOrder));
         const historyResponse = await fetch('/api/stories/' + id + '/history');
-        const historyResult = await historyResponse.json();
+        const historyResult = await historyResponse.json() as { data?: EditHistoryEntry[]; error?: string };
         if (historyResponse.ok) setHistory(historyResult.data ?? []);
       } catch (err) {
         if (!cancelled) {
