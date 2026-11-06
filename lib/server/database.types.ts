@@ -56,6 +56,68 @@ export type Database = {
         }
         Relationships: []
       }
+      admin_invitations: {
+        Row: {
+          accepted_at: string | null
+          created_at: string
+          email: string
+          expires_at: string
+          id: string
+          invited_by: string
+          revoked_at: string | null
+          role: string
+          token_hash: string
+        }
+        Insert: {
+          accepted_at?: string | null
+          created_at?: string
+          email: string
+          expires_at: string
+          id?: string
+          invited_by: string
+          revoked_at?: string | null
+          role: string
+          token_hash: string
+        }
+        Update: {
+          accepted_at?: string | null
+          created_at?: string
+          email?: string
+          expires_at?: string
+          id?: string
+          invited_by?: string
+          revoked_at?: string | null
+          role?: string
+          token_hash?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "admin_invitations_invited_by_fkey"
+            columns: ["invited_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      comment_rate_limits: {
+        Row: {
+          rate_key: string
+          request_count: number
+          window_started_at: string
+        }
+        Insert: {
+          rate_key: string
+          request_count?: number
+          window_started_at?: string
+        }
+        Update: {
+          rate_key?: string
+          request_count?: number
+          window_started_at?: string
+        }
+        Relationships: []
+      }
       media: {
         Row: {
           alt_text: string | null
@@ -107,6 +169,96 @@ export type Database = {
         }
         Relationships: []
       }
+      newsletter_deliveries: {
+        Row: {
+          attempted_at: string | null
+          created_at: string
+          error_message: string | null
+          id: string
+          provider_message_id: string | null
+          sent_at: string | null
+          status: string
+          story_id: string
+          subscriber_id: string
+        }
+        Insert: {
+          attempted_at?: string | null
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          provider_message_id?: string | null
+          sent_at?: string | null
+          status?: string
+          story_id: string
+          subscriber_id: string
+        }
+        Update: {
+          attempted_at?: string | null
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          provider_message_id?: string | null
+          sent_at?: string | null
+          status?: string
+          story_id?: string
+          subscriber_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "newsletter_deliveries_story_id_fkey"
+            columns: ["story_id"]
+            isOneToOne: false
+            referencedRelation: "stories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "newsletter_deliveries_subscriber_id_fkey"
+            columns: ["subscriber_id"]
+            isOneToOne: false
+            referencedRelation: "newsletter_subscribers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      newsletter_subscribers: {
+        Row: {
+          confirmation_token_hash: string | null
+          confirmed_at: string | null
+          consent_source: string
+          created_at: string
+          email: string
+          email_normalized: string
+          id: string
+          status: string
+          unsubscribe_token_hash: string
+          unsubscribed_at: string | null
+        }
+        Insert: {
+          confirmation_token_hash?: string | null
+          confirmed_at?: string | null
+          consent_source?: string
+          created_at?: string
+          email: string
+          email_normalized: string
+          id?: string
+          status?: string
+          unsubscribe_token_hash: string
+          unsubscribed_at?: string | null
+        }
+        Update: {
+          confirmation_token_hash?: string | null
+          confirmed_at?: string | null
+          consent_source?: string
+          created_at?: string
+          email?: string
+          email_normalized?: string
+          id?: string
+          status?: string
+          unsubscribe_token_hash?: string
+          unsubscribed_at?: string | null
+        }
+        Relationships: []
+      }
       opportunities: {
         Row: {
           application_url: string | null
@@ -118,7 +270,6 @@ export type Database = {
           organisation: string
           origin: string
           published_at: string | null
-          read_count: number
           slug: string
           status: string
           title: string
@@ -135,7 +286,6 @@ export type Database = {
           organisation: string
           origin: string
           published_at?: string | null
-          read_count?: number
           slug: string
           status?: string
           title: string
@@ -152,7 +302,6 @@ export type Database = {
           organisation?: string
           origin?: string
           published_at?: string | null
-          read_count?: number
           slug?: string
           status?: string
           title?: string
@@ -160,6 +309,41 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      password_reset_tokens: {
+        Row: {
+          created_at: string
+          expires_at: string
+          id: string
+          token_hash: string
+          used_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          expires_at: string
+          id?: string
+          token_hash: string
+          used_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          expires_at?: string
+          id?: string
+          token_hash?: string
+          used_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "password_reset_tokens_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       radar_items: {
         Row: {
@@ -215,6 +399,97 @@ export type Database = {
         }
         Relationships: []
       }
+      spotlight_submission_links: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          expires_at: string
+          id: string
+          token_hash: string
+          used_at: string | null
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          expires_at: string
+          id?: string
+          token_hash: string
+          used_at?: string | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          expires_at?: string
+          id?: string
+          token_hash?: string
+          used_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "spotlight_submission_links_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      spotlights: {
+        Row: {
+          author_name: string
+          body: string
+          created_at: string
+          created_by: string | null
+          excerpt: string
+          id: string
+          image_url: string | null
+          is_current: boolean
+          published_at: string | null
+          status: string
+          submitted_by: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          author_name: string
+          body: string
+          created_at?: string
+          created_by?: string | null
+          excerpt: string
+          id?: string
+          image_url?: string | null
+          is_current?: boolean
+          published_at?: string | null
+          status?: string
+          submitted_by?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          author_name?: string
+          body?: string
+          created_at?: string
+          created_by?: string | null
+          excerpt?: string
+          id?: string
+          image_url?: string | null
+          is_current?: boolean
+          published_at?: string | null
+          status?: string
+          submitted_by?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "spotlights_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       stories: {
         Row: {
           author_id: string | null
@@ -224,15 +499,17 @@ export type Database = {
           content_type: string
           cover_image: string | null
           created_at: string
+          editing_locked_at: string | null
+          editing_locked_by: string | null
           excerpt: string
           featured: boolean
-          is_spotlight: boolean
           id: string
+          is_spotlight: boolean
           origin: string
           published_at: string | null
           read_count: number
-          slug: string
           short_code: string
+          slug: string
           status: string
           title: string
           updated_at: string
@@ -245,15 +522,17 @@ export type Database = {
           content_type: string
           cover_image?: string | null
           created_at?: string
+          editing_locked_at?: string | null
+          editing_locked_by?: string | null
           excerpt: string
           featured?: boolean
-          is_spotlight?: boolean
           id?: string
+          is_spotlight?: boolean
           origin: string
           published_at?: string | null
           read_count?: number
-          slug: string
           short_code: string
+          slug: string
           status?: string
           title: string
           updated_at?: string
@@ -266,15 +545,17 @@ export type Database = {
           content_type?: string
           cover_image?: string | null
           created_at?: string
+          editing_locked_at?: string | null
+          editing_locked_by?: string | null
           excerpt?: string
           featured?: boolean
-          is_spotlight?: boolean
           id?: string
+          is_spotlight?: boolean
           origin?: string
           published_at?: string | null
           read_count?: number
-          slug?: string
           short_code?: string
+          slug?: string
           status?: string
           title?: string
           updated_at?: string
@@ -285,6 +566,134 @@ export type Database = {
             columns: ["author_id"]
             isOneToOne: false
             referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "stories_editing_locked_by_fkey"
+            columns: ["editing_locked_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      story_comment_reports: {
+        Row: {
+          comment_id: string
+          created_at: string
+          id: string
+          reason: string
+          reporter_hash: string
+        }
+        Insert: {
+          comment_id: string
+          created_at?: string
+          id?: string
+          reason: string
+          reporter_hash: string
+        }
+        Update: {
+          comment_id?: string
+          created_at?: string
+          id?: string
+          reason?: string
+          reporter_hash?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "story_comment_reports_comment_id_fkey"
+            columns: ["comment_id"]
+            isOneToOne: false
+            referencedRelation: "story_comments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      story_comments: {
+        Row: {
+          body: string
+          created_at: string
+          display_name: string
+          email: string
+          id: string
+          status: string
+          story_id: string
+          updated_at: string
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          display_name: string
+          email: string
+          id?: string
+          status?: string
+          story_id: string
+          updated_at?: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          display_name?: string
+          email?: string
+          id?: string
+          status?: string
+          story_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "story_comments_story_id_fkey"
+            columns: ["story_id"]
+            isOneToOne: false
+            referencedRelation: "stories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      story_edit_history: {
+        Row: {
+          action: string
+          after_snapshot: Json | null
+          before_snapshot: Json | null
+          created_at: string
+          editor_id: string | null
+          editor_name: string
+          id: string
+          story_id: string
+        }
+        Insert: {
+          action: string
+          after_snapshot?: Json | null
+          before_snapshot?: Json | null
+          created_at?: string
+          editor_id?: string | null
+          editor_name: string
+          id?: string
+          story_id: string
+        }
+        Update: {
+          action?: string
+          after_snapshot?: Json | null
+          before_snapshot?: Json | null
+          created_at?: string
+          editor_id?: string | null
+          editor_name?: string
+          id?: string
+          story_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "story_edit_history_editor_id_fkey"
+            columns: ["editor_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "story_edit_history_story_id_fkey"
+            columns: ["story_id"]
+            isOneToOne: false
+            referencedRelation: "stories"
             referencedColumns: ["id"]
           },
         ]
@@ -329,6 +738,38 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "story_images_story_id_fkey"
+            columns: ["story_id"]
+            isOneToOne: false
+            referencedRelation: "stories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      story_read_events: {
+        Row: {
+          created_at: string
+          id: number
+          read_date: string
+          story_id: string
+          visitor_hash: string
+        }
+        Insert: {
+          created_at?: string
+          id?: never
+          read_date: string
+          story_id: string
+          visitor_hash: string
+        }
+        Update: {
+          created_at?: string
+          id?: never
+          read_date?: string
+          story_id?: string
+          visitor_hash?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "story_read_events_story_id_fkey"
             columns: ["story_id"]
             isOneToOne: false
             referencedRelation: "stories"
@@ -445,14 +886,23 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      accept_admin_invitation: {
+        Args: { p_name: string; p_password_hash: string; p_token_hash: string }
+        Returns: string
+      }
+      check_comment_rate_limit: {
+        Args: { p_rate_key: string }
+        Returns: boolean
+      }
       record_story_read: {
         Args: { p_story_id: string; p_visitor_hash: string }
         Returns: number
       }
-      set_current_spotlight: {
-        Args: { p_story_id: string | null }
+      reset_user_password: {
+        Args: { p_password_hash: string; p_token_hash: string }
         Returns: boolean
       }
+      set_current_spotlight: { Args: { p_story_id: string }; Returns: boolean }
     }
     Enums: {
       [_ in never]: never
