@@ -226,6 +226,7 @@ export type Database = {
           created_at: string
           excerpt: string
           featured: boolean
+          is_spotlight: boolean
           id: string
           origin: string
           published_at: string | null
@@ -246,6 +247,7 @@ export type Database = {
           created_at?: string
           excerpt: string
           featured?: boolean
+          is_spotlight?: boolean
           id?: string
           origin: string
           published_at?: string | null
