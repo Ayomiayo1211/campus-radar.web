@@ -7,6 +7,7 @@ import Link from 'next/link';
 type Story = {
   id: string;
   slug: string;
+  shortCode: string | null;
   title: string;
   excerpt: string;
   contentType: string;
@@ -28,6 +29,7 @@ export default function StoriesPage() {
   const [stories, setStories] = useState<Story[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [copiedStoryId, setCopiedStoryId] = useState<string | null>(null);
 
   async function loadStories() {
     try {
@@ -159,12 +161,32 @@ export default function StoriesPage() {
                       </div>
                     </div>
 
-                    <Link
-                      href={`/admin/stories/${story.id}`}
-                      className="shrink-0 rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium hover:bg-gray-50"
-                    >
-                      Edit
-                    </Link>
+                    <div className="flex shrink-0 flex-wrap gap-2">
+                      {story.status === 'PUBLISHED' && (
+                        <button
+                          type="button"
+                          onClick={async () => {
+                            const shareUrl = new URL(story.shortCode ? `/s/${story.shortCode}` : `/news/${story.slug}`, window.location.origin).toString();
+                            try {
+                              await navigator.clipboard.writeText(shareUrl);
+                              setCopiedStoryId(story.id);
+                              window.setTimeout(() => setCopiedStoryId((current) => current === story.id ? null : current), 2200);
+                            } catch {
+                              window.prompt('Copy this story link:', shareUrl);
+                            }
+                          }}
+                          className="rounded-lg border border-[#173B87] px-4 py-2 text-sm font-medium text-[#173B87] hover:bg-blue-50"
+                        >
+                          {copiedStoryId === story.id ? 'Link copied' : 'Copy share link'}
+                        </button>
+                      )}
+                      <Link
+                        href={`/admin/stories/${story.id}`}
+                        className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium hover:bg-gray-50"
+                      >
+                        Edit
+                      </Link>
+                    </div>
                   </div>
                 </article>
               ))}
