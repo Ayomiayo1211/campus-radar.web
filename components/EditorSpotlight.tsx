@@ -8,7 +8,7 @@ export function EditorialSpotlight(){
  useEffect(()=>{
   if(window.location.pathname.startsWith('/admin'))return;
   let cancelled=false;
-  const timer=window.setTimeout(()=>{if(!cancelled)setVisible(true);},20000);
+  const timer=window.setTimeout(()=>{if(!cancelled)setVisible(true);},10000);
   fetch('/api/spotlight',{cache:'no-store'}).then(r=>r.ok?r.json() as Promise<SpotlightResponse>:null).then(j=>{if(cancelled||!j?.data)return;const value=j.data;const key='campus-radar-spotlight-dismissed-'+value.id;if(sessionStorage.getItem(key)==='true')return;setItem(value);}).catch(e=>console.error('Spotlight load failed',e));
   return()=>{cancelled=true;window.clearTimeout(timer);};
  },[]);
