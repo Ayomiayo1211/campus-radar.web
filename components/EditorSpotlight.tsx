@@ -132,7 +132,7 @@ export function EditorialSpotlight() {
 
           {story.coverImage && (
             <div className="mt-5 aspect-[16/9] overflow-hidden rounded-xl bg-gray-100">
-              <img src={story.cover_image} alt="" className="h-full w-full object-cover" />
+              <img src={story.coverImage} alt="" className="h-full w-full object-cover" />
             </div>
           )}
 
