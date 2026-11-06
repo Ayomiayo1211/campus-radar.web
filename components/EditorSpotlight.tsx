@@ -2,13 +2,12 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
 
 type SpotlightStory = {
   slug: string;
   title: string;
   excerpt: string;
-  cover_image: string | null;
+  coverImage: string | null;
 };
 
 function RadarMark() {
@@ -39,12 +38,11 @@ function RadarMark() {
 }
 
 export function EditorialSpotlight() {
-  const pathname = usePathname();
   const [story, setStory] = useState<SpotlightStory | null>(null);
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
-    if (pathname.startsWith('/admin')) return;
+    if (window.location.pathname.startsWith('/admin')) return;
     let cancelled = false;
     const timer = window.setTimeout(() => {
       if (!cancelled) setVisible(true);
@@ -132,7 +130,7 @@ export function EditorialSpotlight() {
             Something is on our radar
           </p>
 
-          {story.cover_image && (
+          {story.coverImage && (
             <div className="mt-5 aspect-[16/9] overflow-hidden rounded-xl bg-gray-100">
               <img src={story.cover_image} alt="" className="h-full w-full object-cover" />
             </div>
