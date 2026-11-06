@@ -15,9 +15,9 @@ export async function POST(request:NextRequest) {
   if(title.length<3||title.length>180||excerpt.length<10||excerpt.length>500||body.length<20||author.length<2) return NextResponse.json({error:'Complete the title, excerpt, write-up and author fields.'},{status:400});
   if(image&&!/^https:\/\//i.test(image)) return NextResponse.json({error:'Invalid image URL'},{status:400});
   const db=getSupabaseAdmin() as any;
-  if(status==='PUBLISHED') await db.from('spotlights').update({is_current:false}).eq('is_current',true);
-  const {data,error}=await db.from('spotlights').insert({title,excerpt,body,image_url:image,author_name:author,status,is_current:status==='PUBLISHED',created_by:user.id,published_at:status==='PUBLISHED'?new Date().toISOString():null}).select('*').single();
+  const {data,error}=await db.from('spotlights').insert({title,excerpt,body,image_url:image,author_name:author,status,is_current:false,created_by:user.id,published_at:status==='PUBLISHED'?new Date().toISOString():null}).select('*').single();
   if(error||!data) return NextResponse.json({error:'Could not save Spotlight'},{status:500});
+  if(status==='PUBLISHED'){await db.from('spotlights').update({is_current:false}).eq('is_current',true);const activated=await db.from('spotlights').update({is_current:true}).eq('id',data.id);if(activated.error)return NextResponse.json({error:'Saved, but could not activate Spotlight'},{status:500});}
   return NextResponse.json({data},{status:201});
 }
 export async function PATCH(request:NextRequest) {
@@ -29,7 +29,7 @@ export async function PATCH(request:NextRequest) {
   const updates:any={updated_at:new Date().toISOString()};
   for(const k of ['title','excerpt','body','author_name','image_url','status']) if(b[k]!==undefined) updates[k]=b[k];
   if(b.activate===true){updates.is_current=true;updates.status='PUBLISHED';updates.published_at=new Date().toISOString();}
-  if(b.deactivate===true) updates.is_current=false;
+  if(b.deactivate===true || (updates.status && updates.status !== 'PUBLISHED')) updates.is_current=false;
   const {data,error}=await db.from('spotlights').update(updates).eq('id',b.id).select('*').single();
   if(error||!data) return NextResponse.json({error:'Could not update Spotlight'},{status:500});
   return NextResponse.json({data});
