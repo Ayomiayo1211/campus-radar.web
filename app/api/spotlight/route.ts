@@ -24,7 +24,7 @@ export async function PATCH(request:NextRequest) {
   try { await requireRole(['SUPER_ADMIN','EDITOR']); } catch { return NextResponse.json({error:'Editors only'},{status:403}); }
   let b:any; try { b=await request.json(); } catch { return NextResponse.json({error:'Invalid request'},{status:400}); }
   if(typeof b.id!=='string') return NextResponse.json({error:'Missing Spotlight ID'},{status:400});
-  const db=getSupabaseAdmin();
+  const db=getSupabaseAdmin() as any;
   if(b.activate===true) await db.from('spotlights').update({is_current:false}).eq('is_current',true);
   const updates:any={updated_at:new Date().toISOString()};
   for(const k of ['title','excerpt','body','author_name','image_url','status']) if(b[k]!==undefined) updates[k]=b[k];
