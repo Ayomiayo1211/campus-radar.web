@@ -2,13 +2,14 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 type Spotlight={id:string;title:string;excerpt:string;body:string;imageUrl:string|null;authorName:string};
+type SpotlightResponse={data?:Spotlight|null;error?:string};
 export function EditorialSpotlight(){
  const [item,setItem]=useState<Spotlight|null>(null),[visible,setVisible]=useState(false);
  useEffect(()=>{
   if(window.location.pathname.startsWith('/admin'))return;
   let cancelled=false;
   const timer=window.setTimeout(()=>{if(!cancelled)setVisible(true);},20000);
-  fetch('/api/spotlight',{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(cancelled||!j?.data)return;const value=j.data as Spotlight;const key='campus-radar-spotlight-dismissed-'+value.id;if(sessionStorage.getItem(key)==='true')return;setItem(value);}).catch(e=>console.error('Spotlight load failed',e));
+  fetch('/api/spotlight',{cache:'no-store'}).then(r=>r.ok?r.json() as Promise<SpotlightResponse>:null).then(j=>{if(cancelled||!j?.data)return;const value=j.data;const key='campus-radar-spotlight-dismissed-'+value.id;if(sessionStorage.getItem(key)==='true')return;setItem(value);}).catch(e=>console.error('Spotlight load failed',e));
   return()=>{cancelled=true;window.clearTimeout(timer);};
  },[]);
  function dismiss(){if(item)sessionStorage.setItem('campus-radar-spotlight-dismissed-'+item.id,'true');setVisible(false);}
