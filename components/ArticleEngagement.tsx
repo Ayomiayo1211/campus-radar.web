@@ -2,7 +2,7 @@
 import {useEffect,useState} from 'react';
 type Comment={id:string;display_name:string;body:string;created_at:string};
 export function ArticleEngagement({storyId,spotlightId}:{storyId?:string;spotlightId?:string}){
- const destination=spotlightId?{spotlightId}:{storyId};
+ const destination:Record<string,string>=spotlightId?{spotlightId}:storyId?{storyId}:{};
  const destinationKey=spotlightId||storyId||'';
  const [items,setItems]=useState<Comment[]>([]),[name,setName]=useState(''),[email,setEmail]=useState(''),[body,setBody]=useState(''),[subscribe,setSubscribe]=useState(false),[loading,setLoading]=useState(false),[message,setMessage]=useState('');
  async function load(){const params=new URLSearchParams(destination);const r=await fetch(`/api/comments?${params.toString()}`);const d=await r.json() as any;if(r.ok)setItems(d.data||[])}
