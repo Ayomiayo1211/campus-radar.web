@@ -1,6 +1,6 @@
-
 import Image from 'next/image';
 import Link from 'next/link';
+import { ActiveNavLink } from './ActiveNavLink';
 
 const nav = [
   ['/news', 'News'],
@@ -15,11 +15,7 @@ export function Header() {
   return (
     <header className="sticky top-0 z-40 border-b border-[var(--line)] bg-white/95 backdrop-blur">
       <div className="container flex min-h-20 items-center justify-between gap-6">
-        <Link
-          href="/"
-          className="shrink-0"
-          aria-label="Campus Radar home"
-        >
+        <Link href="/" className="shrink-0" aria-label="Campus Radar home">
           <Image
             src="/campusradar.svg"
             alt="Campus Radar"
@@ -31,21 +27,13 @@ export function Header() {
         </Link>
 
         <nav
-          className="hidden items-center gap-5 text-[13px] font-bold xl:flex"
+          className="hidden items-center gap-2 text-[13px] font-bold xl:flex"
           aria-label="Primary navigation"
         >
           {nav.map(([href, label]) => (
-            <Link key={href} href={href} className="nav-link">
-              {label}
-            </Link>
+            <ActiveNavLink key={href} href={href} label={label} />
           ))}
-
-          <Link
-            href="/confidential"
-            className="rounded-full bg-[#173B87] px-4 py-2.5 text-white transition-colors hover:bg-[#2457C5]"
-          >
-            Confidential
-          </Link>
+          <ActiveNavLink href="/confidential" label="Confidential" />
         </nav>
 
         <div className="flex shrink-0 items-center gap-4">
@@ -62,27 +50,11 @@ export function Header() {
             </summary>
 
             <div className="absolute right-0 mt-3 w-64 rounded-xl border border-[var(--line)] bg-white p-4 shadow-xl">
-              <nav
-                className="grid gap-1 text-sm font-bold"
-                aria-label="Mobile navigation"
-              >
+              <nav className="grid gap-1 text-sm font-bold" aria-label="Mobile navigation">
                 {nav.map(([href, label]) => (
-                  <Link
-                    key={href}
-                    href={href}
-                    className="border-b border-[var(--line)] px-2 py-3 transition-colors hover:text-[#2457C5]"
-                  >
-                    {label}
-                  </Link>
+                  <ActiveNavLink key={href} href={href} label={label} mobile />
                 ))}
-
-                <Link
-                  href="/confidential"
-                  className="mt-2 rounded-lg bg-[#173B87] px-3 py-3 text-white transition-colors hover:bg-[#2457C5]"
-                >
-                  Campus Confidential
-                </Link>
-
+                <ActiveNavLink href="/confidential" label="Campus Confidential" mobile />
                 <Link
                   href="/submit"
                   className="px-3 py-3 text-[#173B87] underline underline-offset-4"
