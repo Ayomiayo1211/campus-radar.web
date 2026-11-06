@@ -11,6 +11,10 @@ const links = [
     href: '/admin',
   },
   {
+    label: 'Spotlight',
+    href: '/admin/spotlight',
+  },
+  {
     label: 'Stories',
     href: '/admin/stories',
   },
@@ -39,7 +43,7 @@ const links = [
 export default function AdminNav() {
   const pathname = usePathname();
   const [canEditSpotlight, setCanEditSpotlight] = useState(false);
-  useEffect(() => { fetch('/api/auth/session', { cache: 'no-store' }).then(r => r.json()).then(j => setCanEditSpotlight(['SUPER_ADMIN','EDITOR'].includes(j.user?.role))).catch(() => setCanEditSpotlight(false)); }, []);
+  useEffect(() => { fetch('/api/auth/session', { cache: 'no-store' }).then(r => r.json()).then((j: { user?: { role?: string } }) => setCanEditSpotlight(['SUPER_ADMIN','EDITOR'].includes(j.user?.role ?? ''))).catch(() => setCanEditSpotlight(false)); }, []);
 
   return (
     <nav className="border-b border-gray-200 bg-white">
