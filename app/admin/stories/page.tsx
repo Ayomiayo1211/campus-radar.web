@@ -17,6 +17,9 @@ type Story = {
   publishedAt: string | null;
   createdAt: string;
   readCount: number;
+  editingLockedBy?: string | null;
+  editingLockedByName?: string | null;
+  editContributors?: { id: string | null; name: string }[];
 };
 
 type StoriesResponse = {
@@ -149,6 +152,14 @@ export default function StoriesPage() {
 
                       <div className="mt-4 text-xs text-gray-500">
                         <p>By {story.authorName}</p>
+                        <p className="mt-1">
+                          Worked on by: {story.editContributors?.length ? story.editContributors.map(person => person.name).join(', ') : 'No recorded activity'}
+                        </p>
+                        {story.editingLockedBy && (
+                          <p className="mt-1 font-semibold text-[#173B87]">
+                            Currently working: {story.editingLockedByName || 'An editor'}
+                          </p>
+                        )}
                         <p className="mt-1">
                           Created{' '}
                           {new Date(story.createdAt).toLocaleString()}

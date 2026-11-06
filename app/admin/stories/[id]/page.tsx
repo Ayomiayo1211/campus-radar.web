@@ -25,6 +25,11 @@ type Story = {
   coverImage: string | null;
   authorName: string;
   images?: GalleryImage[];
+  editingLockedBy?: string | null;
+  editingLockedAt?: string | null;
+  editingLockedByName?: string | null;
+  currentUserId?: string;
+  currentUserRole?: string;
 };
 
 type GalleryImage = { id?: string; mediaId?: string | null; url: string; altText: string | null; caption: string | null; photographer: string | null; displayOrder: number; };
@@ -37,6 +42,8 @@ type Media = {
   height: number | null;
 };
 
+type EditHistoryEntry = { id: string; editor_name: string; action: 'STARTED' | 'UPDATED' | 'RELEASED'; before_snapshot: Record<string, unknown> | null; after_snapshot: Record<string, unknown> | null; created_at: string; };
+
 type ApiResponse<T> = {
   data?: T;
   error?: string;
@@ -48,6 +55,9 @@ export default function EditStoryPage() {
   const id = params.id as string;
 
   const [story, setStory] = useState<Story | null>(null);
+  const [history, setHistory] = useState<EditHistoryEntry[]>([]);
+  const [historyLoading, setHistoryLoading] = useState(true);
+  const [lockBusy, setLockBusy] = useState(false);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
@@ -73,6 +83,8 @@ export default function EditStoryPage() {
 
   const imageInputRef = useRef<HTMLInputElement>(null);
   const bodyInputRef = useRef<HTMLTextAreaElement>(null);
+  const canEdit = !!story && (story.editingLockedBy ? story.editingLockedBy === story.currentUserId : story.currentUserRole === 'REPORTER');
+  const workedBy = [...new Set(history.map(item => item.editor_name))];
 
   useEffect(() => {
     let cancelled = false;
@@ -101,12 +113,15 @@ export default function EditStoryPage() {
         setAuthorName(data.authorName);
         setCoverImage(data.coverImage || '');
         setGalleryImages((data.images ?? []).slice().sort((a, b) => a.displayOrder - b.displayOrder));
+        const historyResponse = await fetch('/api/stories/' + id + '/history');
+        const historyResult = await historyResponse.json() as { data?: EditHistoryEntry[]; error?: string };
+        if (historyResponse.ok) setHistory(historyResult.data ?? []);
       } catch (err) {
         if (!cancelled) {
           setError(err instanceof Error ? err.message : 'Something went wrong');
         }
       } finally {
-        if (!cancelled) setLoading(false);
+        if (!cancelled) { setLoading(false); setHistoryLoading(false); }
       }
     }
 
@@ -266,6 +281,26 @@ export default function EditStoryPage() {
     setGalleryImages(current => current.filter((_, i) => i !== index).map((image, displayOrder) => ({ ...image, displayOrder })));
   }
 
+  async function claimStory() {
+    setLockBusy(true); setError('');
+    try {
+      const response = await fetch('/api/stories/' + id + '/lock', { method: 'POST' });
+      const result = await response.json() as { error?: string };
+      if (!response.ok) throw new Error(result.error || 'Could not claim this story');
+      window.location.reload();
+    } catch (err) { setError(err instanceof Error ? err.message : 'Could not claim this story'); setLockBusy(false); }
+  }
+
+  async function releaseStory() {
+    if (!window.confirm('Finish working and release this story? Other editors will then be able to claim it.')) return;
+    setLockBusy(true); setError('');
+    try {
+      const response = await fetch('/api/stories/' + id + '/lock', { method: 'DELETE' });
+      const result = await response.json() as { error?: string };
+      if (!response.ok) throw new Error(result.error || 'Could not release this story');
+      router.push('/admin/stories'); router.refresh();
+    } catch (err) { setError(err instanceof Error ? err.message : 'Could not release this story'); setLockBusy(false); }
+  }
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setSaving(true);
@@ -371,7 +406,80 @@ export default function EditStoryPage() {
           </div>
         )}
 
+        
+        <section className="mb-6 rounded-xl border border-gray-200 bg-gray-50 p-5">
+          <div className="flex flex-wrap items-start justify-between gap-4">
+            <div>
+              <h2 className="font-semibold text-gray-900">Editorial ownership</h2>
+              {story.editingLockedBy ? (
+                <p className="mt-1 text-sm text-gray-700">
+                  {canEdit ? 'You currently own this story. Everyone else, including Super Admins, has read-only access.' : 'Currently being worked on by ' + (story.editingLockedByName || 'another editor') + '. This story is read-only until it is released.'}
+                </p>
+              ) : (
+                <p className="mt-1 text-sm text-gray-700">
+                  {story.currentUserRole === 'REPORTER' ? 'No editor has claimed this story. You can continue editing your own submission.' : 'No one is currently working on this story. Claim it before making changes.'}
+                </p>
+              )}
+              <p className="mt-2 text-xs text-gray-500">Worked on by: {workedBy.length ? workedBy.join(', ') : 'No recorded activity yet'}</p>
+            </div>
+            <div className="flex gap-2">
+              {!story.editingLockedBy && story.currentUserRole !== 'REPORTER' && (
+                <button type="button" onClick={() => void claimStory()} disabled={lockBusy} className="rounded-lg bg-[#173B87] px-4 py-2 text-sm font-semibold text-white disabled:opacity-50">
+                  {lockBusy ? 'Claiming...' : 'Start working'}
+                </button>
+              )}
+              {canEdit && story.editingLockedBy && (
+                <button type="button" onClick={() => void releaseStory()} disabled={lockBusy} className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium disabled:opacity-50">
+                  {lockBusy ? 'Releasing...' : 'Finish & release'}
+                </button>
+              )}
+            </div>
+          </div>
+          {story.editingLockedAt && <p className="mt-2 text-xs text-gray-500">Claimed {new Date(story.editingLockedAt).toLocaleString()}</p>}
+        </section>
+
+        <section className="mb-8 rounded-xl border border-gray-200 bg-white p-5">
+          <h2 className="font-semibold text-gray-900">Change history</h2>
+          <p className="mt-1 text-sm text-gray-500">A record of who started, saved changes to, and released this story.</p>
+          {historyLoading ? <p className="mt-4 text-sm text-gray-500">Loading history...</p> : history.length === 0 ? <p className="mt-4 text-sm text-gray-500">No changes have been recorded yet.</p> : (
+            <div className="mt-4 divide-y divide-gray-100">
+              {history.map(entry => {
+                const before = entry.before_snapshot || {};
+                const after = entry.after_snapshot || {};
+                const changed = entry.action === 'UPDATED' ? Object.keys(after).filter(key => JSON.stringify(before[key]) !== JSON.stringify(after[key])) : [];
+                const labels: Record<string, string> = { title: 'Headline', excerpt: 'Excerpt', body: 'Story body', content_type: 'Content type', origin: 'Origin', commercial_status: 'Commercial status', status: 'Publishing status', featured: 'Featured status', author_name: 'Byline', cover_image: 'Cover image', tags: 'Tags', images: 'Gallery images' };
+                return (
+                  <div key={entry.id} className="py-4">
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <p className="text-sm font-semibold text-gray-900">{entry.editor_name} <span className="font-normal text-gray-500">{entry.action === 'STARTED' ? 'started working' : entry.action === 'RELEASED' ? 'released the story' : 'saved changes'}</span></p>
+                      <time className="text-xs text-gray-500">{new Date(entry.created_at).toLocaleString()}</time>
+                    </div>
+                    {changed.length > 0 && <p className="mt-2 text-sm text-gray-600">Changed: {changed.map(key => labels[key] || key).join(', ')}</p>}
+                    {entry.action === 'UPDATED' && (
+                      <details className="mt-2">
+                        <summary className="cursor-pointer text-xs font-medium text-[#173B87]">View before and after</summary>
+                        <div className="mt-3 space-y-3">
+                          {changed.map(key => (
+                            <div key={key} className="rounded-lg bg-gray-50 p-3">
+                              <p className="mb-2 text-xs font-semibold text-gray-700">{labels[key] || key}</p>
+                              <div className="grid gap-3 md:grid-cols-2">
+                                <div><p className="mb-1 text-[11px] font-semibold uppercase text-gray-500">Before</p><pre className="whitespace-pre-wrap break-words text-xs text-gray-700">{JSON.stringify(before[key] ?? null, null, 2)}</pre></div>
+                                <div><p className="mb-1 text-[11px] font-semibold uppercase text-gray-500">After</p><pre className="whitespace-pre-wrap break-words text-xs text-gray-700">{JSON.stringify(after[key] ?? null, null, 2)}</pre></div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </details>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </section>
+
         <form onSubmit={handleSubmit} className="space-y-8">
+          <fieldset disabled={!canEdit} className="space-y-8">
           <section className="rounded-xl border border-gray-200 bg-white p-6">
             <h2 className="mb-6 text-lg font-semibold text-black">Story Details</h2>
 
@@ -523,15 +631,16 @@ export default function EditStoryPage() {
 
                       </section>
 
+          </fieldset>
           <div className="flex flex-wrap justify-between gap-3">
-            <button type="button" onClick={handleDelete} disabled={saving || uploadingImage || uploadingGallery} className="rounded-lg border border-red-300 px-5 py-3 text-sm font-medium text-red-700 hover:bg-red-50 disabled:opacity-60">
+            <button type="button" onClick={handleDelete} disabled={!canEdit || saving || uploadingImage || uploadingGallery} className="rounded-lg border border-red-300 px-5 py-3 text-sm font-medium text-red-700 hover:bg-red-50 disabled:opacity-60">
               Delete Story
             </button>
             <div className="flex gap-3">
               <button type="button" onClick={() => router.push('/admin/stories')} className="rounded-lg border border-gray-300 px-5 py-3 text-sm font-medium hover:bg-gray-50">
                 Cancel
               </button>
-              <button type="submit" disabled={saving || uploadingImage || uploadingGallery} className="rounded-lg bg-black px-5 py-3 text-sm font-medium text-white hover:bg-gray-800 disabled:opacity-60">
+              <button type="submit" disabled={!canEdit || saving || uploadingImage || uploadingGallery} className="rounded-lg bg-black px-5 py-3 text-sm font-medium text-white hover:bg-gray-800 disabled:opacity-60">
                 {saving ? 'Saving...' : 'Save Changes'}
               </button>
             </div>

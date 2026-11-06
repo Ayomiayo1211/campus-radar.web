@@ -26,7 +26,34 @@ export async function GET(request: NextRequest) {
   if (type) query = query.eq('content_type', type);
   const { data, error } = await query;
   if (error) return NextResponse.json({ error: 'Could not load stories' }, { status: 500 });
-  return NextResponse.json({ data: toCamelCase(data ?? []) });
+
+  const stories = toCamelCase(data ?? []);
+  if (!admin || !data?.length) return NextResponse.json({ data: stories });
+
+  const storyIds = data.map(story => story.id);
+  const lockOwnerIds = [...new Set(data.map(story => story.editing_locked_by).filter(Boolean))] as string[];
+  const [historyResult, ownersResult] = await Promise.all([
+    db.from('story_edit_history').select('story_id,editor_id,editor_name')
+      .in('story_id', storyIds).order('created_at', { ascending: false }),
+    lockOwnerIds.length ? db.from('users').select('id,name').in('id', lockOwnerIds) : Promise.resolve({ data: [] as {id:string;name:string}[] }),
+  ]);
+  if (historyResult.error) return NextResponse.json({ error: 'Could not load editorial activity' }, { status: 500 });
+
+  const contributors = new Map<string, { id: string | null; name: string }[]>();
+  for (const entry of historyResult.data ?? []) {
+    const current = contributors.get(entry.story_id) ?? [];
+    if (!current.some(person => person.id === entry.editor_id || (!person.id && person.name === entry.editor_name))) {
+      current.push({ id: entry.editor_id, name: entry.editor_name });
+    }
+    contributors.set(entry.story_id, current);
+  }
+  const owners = new Map((ownersResult.data ?? []).map(person => [person.id, person.name]));
+  const enriched = stories.map((story: any) => ({
+    ...story,
+    editContributors: contributors.get(story.id) ?? [],
+    editingLockedByName: story.editingLockedBy ? owners.get(story.editingLockedBy) ?? 'Former editor' : null,
+  }));
+  return NextResponse.json({ data: enriched });
 }
 
 export async function POST(request: NextRequest) {
