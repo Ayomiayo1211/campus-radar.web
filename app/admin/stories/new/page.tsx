@@ -43,6 +43,7 @@ export default function NewStoryPage() {
     useState('EDITORIAL');
   const [status, setStatus] = useState('DRAFT');
   const [featured, setFeatured] = useState(false);
+  const [isSpotlight, setIsSpotlight] = useState(false);
   const [authorName, setAuthorName] = useState('');
   const [coverImage, setCoverImage] = useState('');
 
@@ -346,6 +347,7 @@ export default function NewStoryPage() {
           commercialStatus,
           status,
           featured,
+          isSpotlight,
           authorName,
           coverImage: coverImage || undefined,
           galleryImages: galleryImages.map((image, index) => ({
@@ -814,6 +816,11 @@ export default function NewStoryPage() {
                 className="h-4 w-4"
               />
               Feature this story
+            </label>
+
+            <label className={`mt-4 flex items-start gap-3 rounded-lg border p-4 text-sm ${status === 'PUBLISHED' ? 'border-[#173B87] bg-blue-50' : 'border-gray-200 bg-gray-50'}`}>
+              <input type="checkbox" checked={isSpotlight} onChange={(event) => setIsSpotlight(event.target.checked)} disabled={status !== 'PUBLISHED'} className="mt-0.5 h-4 w-4" />
+              <span><strong className="block text-gray-900">Set as current Campus Radar Spotlight</strong><span className="mt-1 block text-gray-600">This published story will be featured in the homepage Spotlight popup. Selecting it replaces the previous Spotlight.</span>{status !== 'PUBLISHED' && <span className="mt-1 block text-amber-700">Publish this story first to select it as Spotlight.</span>}</span>
             </label>
           </section>
 
