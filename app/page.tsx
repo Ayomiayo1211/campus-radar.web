@@ -29,6 +29,13 @@ export default async function Home() {
     coverImage: story.cover_image,
   }));
 
+  const { data: spotlightRow } = await getSupabaseAdmin()
+    .from('stories')
+    .select('slug,title,excerpt,cover_image')
+    .eq('status', 'PUBLISHED')
+    .eq('is_spotlight', true)
+    .maybeSingle();
+
   const topStories = publishedStories.slice(0, 3);
   const latestStories = publishedStories.slice(3, 8);
 
@@ -44,7 +51,7 @@ export default async function Home() {
   return (
     <>
       <Header />
-      <EditorialSpotlight />
+      <EditorialSpotlight story={spotlightRow ?? null} />
 
       <main>
         {/* Top Stories */}
