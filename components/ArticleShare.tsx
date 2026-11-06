@@ -6,18 +6,19 @@ type ArticleShareProps = {
   title: string;
   excerpt: string;
   shortCode: string;
+  sharePath?: string;
 };
 
-export function ArticleShare({ title, excerpt, shortCode }: ArticleShareProps) {
+export function ArticleShare({ title, excerpt, shortCode, sharePath }: ArticleShareProps) {
   const [copied, setCopied] = useState(false);
   const [url, setUrl] = useState('');
 
   useEffect(() => {
-    setUrl(shortCode ? new URL(`/s/${shortCode}`, window.location.origin).toString() : window.location.href);
-  }, [shortCode]);
+    setUrl(shortCode ? new URL(`/s/${shortCode}`, window.location.origin).toString() : sharePath ? new URL(sharePath, window.location.origin).toString() : window.location.href);
+  }, [shortCode, sharePath]);
 
   async function shareArticle() {
-    const currentUrl = shortCode ? new URL(`/s/${shortCode}`, window.location.origin).toString() : window.location.href;
+    const currentUrl = shortCode ? new URL(`/s/${shortCode}`, window.location.origin).toString() : sharePath ? new URL(sharePath, window.location.origin).toString() : window.location.href;
     if (navigator.share) {
       try {
         await navigator.share({ title, text: excerpt, url: currentUrl });
