@@ -268,6 +268,7 @@ export type Database = {
           created_at?: string
           excerpt?: string
           featured?: boolean
+          is_spotlight?: boolean
           id?: string
           origin?: string
           published_at?: string | null
@@ -447,6 +448,10 @@ export type Database = {
       record_story_read: {
         Args: { p_story_id: string; p_visitor_hash: string }
         Returns: number
+      }
+      set_current_spotlight: {
+        Args: { p_story_id: string | null }
+        Returns: boolean
       }
     }
     Enums: {
