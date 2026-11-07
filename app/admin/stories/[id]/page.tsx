@@ -11,6 +11,7 @@ import {
 } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import imageCompression from 'browser-image-compression';
+import ArticleThumbnail from '@/components/ArticleThumbnail';
 
 type Story = {
   id: string;
@@ -24,6 +25,8 @@ type Story = {
   featured: boolean;
   coverImage: string | null;
   authorName: string;
+  publishedAt?: string | null;
+  createdAt?: string;
   images?: GalleryImage[];
   editingLockedBy?: string | null;
   editingLockedAt?: string | null;
@@ -552,6 +555,8 @@ export default function EditStoryPage() {
             </div>
           </section>
 
+
+                    <ArticleThumbnail title={title} excerpt={excerpt} coverImage={coverImage} contentType={contentType} authorName={authorName} date={story?.publishedAt || story?.createdAt || null} />
 
           <section className="rounded-xl border border-gray-200 bg-white p-6">
             <div className="mb-5 flex flex-wrap items-start justify-between gap-4">
