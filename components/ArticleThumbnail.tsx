@@ -45,12 +45,7 @@ export default function ArticleThumbnail({ title, excerpt, coverImage, contentTy
       ctx.fillStyle = shade; ctx.fillRect(0, 0, size, size);
 
       ctx.fillStyle = '#faf8f2'; ctx.fillRect(52, 52, 224, 82);
-      const logo = new Image(); logo.src = '/campusradar.svg';
-      await new Promise<void>((resolve) => { logo.onload = () => resolve(); logo.onerror = () => resolve(); });
-      if (logo.complete && logo.naturalWidth) {
-        const scale = Math.min(200 / logo.width, 70 / logo.height);
-        ctx.drawImage(logo, 64 + (200 - logo.width * scale) / 2, 58 + (70 - logo.height * scale) / 2, logo.width * scale, logo.height * scale);
-      } else { ctx.fillStyle = '#233f9e'; ctx.font = '700 24px Arial'; ctx.fillText('CAMPUS RADAR', 68, 103); }
+      ctx.fillStyle = '#233f9e'; ctx.font = '700 27px Arial'; ctx.fillText('CAMPUS RADAR', 68, 103);
 
       const dateText = displayDate(date);
       ctx.font = '600 20px Arial';
@@ -59,7 +54,7 @@ export default function ArticleThumbnail({ title, excerpt, coverImage, contentTy
       ctx.beginPath(); ctx.roundRect(size - dateWidth - 52, 52, dateWidth, 82, 41); ctx.fill(); ctx.stroke();
       ctx.fillStyle = '#2c51d2'; ctx.textAlign = 'center'; ctx.fillText(dateText, size - dateWidth / 2 - 52, 102); ctx.textAlign = 'left';
 
-      ctx.fillStyle = 'rgba(12, 25, 57, 0.88)'; ctx.fillRect(0, 690, size, 390);
+      ctx.fillStyle = 'rgba(12, 25, 57, 0.88)'; ctx.fillRect(0, 800, size, 320);
       const category = labelFor(contentType);
       ctx.font = '600 24px Arial'; const categoryWidth = ctx.measureText(category).width + 52;
       ctx.fillStyle = '#faf8f2'; ctx.strokeStyle = '#233f9e'; ctx.lineWidth = 3;
@@ -67,14 +62,14 @@ export default function ArticleThumbnail({ title, excerpt, coverImage, contentTy
       ctx.fillStyle = '#2c51d2'; ctx.fillText(category, 58, 679);
 
       ctx.fillStyle = '#fff'; ctx.font = '700 48px Arial';
-      wrapText(ctx, title || 'Your article headline', 1125).slice(0, 3).forEach((line, index) => ctx.fillText(line, 34, 770 + index * 58));
+      wrapText(ctx, title || 'Your article headline', 1125).slice(0, 3).forEach((line, index) => ctx.fillText(line, 34, 850 + index * 58));
       ctx.font = '400 27px Arial';
       wrapText(ctx, excerpt || 'Your article summary will appear here.', 1080).slice(0, 3).forEach((line, index) => ctx.fillText(line, 36, 950 + index * 38));
       ctx.font = '600 23px Arial'; ctx.textAlign = 'right'; ctx.fillText('By: ' + (authorName || 'Campus Radar'), 1150, 1040); ctx.textAlign = 'left';
 
-      ctx.fillStyle = '#fff'; ctx.fillRect(0, 1080, size, 120);
-      ctx.fillStyle = '#2c51d2'; ctx.font = '500 24px Arial'; ctx.fillText('READ MORE: www.campusradar.com', 52, 1150);
-      ctx.textAlign = 'right'; ctx.font = '600 22px Arial'; ctx.fillText('@campusradarfunaab', 1150, 1150); ctx.textAlign = 'left';
+      ctx.fillStyle = '#fff'; ctx.fillRect(0, 1120, size, 80);
+      ctx.fillStyle = '#2c51d2'; ctx.font = '500 24px Arial'; ctx.fillText('READ MORE: www.campusradar.com', 52, 1168);
+      ctx.textAlign = 'right'; ctx.font = '600 22px Arial'; ctx.fillText('@campusradarfunaab', 1150, 1168); ctx.textAlign = 'left';
 
       const blob = await new Promise<Blob>((resolve, reject) => canvas.toBlob(value => value ? resolve(value) : reject(new Error('Could not export the thumbnail.')), 'image/png'));
       const url = URL.createObjectURL(blob); const anchor = document.createElement('a'); anchor.href = url;
@@ -94,13 +89,13 @@ export default function ArticleThumbnail({ title, excerpt, coverImage, contentTy
         <div className="relative h-full w-full">
           {coverImage ? <img src={coverImage} alt="" className="absolute inset-0 h-full w-full object-cover" /> : <div className="absolute inset-0 bg-gradient-to-br from-[#233f9e] to-[#101d3d]" />}
           <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-transparent to-black/40" />
-          <div className="absolute left-[4.4%] top-[4.4%] flex h-[7.2%] w-[23%] items-center justify-center bg-[#faf8f2] p-2"><img src="/campusradar.svg" alt="Campus Radar" className="h-full w-full object-contain" /></div>
+          <div className="absolute left-[4.4%] top-[4.4%] flex h-[7.2%] w-[23%] items-center justify-center bg-[#faf8f2] px-2 text-[clamp(10px,2vw,17px)] font-extrabold tracking-tight text-[#233f9e]">CAMPUS RADAR</div>
           <div className="absolute right-[4.4%] top-[4.4%] rounded-full border-2 border-[#233f9e] bg-[#faf8f2] px-3 py-2 text-[clamp(7px,1.55vw,12px)] font-semibold text-[#2c51d2]">{displayDate(date)}</div>
-          <div className="absolute inset-x-0 bottom-[10%] h-[32.5%] bg-[#0c1939]/90" />
-          <div className="absolute bottom-[39%] left-[2.8%] rounded-full border-2 border-[#233f9e] bg-[#faf8f2] px-4 py-2 text-[clamp(9px,1.8vw,14px)] font-semibold text-[#2c51d2]">{labelFor(contentType)}</div>
-          <div className="absolute bottom-[22%] left-[2.8%] right-[2.8%]"><h3 className="line-clamp-3 text-[clamp(18px,4vw,34px)] font-bold leading-[1.08]">{title || 'Your article headline'}</h3><p className="mt-2 line-clamp-3 text-[clamp(10px,2.2vw,17px)] leading-snug">{excerpt || 'Your article summary will appear here.'}</p></div>
-          <p className="absolute bottom-[11.7%] right-[3%] text-[clamp(9px,1.8vw,14px)] font-semibold">By: {authorName || 'Campus Radar'}</p>
-          <div className="absolute inset-x-0 bottom-0 flex h-[10%] items-center justify-between bg-white px-[4.4%] text-[clamp(8px,1.8vw,14px)] font-medium text-[#2c51d2]"><span>READ MORE: www.campusradar.com</span><span>@campusradarfunaab</span></div>
+          <div className="absolute inset-x-0 bottom-[6.6%] h-[26.8%] bg-[#0c1939]/90" />
+          <div className="absolute top-[58.8%] left-[2.8%] rounded-full border-2 border-[#233f9e] bg-[#faf8f2] px-4 py-2 text-[clamp(9px,1.8vw,14px)] font-semibold text-[#2c51d2]">{labelFor(contentType)}</div>
+          <div className="absolute top-[68%] left-[2.8%] right-[2.8%]"><h3 className="line-clamp-3 text-[clamp(18px,4vw,34px)] font-bold leading-[1.08]">{title || 'Your article headline'}</h3><p className="mt-2 line-clamp-3 text-[clamp(10px,2.2vw,17px)] leading-snug">{excerpt || 'Your article summary will appear here.'}</p></div>
+          <p className="absolute top-[87.2%] right-[3%] text-[clamp(9px,1.8vw,14px)] font-semibold">By: {authorName || 'Campus Radar'}</p>
+          <div className="absolute inset-x-0 bottom-0 flex h-[6.6%] items-center justify-between bg-white px-[4.4%] text-[clamp(8px,1.8vw,14px)] font-medium text-[#2c51d2]"><span>READ MORE: www.campusradar.com</span><span>@campusradarfunaab</span></div>
         </div>
       </div>
       {!coverImage && <p className="mt-3 text-xs text-amber-700">Select a cover image to enable PNG download.</p>}
