@@ -11,6 +11,7 @@ import {
 } from 'react';
 import { useRouter } from 'next/navigation';
 import imageCompression from 'browser-image-compression';
+import ArticleThumbnail from '@/components/ArticleThumbnail';
 
 type Media = {
   id: string;
@@ -576,6 +577,8 @@ export default function NewStoryPage() {
               </div>
             </div>
           </section>
+
+                    <ArticleThumbnail title={title} excerpt={excerpt} coverImage={coverImage} contentType={contentType} authorName={authorName} />
 
           <section className="rounded-xl border border-gray-200 bg-white p-6">
             <div className="mb-5 flex flex-wrap items-start justify-between gap-4">
