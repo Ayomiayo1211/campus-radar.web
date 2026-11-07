@@ -86,10 +86,21 @@ export default function ArticleThumbnail({ title, excerpt, coverImage, contentTy
       ctx.fillText('By: ' + (authorName || 'Campus Radar'), 1074, 1084); ctx.textAlign = 'left';
 
       ctx.fillStyle = '#FFFFFF'; ctx.fillRect(0, 1122, size, 78);
-      ctx.fillStyle = '#2C51D2'; ctx.font = '400 29px Arial';
-      ctx.fillText('READ MORE: www.campusradar.com', 52.5, 1170);
-      ctx.textAlign = 'right'; ctx.font = '400 25px Arial';
-      ctx.fillText('f   X   ♪   ◎   @campusradarfunaab', 1148, 1170); ctx.textAlign = 'left';
+      ctx.fillStyle = '#2C51D2'; ctx.font = '400 24px Arial'; ctx.textBaseline = 'middle';
+      ctx.fillText('READ MORE: www.campusradar.com', 52.5, 1161);
+      // Keep the social marks and handle in a dedicated, evenly spaced group.
+      const cy = 1161;
+      ctx.fillStyle = '#2C51D2'; ctx.beginPath(); ctx.arc(756, cy, 13, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#FFFFFF'; ctx.font = 'bold 21px Arial'; ctx.textAlign = 'center'; ctx.fillText('f', 756, cy + 1);
+      ctx.strokeStyle = '#2C51D2'; ctx.lineWidth = 3.2; ctx.lineCap = 'round';
+      ctx.beginPath(); ctx.moveTo(786, cy - 11); ctx.lineTo(807, cy + 11); ctx.moveTo(807, cy - 11); ctx.lineTo(786, cy + 11); ctx.stroke();
+      ctx.lineWidth = 4; ctx.beginPath(); ctx.moveTo(835, cy - 13); ctx.lineTo(835, cy + 5); ctx.moveTo(835, cy - 13); ctx.quadraticCurveTo(844, cy - 10, 848, cy - 5); ctx.stroke();
+      ctx.beginPath(); ctx.arc(830, cy + 7, 6, 0, Math.PI * 2); ctx.fillStyle = '#2C51D2'; ctx.fill();
+      ctx.strokeStyle = '#2C51D2'; ctx.lineWidth = 2.8; ctx.beginPath(); ctx.roundRect(861, cy - 12, 24, 24, 6); ctx.stroke();
+      ctx.beginPath(); ctx.arc(873, cy, 5.5, 0, Math.PI * 2); ctx.stroke();
+      ctx.beginPath(); ctx.arc(880, cy - 7, 1.4, 0, Math.PI * 2); ctx.fill();
+      ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic'; ctx.font = '400 20px Arial';
+      ctx.fillText('@campusradarfunaab', 900, 1169);
 
       const blob = await new Promise<Blob>((resolve, reject) => canvas.toBlob(value => value ? resolve(value) : reject(new Error('Could not export the thumbnail.')), 'image/png'));
       const url = URL.createObjectURL(blob); const anchor = document.createElement('a'); anchor.href = url;
@@ -119,14 +130,14 @@ export default function ArticleThumbnail({ title, excerpt, coverImage, contentTy
             <p className="mt-[1.2%] line-clamp-2 text-[clamp(10px,2.45vw,19px)] leading-[1.1]">{excerpt || 'Your article summary will appear here.'}</p>
           </div>
           <p className="absolute right-[3.1%] top-[87.2%] text-[clamp(10px,3.05vw,23px)] font-semibold leading-none">By: {authorName || 'Campus Radar'}</p>
-          <div className="absolute inset-x-0 bottom-0 flex h-[6.56%] items-center justify-between bg-white px-[4.37%] text-[clamp(8px,2.65vw,20px)] font-normal leading-none text-[#2C51D2]">
-            <span>READ MORE: www.campusradar.com</span>
-            <div className="flex items-center gap-[0.8vw]">
-              <Facebook size={14} strokeWidth={2.4} fill="#2C51D2" color="#2C51D2" />
-              <span className="font-semibold">X</span>
-              <Music2 size={14} strokeWidth={2.4} />
-              <Instagram size={14} strokeWidth={2.2} />
-              <span>@campusradarfunaab</span>
+          <div className="absolute inset-x-0 bottom-0 flex h-[6.56%] items-center justify-between gap-2 bg-white px-[4.37%] text-[#2C51D2]">
+            <span className="shrink-0 whitespace-nowrap text-[clamp(8px,1.9vw,15px)] font-normal leading-none">READ MORE: www.campusradar.com</span>
+            <div className="flex shrink-0 items-center gap-[clamp(3px,0.65vw,7px)]">
+              <Facebook className="h-[clamp(11px,2.4vw,17px)] w-[clamp(11px,2.4vw,17px)]" strokeWidth={2.4} fill="#2C51D2" color="#2C51D2" />
+              <span className="text-[clamp(10px,1.8vw,14px)] font-semibold leading-none">X</span>
+              <Music2 className="h-[clamp(11px,2.4vw,17px)] w-[clamp(11px,2.4vw,17px)]" strokeWidth={2.4} />
+              <Instagram className="h-[clamp(11px,2.4vw,17px)] w-[clamp(11px,2.4vw,17px)]" strokeWidth={2.2} />
+              <span className="whitespace-nowrap text-[clamp(7px,1.55vw,12px)] leading-none">@campusradarfunaab</span>
             </div>
           </div>
         </div>
