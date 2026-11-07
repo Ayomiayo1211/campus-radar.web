@@ -1,6 +1,6 @@
 'use client';
 import { useState } from 'react';
-import { Facebook, Instagram, Music2, AtSign } from 'lucide-react';
+import { Facebook, Instagram, Music2 } from 'lucide-react';
 
 type Props = { title: string; excerpt: string; coverImage: string; contentType: string; authorName: string; date?: string | null };
 
@@ -24,6 +24,7 @@ function wrapText(ctx: CanvasRenderingContext2D, text: string, maxWidth: number)
 function loadImage(src: string) {
   return new Promise<HTMLImageElement>((resolve, reject) => {
     const image = new Image();
+    image.crossOrigin = 'anonymous';
     image.onload = () => resolve(image);
     image.onerror = () => reject(new Error('Could not load the image asset.'));
     image.src = src;
