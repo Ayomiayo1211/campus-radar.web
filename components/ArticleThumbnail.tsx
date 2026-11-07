@@ -30,6 +30,26 @@ function loadImage(src: string) {
     image.src = src;
   });
 }
+function drawFooterSocials(ctx: CanvasRenderingContext2D) {
+  const blue = '#2C51D2';
+  const centerY = 1161;
+  // Facebook mark
+  ctx.fillStyle = blue; ctx.beginPath(); ctx.arc(756, centerY, 13, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = '#FFFFFF'; ctx.font = 'bold 21px Arial'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('f', 756, centerY + 1);
+  // X mark
+  ctx.strokeStyle = blue; ctx.lineWidth = 3.2; ctx.lineCap = 'round';
+  ctx.beginPath(); ctx.moveTo(786, centerY - 11); ctx.lineTo(807, centerY + 11); ctx.moveTo(807, centerY - 11); ctx.lineTo(786, centerY + 11); ctx.stroke();
+  // TikTok-inspired music note
+  ctx.strokeStyle = blue; ctx.lineWidth = 4; ctx.beginPath(); ctx.moveTo(835, centerY - 13); ctx.lineTo(835, centerY + 5); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(835, centerY - 13); ctx.quadraticCurveTo(844, centerY - 10, 848, centerY - 5); ctx.stroke();
+  ctx.beginPath(); ctx.arc(830, centerY + 7, 6, 0, Math.PI * 2); ctx.fillStyle = blue; ctx.fill();
+  // Instagram outline
+  ctx.strokeStyle = blue; ctx.lineWidth = 2.8; ctx.beginPath(); ctx.roundRect(861, centerY - 12, 24, 24, 6); ctx.stroke();
+  ctx.beginPath(); ctx.arc(873, centerY, 5.5, 0, Math.PI * 2); ctx.stroke();
+  ctx.beginPath(); ctx.arc(880, centerY - 7, 1.4, 0, Math.PI * 2); ctx.fillStyle = blue; ctx.fill();
+  ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
+  ctx.fillStyle = blue; ctx.font = '400 20px Arial'; ctx.fillText('@campusradarfunaab', 900, 1169);
+}
 
 export default function ArticleThumbnail({ title, excerpt, coverImage, contentType, authorName, date }: Props) {
   const [downloading, setDownloading] = useState(false);
@@ -86,10 +106,9 @@ export default function ArticleThumbnail({ title, excerpt, coverImage, contentTy
       ctx.fillText('By: ' + (authorName || 'Campus Radar'), 1074, 1084); ctx.textAlign = 'left';
 
       ctx.fillStyle = '#FFFFFF'; ctx.fillRect(0, 1122, size, 78);
-      ctx.fillStyle = '#2C51D2'; ctx.font = '400 29px Arial';
-      ctx.fillText('READ MORE: www.campusradar.com', 52.5, 1170);
-      ctx.textAlign = 'right'; ctx.font = '400 25px Arial';
-      ctx.fillText('f   X   ♪   ◎   @campusradarfunaab', 1148, 1170); ctx.textAlign = 'left';
+      ctx.fillStyle = '#2C51D2'; ctx.font = '400 24px Arial'; ctx.textBaseline = 'middle';
+      ctx.fillText('READ MORE: www.campusradar.com', 52.5, 1161);
+      drawFooterSocials(ctx);
 
       const blob = await new Promise<Blob>((resolve, reject) => canvas.toBlob(value => value ? resolve(value) : reject(new Error('Could not export the thumbnail.')), 'image/png'));
       const url = URL.createObjectURL(blob); const anchor = document.createElement('a'); anchor.href = url;
@@ -119,14 +138,14 @@ export default function ArticleThumbnail({ title, excerpt, coverImage, contentTy
             <p className="mt-[1.2%] line-clamp-2 text-[clamp(10px,2.45vw,19px)] leading-[1.1]">{excerpt || 'Your article summary will appear here.'}</p>
           </div>
           <p className="absolute right-[3.1%] top-[87.2%] text-[clamp(10px,3.05vw,23px)] font-semibold leading-none">By: {authorName || 'Campus Radar'}</p>
-          <div className="absolute inset-x-0 bottom-0 flex h-[6.56%] items-center justify-between bg-white px-[4.37%] text-[clamp(8px,2.65vw,20px)] font-normal leading-none text-[#2C51D2]">
-            <span>READ MORE: www.campusradar.com</span>
-            <div className="flex items-center gap-[0.8vw]">
-              <Facebook size={14} strokeWidth={2.4} fill="#2C51D2" color="#2C51D2" />
-              <span className="font-semibold">X</span>
-              <Music2 size={14} strokeWidth={2.4} />
-              <Instagram size={14} strokeWidth={2.2} />
-              <span>@campusradarfunaab</span>
+          <div className="absolute inset-x-0 bottom-0 flex h-[6.56%] items-center justify-between gap-2 bg-white px-[4.37%] text-[#2C51D2]">
+            <span className="shrink-0 whitespace-nowrap text-[clamp(8px,1.9vw,15px)] font-normal leading-none">READ MORE: www.campusradar.com</span>
+            <div className="flex shrink-0 items-center gap-[clamp(3px,0.65vw,7px)]">
+              <Facebook className="h-[clamp(11px,2.4vw,17px)] w-[clamp(11px,2.4vw,17px)]" strokeWidth={2.4} fill="#2C51D2" color="#2C51D2" />
+              <span className="text-[clamp(10px,1.8vw,14px)] font-semibold leading-none">X</span>
+              <Music2 className="h-[clamp(11px,2.4vw,17px)] w-[clamp(11px,2.4vw,17px)]" strokeWidth={2.4} />
+              <Instagram className="h-[clamp(11px,2.4vw,17px)] w-[clamp(11px,2.4vw,17px)]" strokeWidth={2.2} />
+              <span className="whitespace-nowrap text-[clamp(7px,1.55vw,12px)] leading-none">@campusradarfunaab</span>
             </div>
           </div>
         </div>
