@@ -17,7 +17,7 @@ export async function GET(request:NextRequest) {
 export async function POST(request:NextRequest) {
   let body:any;try{body=await request.json()}catch{return NextResponse.json({error:'Invalid request'},{status:400})}
   const storyId=String(body.storyId||''),spotlightId=String(body.spotlightId||''),name=String(body.displayName||'').trim(),email=String(body.email||'').trim().toLowerCase(),comment=String(body.body||'').trim();
-  if((!storyId&&!spotlightId)||(storyId&&spotlightId)||!validId(storyId||spotlightId)||name.length<2||name.length>60||!/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email)||email.length>254||comment.length<2||comment.length>2000) return NextResponse.json({error:'Check your name, email and comment. Comments must be 2–2,000 characters.'},{status:400});
+  if((!storyId&&!spotlightId)||(storyId&&spotlightId)||!validId(storyId||spotlightId)||name.length<2||name.length>60||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)||email.length>254||comment.length<2||comment.length>2000) return NextResponse.json({error:'Check your name, email and comment. Comments must be 2–2,000 characters.'},{status:400});
   if(body.website) return NextResponse.json({message:'Comment received.'});
   const ip=request.headers.get('cf-connecting-ip')||request.headers.get('x-forwarded-for')?.split(',')[0]?.trim()||'unknown';
   const rateKey=hashValue(ip+'|'+(process.env.AUTH_SECRET||'campus-radar'));
