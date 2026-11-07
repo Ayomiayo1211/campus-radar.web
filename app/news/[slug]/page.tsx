@@ -156,7 +156,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
               <img
                 src={story.coverImage}
                 alt={story.title}
-                className="max-h-[480px] w-full rounded-xl object-cover"
+                className="mx-auto aspect-square h-auto max-h-none w-full max-w-[700px] rounded-xl object-contain"
               />
             </figure>
           )}
