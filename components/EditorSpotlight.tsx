@@ -34,7 +34,7 @@ export function EditorialSpotlight() {
 
   useEffect(() => {
     setVisible(false);
-    if (!item || pathname.startsWith('/admin')) return;
+    if (!item || pathname.startsWith('/admin') || pathname === '/spotlight' || pathname.startsWith('/spotlight/')) return;
     const timer = window.setTimeout(() => setVisible(true), 10000);
     return () => window.clearTimeout(timer);
   }, [pathname, item]);
