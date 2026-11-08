@@ -216,26 +216,27 @@ summary::-webkit-details-marker {
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.24);
 }
 
-/* Keep existing utility-based pages and admin screens readable without changing their layouts. */
-.dark [class*="bg-white"],
-.dark [class*="bg-[#F8FAFC]"],
-.dark [class*="bg-[#F9FAFB]"],
-.dark [class*="bg-[#EEF3FF]"],
-.dark [class*="bg-slate-50"],
-.dark [class*="bg-gray-50"] {
-  background-color: var(--surface) !important;
+/* Theme-aware shared surfaces and interactive states. */
+.dark .site-logo {
+  filter: brightness(0) invert(1);
 }
 
-.dark [class*="text-[#173B87]"],
-.dark [class*="text-[#2457C5]"],
-.dark [class*="text-blue-900"],
-.dark [class*="text-blue-800"] {
-  color: #a9c2ff !important;
+.dark .card {
+  background: var(--surface);
+  border-color: var(--line);
 }
 
-.dark [class*="border-[#173B87]"],
-.dark [class*="border-[#2457C5]"] {
-  border-color: #526fae !important;
+.dark .card:hover {
+  border-color: #83a8ff;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.3);
+}
+
+.dark .story-image {
+  background: #202d43;
+}
+
+.dark header {
+  background-color: rgb(17 24 39 / 94%);
 }
 
 .dark input,
@@ -258,12 +259,99 @@ summary::-webkit-details-marker {
 
 .dark table,
 .dark th,
-.dark td {
+.dark td,
+.dark hr {
   border-color: var(--line);
 }
 
-.dark hr {
-  border-color: var(--line);
+.dark .spotlight-modal {
+  background: #172235;
+  border: 1px solid #35445b;
+}
+
+.spotlight-modal {
+  background: #ffffff;
+}
+
+.spotlight-eyebrow,
+.spotlight-period {
+  color: #c13b45;
+}
+
+.spotlight-heading {
+  color: #173b87;
+}
+
+.spotlight-muted {
+  color: #667085;
+}
+
+.spotlight-title {
+  color: #101828;
+}
+
+.spotlight-excerpt {
+  color: #475467;
+}
+
+.spotlight-secondary {
+  border-color: #d0d5dd;
+  color: #344054;
+}
+
+.spotlight-secondary:hover {
+  background: #f2f4f7;
+  border-color: #98a2b3;
+}
+
+.spotlight-primary {
+  background: #173b87;
+  color: #ffffff;
+}
+
+.spotlight-primary:hover {
+  background: #2457c5;
+}
+
+.dark .spotlight-eyebrow,
+.dark .spotlight-period {
+  color: #ff8992;
+}
+
+.dark .spotlight-heading {
+  color: #b8ccff;
+}
+
+.dark .spotlight-muted {
+  color: #aab8cc;
+}
+
+.dark .spotlight-title {
+  color: #f3f6fc;
+}
+
+.dark .spotlight-excerpt {
+  color: #c4cede;
+}
+
+.dark .spotlight-secondary {
+  border-color: #52627a;
+  color: #e5ebf5;
+  background: #202e43;
+}
+
+.dark .spotlight-secondary:hover {
+  background: #2b3d57;
+  border-color: #8298ba;
+}
+
+.dark .spotlight-primary {
+  background: #3159a5;
+  color: #ffffff;
+}
+
+.dark .spotlight-primary:hover {
+  background: #426fc2;
 }
 
 @media (prefers-reduced-motion: no-preference) {
@@ -272,4 +360,39 @@ summary::-webkit-details-marker {
   header {
     transition: background-color 160ms ease, color 160ms ease, border-color 160ms ease;
   }
+}
+
+
+.spotlight-back,
+.spotlight-page-heading {
+  color: #173b87;
+}
+
+.spotlight-page-eyebrow {
+  color: #b52e35;
+}
+
+.spotlight-page-muted {
+  color: #667085;
+}
+
+.dark .spotlight-back,
+.dark .spotlight-page-heading {
+  color: #b8ccff;
+}
+
+.dark .spotlight-page-eyebrow {
+  color: #ff8992;
+}
+
+.dark .spotlight-page-muted {
+  color: #aab8cc;
+}
+
+.dark .prose {
+  color: var(--ink);
+}
+
+.dark .prose :where(strong, b) {
+  color: #f3f6fc;
 }

@@ -14,7 +14,7 @@ const nav = [
 
 export function Header() {
   return (
-    <header className="sticky top-0 z-40 border-b border-[var(--line)] bg-white/95 backdrop-blur">
+    <header className="sticky top-0 z-40 border-b border-[var(--line)] bg-[var(--paper)]/95 backdrop-blur">
       <div className="container flex min-h-20 items-center justify-between gap-6">
         <Link href="/" className="shrink-0" aria-label="Campus Radar home">
           <Image
@@ -23,7 +23,7 @@ export function Header() {
             width={220}
             height={65}
             priority
-            className="h-auto w-[155px] object-contain object-left sm:w-[180px]"
+            className="site-logo h-auto w-[155px] object-contain object-left sm:w-[180px]"
           />
         </Link>
 
@@ -51,7 +51,7 @@ export function Header() {
               Menu
             </summary>
 
-            <div className="absolute right-0 mt-3 w-64 rounded-xl border border-[var(--line)] bg-white p-4 shadow-xl">
+            <div className="absolute right-0 mt-3 w-64 rounded-xl border border-[var(--line)] bg-[var(--paper)] p-4 shadow-xl">
               <nav className="grid gap-1 text-sm font-bold" aria-label="Mobile navigation">
                 {nav.map(([href, label]) => (
                   <ActiveNavLink key={href} href={href} label={label} mobile />

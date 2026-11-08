@@ -61,14 +61,14 @@ export default async function SharedSpotlightPage({ params }: Props) {
     <>
       <Header />
       <main className="container min-h-screen max-w-4xl py-8">
-        <Link href="/spotlight" className="text-sm font-bold text-[#173B87] hover:underline">
+        <Link href="/spotlight" className="spotlight-back text-sm font-bold hover:underline">
           ← Back to Current Spotlight
         </Link>
         <article className="mt-8">
-          <p className="text-xs font-bold uppercase tracking-widest text-[#B52E35]">
+          <p className="spotlight-page-eyebrow text-xs font-bold uppercase tracking-widest">
             Campus Radar presents
           </p>
-          <h1 className="mt-2 text-4xl font-black text-[#173B87]">SPOTLIGHT.</h1>
+          <h1 className="spotlight-page-heading mt-2 text-4xl font-black">SPOTLIGHT.</h1>
           {data.image_url && (
             <img
               src={data.image_url}
