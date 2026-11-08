@@ -313,7 +313,14 @@ export default function NewRadarPage() {
                 <select
                   id="kind"
                   value={kind}
-                  onChange={(event) => setKind(event.target.value)}
+                  onChange={(event) => {
+                    const nextKind = event.target.value;
+                    setKind(nextKind);
+                    if (nextKind === 'ANNOUNCEMENT') {
+                      setEventDate('');
+                      setLocation('');
+                    }
+                  }}
                   className={selectClass}
                 >
                   <option value="UPDATE">Update</option>
@@ -440,35 +447,39 @@ export default function NewRadarPage() {
 
           <section className="rounded-xl border border-gray-200 p-6">
             <h2 className="mb-5 text-lg font-semibold text-black">
-              Event Details
+              Additional Details
             </h2>
 
             <div className="space-y-5">
-              <div>
-                <label htmlFor="eventDate" className="mb-2 block text-sm font-medium text-gray-900">
-                  Date and Time
-                </label>
-                <input
-                  id="eventDate"
-                  type="datetime-local"
-                  value={eventDate}
-                  onChange={(event) => setEventDate(event.target.value)}
-                  className={inputClass}
-                />
-              </div>
+              {kind !== 'ANNOUNCEMENT' && (
+                <>
+                  <div>
+                    <label htmlFor="eventDate" className="mb-2 block text-sm font-medium text-gray-900">
+                      Date and Time
+                    </label>
+                    <input
+                      id="eventDate"
+                      type="datetime-local"
+                      value={eventDate}
+                      onChange={(event) => setEventDate(event.target.value)}
+                      className={inputClass}
+                    />
+                  </div>
 
-              <div>
-                <label htmlFor="location" className="mb-2 block text-sm font-medium text-gray-900">
-                  Location
-                </label>
-                <input
-                  id="location"
-                  value={location}
-                  onChange={(event) => setLocation(event.target.value)}
-                  placeholder="e.g. FUNAAB Ceremonial Building"
-                  className={inputClass}
-                />
-              </div>
+                  <div>
+                    <label htmlFor="location" className="mb-2 block text-sm font-medium text-gray-900">
+                      Location
+                    </label>
+                    <input
+                      id="location"
+                      value={location}
+                      onChange={(event) => setLocation(event.target.value)}
+                      placeholder="e.g. FUNAAB Ceremonial Building"
+                      className={inputClass}
+                    />
+                  </div>
+                </>
+              )}
 
               <div>
                 <label htmlFor="link" className="mb-2 block text-sm font-medium text-gray-900">
