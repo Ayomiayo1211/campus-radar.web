@@ -7,13 +7,21 @@ const MANAGERS=['SUPER_ADMIN','EDITOR'] as const;
 export async function GET(request:NextRequest){
  const p=request.nextUrl.searchParams,admin=p.get('admin')==='true';if(admin){try{await requireRole([...MANAGERS]);}catch{return NextResponse.json({error:'Unauthorized'},{status:401});}}
  const n=Number(p.get('limit')??20),limit=Number.isFinite(n)?Math.min(Math.max(n,1),50):20;
- let q=getSupabaseAdmin().from('opportunities').select('*').order('deadline',{ascending:true}).limit(limit);if(!admin)q=q.eq('status','PUBLISHED');
+ const now=new Date();
+ let q=getSupabaseAdmin().from('opportunities').select('*').order('deadline',{ascending:true,nullsFirst:false}).limit(limit);
+ if(!admin){
+  q=q.eq('status','PUBLISHED').or(`deadline.is.null,deadline.gt.${now.toISOString()}`);
+  if(p.get('closingSoon')==='true'){
+   const horizon=new Date(now.getTime()+7*24*60*60*1000);
+   q=q.not('deadline','is',null).gte('deadline',now.toISOString()).lte('deadline',horizon.toISOString()).order('deadline',{ascending:true});
+  }
+ }
  const {data,error}=await q;if(error)return NextResponse.json({error:'Could not load opportunities'},{status:500});return NextResponse.json({data:toCamelCase(data??[])});
 }
 export async function POST(request:NextRequest){
  try{await requireRole([...MANAGERS]);}catch{return NextResponse.json({error:'Unauthorized'},{status:401});}
  let body:unknown;try{body=await request.json();}catch{return NextResponse.json({error:'Invalid JSON body'},{status:400});}
  const parsed=opportunitySchema.safeParse(body);if(!parsed.success)return NextResponse.json({error:'Invalid opportunity',details:parsed.error.flatten()},{status:400});
- const d=parsed.data;const {data,error}=await getSupabaseAdmin().from('opportunities').insert({title:d.title,slug:slugify(d.title),organisation:d.organisation,type:d.type,description:d.description,deadline:d.deadline?.toISOString()??null,application_url:d.applicationUrl??null,origin:d.origin,commercial_status:d.commercialStatus,status:d.status,published_at:d.status==='PUBLISHED'?new Date().toISOString():null}).select('*').single();
+ const d=parsed.data;const deadline=d.deadline?new Date(d.deadline):null;if(deadline)deadline.setUTCHours(23,59,59,999);const {data,error}=await getSupabaseAdmin().from('opportunities').insert({title:d.title,slug:slugify(d.title),organisation:d.organisation,type:d.type,description:d.description,deadline:deadline?.toISOString()??null,application_url:d.applicationUrl??null,origin:d.origin,commercial_status:d.commercialStatus,status:d.status,published_at:d.status==='PUBLISHED'?new Date().toISOString():null}).select('*').single();
  if(error)return NextResponse.json({error:'Could not create opportunity'},{status:500});return NextResponse.json({data:toCamelCase(data)},{status:201});
 }

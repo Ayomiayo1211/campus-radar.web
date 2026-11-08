@@ -28,6 +28,17 @@ export default async function Home() {
     coverImage: story.cover_image,
   }));
 
+  const { data: opportunityRows, error: opportunityError } = await getSupabaseAdmin()
+    .from('opportunities')
+    .select('id,title,organisation,type,description,deadline,application_url')
+    .eq('status', 'PUBLISHED')
+    .or(`deadline.is.null,deadline.gt.${new Date().toISOString()}`)
+    .order('deadline', { ascending: true, nullsFirst: false })
+    .limit(6);
+
+  if (opportunityError) console.error('Home page opportunities query failed:', opportunityError.message);
+  const opportunities = opportunityRows ?? [];
+
   const topStories = publishedStories.slice(0, 3);
   const latestStories = publishedStories.slice(3, 8);
 
@@ -166,24 +177,34 @@ export default async function Home() {
           </div>
         </section>
 
-        {/* Opportunities - Coming Soon */}
-        <section className="border-y border-[var(--line)] bg-white">
+        {/* Opportunities */}
+        <section className="border-y border-[var(--line)] bg-[var(--surface)]">
           <div className="container py-6">
-            <div className="mb-3 border-b border-[var(--line)] pb-2">
-              <p className="kicker text-[#173B87]">For students</p>
-              <h2 className="text-xl font-black">Opportunities</h2>
+            <div className="mb-4 flex items-end justify-between border-b border-[var(--line)] pb-2">
+              <div>
+                <p className="kicker text-[#173B87]">For students</p>
+                <h2 className="text-xl font-black">Opportunities</h2>
+              </div>
+              <Link href="/opportunities" className="text-sm font-bold text-[#173B87] underline underline-offset-4">View all</Link>
             </div>
-
-            <div className="rounded-lg border border-[var(--line)] bg-[#F8FAFC] px-5 py-6 text-center">
-              <p className="text-sm font-bold text-[#173B87]">
-                Coming Soon
-              </p>
-              <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-[var(--muted)]">
-                We’re working on a collection of scholarships,
-                internships, fellowships and other opportunities
-                for FUNAAB students. Check back soon.
-              </p>
-            </div>
+            {opportunities.length ? (
+              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                {opportunities.slice(0, 3).map((opportunity) => (
+                  <article key={opportunity.id} className="card flex flex-col p-5">
+                    <p className="kicker text-[var(--accent)]">{opportunity.type.replaceAll('_', ' ')}</p>
+                    <h3 className="mt-2 text-lg font-black leading-snug">{opportunity.title}</h3>
+                    <p className="mt-1 text-sm font-semibold text-[var(--muted)]">{opportunity.organisation}</p>
+                    <p className="mt-3 line-clamp-3 text-sm leading-6 text-[var(--muted)]">{opportunity.description}</p>
+                    <div className="mt-auto pt-5">
+                      {opportunity.deadline && <p className="text-xs font-bold text-[var(--muted)]">DEADLINE · {new Date(opportunity.deadline).toLocaleDateString('en-NG', { day: 'numeric', month: 'short', year: 'numeric' })}</p>}
+                      {opportunity.application_url && <a href={opportunity.application_url} target="_blank" rel="noopener noreferrer" className="mt-3 inline-block text-sm font-bold text-[#173B87] underline underline-offset-4">Apply / Learn more</a>}
+                    </div>
+                  </article>
+                ))}
+              </div>
+            ) : (
+              <p className="rounded-lg border border-[var(--line)] bg-[var(--surface)] px-5 py-6 text-sm text-[var(--muted)]">New scholarships, fellowships, competitions and other opportunities will appear here when published.</p>
+            )}
           </div>
         </section>
 

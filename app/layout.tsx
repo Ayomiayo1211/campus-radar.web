@@ -4,6 +4,7 @@ import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import { EditorialSpotlight } from '@/components/EditorSpotlight';
 import { ThemeProvider } from '@/components/ThemeProvider';
+import { OpportunityDeadlineNudge } from '@/components/OpportunityDeadlineNudge';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -48,6 +49,7 @@ export default function RootLayout({
         <ThemeProvider>
           {children}
           <EditorialSpotlight />
+          <OpportunityDeadlineNudge />
         </ThemeProvider>
       </body>
     </html>
