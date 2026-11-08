@@ -4,7 +4,6 @@ import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { StoryCard } from '@/components/StoryCard';
 import { LatestFeed } from '@/components/LatestFeed';
-import { OpportunityDeadlineNudge } from '@/components/OpportunityDeadlineNudge';
 import { getSupabaseAdmin } from '@/lib/server/supabase';
 
 export const dynamic = 'force-dynamic';
@@ -239,7 +238,6 @@ export default async function Home() {
         </section>
       </main>
 
-      <OpportunityDeadlineNudge />
       <Footer />
     </>
   );
