@@ -440,3 +440,41 @@ summary::-webkit-details-marker {
 .dark .spotlight-content :where(h1,h2,h3,h4,p,li,strong) {
   color: #ffffff;
 }
+
+
+/* Keep common utility-based light surfaces in sync with the selected theme. */
+:root.dark .bg-white,
+:root.dark .bg-gray-50,
+:root.dark .bg-slate-50,
+:root.dark .bg-neutral-50,
+:root.dark .bg-zinc-50,
+:root.dark .bg-stone-50 {
+  background-color: var(--surface) !important;
+  color: var(--ink);
+}
+
+:root.dark .border-gray-100,
+:root.dark .border-gray-200,
+:root.dark .border-slate-100,
+:root.dark .border-slate-200,
+:root.dark .border-neutral-100,
+:root.dark .border-neutral-200 {
+  border-color: var(--line) !important;
+}
+
+:root.dark .text-gray-900,
+:root.dark .text-slate-900,
+:root.dark .text-neutral-900,
+:root.dark .text-zinc-900,
+:root.dark .text-stone-900 {
+  color: var(--ink) !important;
+}
+
+:root.dark .text-gray-600,
+:root.dark .text-gray-500,
+:root.dark .text-slate-600,
+:root.dark .text-slate-500,
+:root.dark .text-neutral-600,
+:root.dark .text-neutral-500 {
+  color: var(--muted) !important;
+}
