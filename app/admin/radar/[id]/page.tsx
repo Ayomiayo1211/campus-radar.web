@@ -434,11 +434,13 @@ export default function EditRadarPage() {
                 <textarea
                   id="summary"
                   value={summary}
-                  onChange={(event) => setSummary(event.target.value)}
+                  onChange={(event) => setSummary(event.target.value.slice(0, 1000))}
+                  maxLength={1000}
                   required
                   rows={5}
                   className={`${inputClass} leading-6`}
                 />
+                <p className="mt-1 text-right text-xs text-gray-500">{summary.length}/1,000 characters</p>
               </div>
 
               <div>
