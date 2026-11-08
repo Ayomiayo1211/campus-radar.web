@@ -182,16 +182,17 @@ export default async function Home() {
           {radarItems.length > 0 ? (
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
               {radarItems.map((item) => (
-                <article key={item.id} className="card flex h-full flex-col overflow-hidden">
+                <article key={item.id} className="card relative flex h-full flex-col overflow-hidden transition hover:-translate-y-0.5 hover:border-black dark:hover:border-[#83A8FF]">
+                  <Link href={`/radar/${item.slug}`} aria-label={`Read Radar update: ${item.title}`} className="absolute inset-0 z-0 rounded-[inherit] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--blue)]" />
                   {item.cover_image && (
                     <img
                       src={item.cover_image}
                       alt=""
                       loading="lazy"
-                      className="h-44 w-full object-cover"
+                      className="pointer-events-none h-44 w-full object-cover"
                     />
                   )}
-                  <div className="flex flex-1 flex-col p-5">
+                  <div className="relative z-10 flex flex-1 flex-col p-5 pointer-events-none">
                     <div className="mb-3 flex flex-wrap items-center gap-2">
                       <span className="kicker text-[#173B87]">
                         {item.kind.replaceAll('_', ' ')}
@@ -206,18 +207,18 @@ export default async function Home() {
                         </span>
                       )}
                     </div>
-                    <Link href={`/radar/${item.slug}`} className="group"><h3 className="text-lg font-black leading-snug group-hover:text-[#173B87]">{item.title}</h3></Link>
+                    <h3 className="text-lg font-black leading-snug">{item.title}</h3>
                     <p className="mt-2 line-clamp-4 text-sm leading-6 text-[var(--muted)]">
                       {item.summary}
                     </p>
-                    <RadarContactActions summary={item.summary}/>
+                    <div className="pointer-events-auto"><RadarContactActions summary={item.summary}/></div>
                     {item.location && (
                       <p className="mt-3 text-xs font-semibold text-[var(--muted)]">
                         {item.location}
                       </p>
                     )}
                     {item.link && (
-                      <div className="mt-auto pt-5">
+                      <div className="pointer-events-auto mt-auto pt-5">
                         <a
                           href={item.link}
                           target="_blank"
@@ -252,14 +253,17 @@ export default async function Home() {
             {opportunities.length ? (
               <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                 {opportunities.slice(0, 3).map((opportunity) => (
-                  <article key={opportunity.id} className="card flex flex-col p-5">
+                  <article key={opportunity.id} className="card relative flex flex-col p-5 transition hover:-translate-y-0.5 hover:border-black dark:hover:border-[#83A8FF]">
+                    <Link href={`/opportunities/${opportunity.slug}`} aria-label={`View opportunity: ${opportunity.title}`} className="absolute inset-0 z-0 rounded-[inherit] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--blue)]" />
+                    <div className="relative z-10 flex flex-1 flex-col pointer-events-none">
                     <p className="kicker text-[var(--accent)]">{opportunity.type.replaceAll('_', ' ')}</p>
-                    <Link href={`/opportunities/${opportunity.slug}`} className="group mt-2"><h3 className="text-lg font-black leading-snug group-hover:text-[#173B87]">{opportunity.title}</h3></Link>
+                    <h3 className="mt-2 text-lg font-black leading-snug">{opportunity.title}</h3>
                     <p className="mt-1 text-sm font-semibold text-[var(--muted)]">{opportunity.organisation}</p>
                     <p className="mt-3 line-clamp-3 text-sm leading-6 text-[var(--muted)]">{opportunity.description}</p>
-                    <div className="mt-auto pt-5">
+                    <div className="pointer-events-auto mt-auto pt-5">
                       {opportunity.deadline && <p className="text-xs font-bold text-[var(--muted)]">DEADLINE · {new Date(opportunity.deadline).toLocaleDateString('en-NG', { day: 'numeric', month: 'short', year: 'numeric' })}</p>}
                       {opportunity.application_url && <a href={opportunity.application_url} target="_blank" rel="noopener noreferrer" className="mt-3 inline-block text-sm font-bold text-[#173B87] underline underline-offset-4">Apply / Learn more</a>}
+                    </div>
                     </div>
                   </article>
                 ))}
