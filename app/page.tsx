@@ -210,6 +210,7 @@ export default async function Home() {
                     <p className="mt-2 line-clamp-4 text-sm leading-6 text-[var(--muted)]">
                       {item.summary}
                     </p>
+                    <RadarContactActions summary={item.summary}/>
                     {item.location && (
                       <p className="mt-3 text-xs font-semibold text-[var(--muted)]">
                         {item.location}
