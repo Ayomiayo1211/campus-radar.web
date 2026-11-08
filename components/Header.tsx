@@ -1,6 +1,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { ActiveNavLink } from './ActiveNavLink';
+import { ThemeControl } from './ThemeControl';
 
 const nav = [
   ['/news', 'News'],
@@ -36,7 +37,8 @@ export function Header() {
           <ActiveNavLink href="/confidential" label="Confidential" />
         </nav>
 
-        <div className="flex shrink-0 items-center gap-4">
+        <div className="flex shrink-0 items-center gap-3">
+          <ThemeControl />
           <Link
             href="/submit"
             className="hidden text-[13px] font-bold text-[#173B87] underline underline-offset-4 transition-colors hover:text-[var(--accent)] sm:inline"
