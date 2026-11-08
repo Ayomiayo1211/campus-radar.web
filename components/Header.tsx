@@ -1,6 +1,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { ActiveNavLink } from './ActiveNavLink';
+import { PrimaryNavigation } from './PrimaryNavigation';
 import { ThemeControl } from './ThemeControl';
 
 const nav = [
@@ -27,15 +28,7 @@ export function Header() {
           />
         </Link>
 
-        <nav
-          className="hidden items-center gap-2 text-[13px] font-bold xl:flex"
-          aria-label="Primary navigation"
-        >
-          {nav.map(([href, label]) => (
-            <ActiveNavLink key={href} href={href} label={label} />
-          ))}
-          <ActiveNavLink href="/confidential" label="Confidential" />
-        </nav>
+        <PrimaryNavigation />
 
         <div className="flex shrink-0 items-center gap-3">
           <ThemeControl />
