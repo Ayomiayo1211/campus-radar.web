@@ -4,6 +4,7 @@ import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { StoryCard } from '@/components/StoryCard';
 import { LatestFeed } from '@/components/LatestFeed';
+import { RadarContactActions } from '@/components/RadarContactActions';
 import { getSupabaseAdmin } from '@/lib/server/supabase';
 
 export const dynamic = 'force-dynamic';
@@ -40,7 +41,7 @@ export default async function Home() {
 
   const { data: opportunityRows, error: opportunityError } = await getSupabaseAdmin()
     .from('opportunities')
-    .select('id,title,organisation,type,description,deadline,application_url')
+    .select('id,slug,title,organisation,type,description,deadline,application_url')
     .eq('status', 'PUBLISHED')
     .or(`deadline.is.null,deadline.gt.${new Date().toISOString()}`)
     .order('deadline', { ascending: true, nullsFirst: false })
@@ -205,10 +206,11 @@ export default async function Home() {
                         </span>
                       )}
                     </div>
-                    <h3 className="text-lg font-black leading-snug">{item.title}</h3>
+                    <Link href={`/radar/${item.slug}`} className="group"><h3 className="text-lg font-black leading-snug group-hover:text-[#173B87]">{item.title}</h3></Link>
                     <p className="mt-2 line-clamp-4 text-sm leading-6 text-[var(--muted)]">
                       {item.summary}
                     </p>
+                    <RadarContactActions summary={item.summary}/>
                     {item.location && (
                       <p className="mt-3 text-xs font-semibold text-[var(--muted)]">
                         {item.location}
@@ -252,7 +254,7 @@ export default async function Home() {
                 {opportunities.slice(0, 3).map((opportunity) => (
                   <article key={opportunity.id} className="card flex flex-col p-5">
                     <p className="kicker text-[var(--accent)]">{opportunity.type.replaceAll('_', ' ')}</p>
-                    <h3 className="mt-2 text-lg font-black leading-snug">{opportunity.title}</h3>
+                    <Link href={`/opportunities/${opportunity.slug}`} className="group mt-2"><h3 className="text-lg font-black leading-snug group-hover:text-[#173B87]">{opportunity.title}</h3></Link>
                     <p className="mt-1 text-sm font-semibold text-[var(--muted)]">{opportunity.organisation}</p>
                     <p className="mt-3 line-clamp-3 text-sm leading-6 text-[var(--muted)]">{opportunity.description}</p>
                     <div className="mt-auto pt-5">
