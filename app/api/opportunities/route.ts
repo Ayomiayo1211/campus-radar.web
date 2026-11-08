@@ -7,7 +7,15 @@ const MANAGERS=['SUPER_ADMIN','EDITOR'] as const;
 export async function GET(request:NextRequest){
  const p=request.nextUrl.searchParams,admin=p.get('admin')==='true';if(admin){try{await requireRole([...MANAGERS]);}catch{return NextResponse.json({error:'Unauthorized'},{status:401});}}
  const n=Number(p.get('limit')??20),limit=Number.isFinite(n)?Math.min(Math.max(n,1),50):20;
- let q=getSupabaseAdmin().from('opportunities').select('*').order('deadline',{ascending:true}).limit(limit);if(!admin)q=q.eq('status','PUBLISHED');
+ const now=new Date();
+ let q=getSupabaseAdmin().from('opportunities').select('*').order('deadline',{ascending:true,nullsFirst:false}).limit(limit);
+ if(!admin){
+  q=q.eq('status','PUBLISHED').or(`deadline.is.null,deadline.gt.${now.toISOString()}`);
+  if(p.get('closingSoon')==='true'){
+   const horizon=new Date(now.getTime()+7*24*60*60*1000);
+   q=q.not('deadline','is',null).gte('deadline',now.toISOString()).lte('deadline',horizon.toISOString()).order('deadline',{ascending:true});
+  }
+ }
  const {data,error}=await q;if(error)return NextResponse.json({error:'Could not load opportunities'},{status:500});return NextResponse.json({data:toCamelCase(data??[])});
 }
 export async function POST(request:NextRequest){
