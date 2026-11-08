@@ -30,8 +30,11 @@ export function OpportunityDeadlineNudge() {
   useEffect(() => {
     let cancelled = false;
     fetch('/api/opportunities?closingSoon=true&limit=5', { cache: 'no-store' })
-      .then((response) => response.ok ? response.json() : Promise.reject(new Error('Unable to load deadlines')))
-      .then((result: { data?: Opportunity[] }) => {
+      .then(async (response) => {
+        if (!response.ok) throw new Error('Unable to load deadlines');
+        return await response.json() as { data?: Opportunity[] };
+      })
+      .then((result) => {
         if (!cancelled) setOpportunities(result.data ?? []);
       })
       .catch(() => undefined);
