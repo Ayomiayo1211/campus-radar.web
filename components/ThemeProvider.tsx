@@ -1,8 +1,8 @@
 'use client';
 
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { createContext, useCallback, useContext, useMemo, useState } from 'react';
 
-export type ThemePreference = 'light' | 'dark' | 'system';
+export type ThemePreference = 'light' | 'dark';
 
 type ThemeContextValue = {
   preference: ThemePreference;
@@ -13,31 +13,13 @@ const ThemeContext = createContext<ThemeContextValue | null>(null);
 const STORAGE_KEY = 'campus-radar-theme';
 
 function applyTheme(preference: ThemePreference) {
-  const dark = preference === 'dark' ||
-    (preference === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+  const dark = preference === 'dark';
   document.documentElement.classList.toggle('dark', dark);
   document.documentElement.style.colorScheme = dark ? 'dark' : 'light';
 }
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [preference, setPreferenceState] = useState<ThemePreference>('system');
-
-  useEffect(() => {
-    const saved = window.localStorage.getItem(STORAGE_KEY);
-    const initial: ThemePreference =
-      saved === 'light' || saved === 'dark' || saved === 'system' ? saved : 'system';
-    setPreferenceState(initial);
-    applyTheme(initial);
-
-    const media = window.matchMedia('(prefers-color-scheme: dark)');
-    const handleSystemChange = () => {
-      if ((window.localStorage.getItem(STORAGE_KEY) || 'system') === 'system') {
-        applyTheme('system');
-      }
-    };
-    media.addEventListener('change', handleSystemChange);
-    return () => media.removeEventListener('change', handleSystemChange);
-  }, []);
+  const [preference, setPreferenceState] = useState<ThemePreference>('light');
 
   const setPreference = useCallback((value: ThemePreference) => {
     window.localStorage.setItem(STORAGE_KEY, value);
