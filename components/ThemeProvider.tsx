@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useCallback, useContext, useMemo, useState } from 'react';
+import { createContext, useCallback, useContext, useMemo, useState, useEffect } from 'react';
 
 export type ThemePreference = 'light' | 'dark';
 
@@ -20,6 +20,21 @@ function applyTheme(preference: ThemePreference) {
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [preference, setPreferenceState] = useState<ThemePreference>('light');
+
+  // The root layout applies the saved class before paint. Sync React state after
+  // hydration so the toggle reflects that same saved preference.
+  useEffect(() => {
+    const syncPreference = () => {
+      const saved = window.localStorage.getItem(STORAGE_KEY);
+      const next: ThemePreference = saved === 'dark' ? 'dark' : 'light';
+      setPreferenceState(next);
+      applyTheme(next);
+    };
+
+    syncPreference();
+    window.addEventListener('storage', syncPreference);
+    return () => window.removeEventListener('storage', syncPreference);
+  }, []);
 
   const setPreference = useCallback((value: ThemePreference) => {
     window.localStorage.setItem(STORAGE_KEY, value);
