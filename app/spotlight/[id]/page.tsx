@@ -64,7 +64,7 @@ export default async function SharedSpotlightPage({ params }: Props) {
         <Link href="/spotlight" className="spotlight-back text-sm font-bold hover:underline">
           ← Back to Current Spotlight
         </Link>
-        <article className="mt-8">
+        <article className="spotlight-content mt-8">
           <p className="spotlight-page-eyebrow text-xs font-bold uppercase tracking-widest">
             Campus Radar presents
           </p>

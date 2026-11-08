@@ -216,10 +216,8 @@ summary::-webkit-details-marker {
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.24);
 }
 
-/* Theme-aware shared surfaces and interactive states. */
-.dark .site-logo {
-  filter: brightness(0) invert(1);
-}
+/* Keep the full-colour Campus Radar mark in both themes. */
+.dark .site-logo { filter: none; }
 
 .dark .card {
   background: var(--surface);
@@ -395,4 +393,50 @@ summary::-webkit-details-marker {
 
 .dark .prose :where(strong, b) {
   color: #f3f6fc;
+}
+
+
+/* Spotlight: strong white primary typography in dark mode, with brand accents retained. */
+.dark .spotlight-modal {
+  background: #111827;
+  border-color: #344258;
+}
+.dark .spotlight-copy {
+  background: #111827;
+}
+.dark .spotlight-heading,
+.dark .spotlight-title,
+.dark .spotlight-page-heading,
+.dark .spotlight-back {
+  color: #ffffff;
+}
+.dark .spotlight-excerpt,
+.dark .spotlight-muted,
+.dark .spotlight-page-muted {
+  color: #d5dce8;
+}
+.dark .spotlight-eyebrow,
+.dark .spotlight-period,
+.dark .spotlight-page-eyebrow {
+  color: #ff737d;
+}
+.dark .spotlight-primary {
+  background: #2c51d2;
+  color: #ffffff;
+}
+.dark .spotlight-primary:hover {
+  background: #3d63e3;
+}
+.dark .spotlight-secondary {
+  background: #202b3d;
+  border-color: #52627a;
+  color: #ffffff;
+}
+.dark .spotlight-secondary:hover {
+  background: #2b3b53;
+  border-color: #8298ba;
+}
+.dark .spotlight-content,
+.dark .spotlight-content :where(h1,h2,h3,h4,p,li,strong) {
+  color: #ffffff;
 }
