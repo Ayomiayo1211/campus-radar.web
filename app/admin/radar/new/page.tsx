@@ -472,7 +472,7 @@ export default function NewRadarPage() {
 
               <div>
                 <label htmlFor="link" className="mb-2 block text-sm font-medium text-gray-900">
-                  External Link
+                  External Link <span className="font-normal text-gray-500">(optional)</span>
                 </label>
                 <input
                   id="link"
