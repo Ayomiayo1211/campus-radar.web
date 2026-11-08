@@ -66,16 +66,18 @@ export default function AdminSessionGuard({ children }: { children: React.ReactN
   if (publicPage) return <>{children}</>;
   if (checking) {
     return (
-      <main className="flex min-h-[60vh] items-center justify-center bg-white">
-        <p className="text-sm text-gray-500">Checking your newsroom session...</p>
-      </main>
+      <div className="admin-interface min-h-screen">
+        <main className="flex min-h-[60vh] items-center justify-center bg-white">
+          <p className="text-sm text-gray-500">Checking your newsroom session...</p>
+        </main>
+      </div>
     );
   }
 
   return (
-    <>
+    <div className="admin-interface min-h-screen">
       <AdminNav />
       {children}
-    </>
+    </div>
   );
 }
