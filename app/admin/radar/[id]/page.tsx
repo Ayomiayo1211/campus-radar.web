@@ -448,7 +448,14 @@ export default function EditRadarPage() {
                 <select
                   id="kind"
                   value={kind}
-                  onChange={(event) => setKind(event.target.value)}
+                  onChange={(event) => {
+                    const nextKind = event.target.value;
+                    setKind(nextKind);
+                    if (nextKind === 'ANNOUNCEMENT') {
+                      setEventDate('');
+                      setLocation('');
+                    }
+                  }}
                   className={`${inputClass} bg-white`}
                 >
                   <option value="UPDATE">Update</option>
@@ -582,34 +589,38 @@ export default function EditRadarPage() {
 
           <section className="rounded-xl border border-gray-200 p-6">
             <h2 className="mb-5 text-lg font-semibold text-black">
-              Event Details
+              Additional Details
             </h2>
 
             <div className="space-y-5">
-              <div>
-                <label htmlFor="eventDate" className={labelClass}>
-                  Date and Time
-                </label>
-                <input
-                  id="eventDate"
-                  type="datetime-local"
-                  value={eventDate}
-                  onChange={(event) => setEventDate(event.target.value)}
-                  className={inputClass}
-                />
-              </div>
+              {kind !== 'ANNOUNCEMENT' && (
+                <>
+                  <div>
+                    <label htmlFor="eventDate" className={labelClass}>
+                      Date and Time
+                    </label>
+                    <input
+                      id="eventDate"
+                      type="datetime-local"
+                      value={eventDate}
+                      onChange={(event) => setEventDate(event.target.value)}
+                      className={inputClass}
+                    />
+                  </div>
 
-              <div>
-                <label htmlFor="location" className={labelClass}>
-                  Location
-                </label>
-                <input
-                  id="location"
-                  value={location}
-                  onChange={(event) => setLocation(event.target.value)}
-                  className={inputClass}
-                />
-              </div>
+                  <div>
+                    <label htmlFor="location" className={labelClass}>
+                      Location
+                    </label>
+                    <input
+                      id="location"
+                      value={location}
+                      onChange={(event) => setLocation(event.target.value)}
+                      className={inputClass}
+                    />
+                  </div>
+                </>
+              )}
 
               <div>
                 <label htmlFor="link" className={labelClass}>
