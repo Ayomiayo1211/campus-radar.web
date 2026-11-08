@@ -186,3 +186,90 @@ summary::-webkit-details-marker {
     transition-duration: 0.01ms !important;
   }
 }
+
+
+/* User-selectable dark theme. The system setting is applied when no override is chosen. */
+:root.dark {
+  color-scheme: dark;
+  --ink: #edf2f7;
+  --muted: #a5b1c2;
+  --line: #303b4d;
+  --paper: #111827;
+  --surface: #192334;
+  --accent: #ff6672;
+  --blue: #83a8ff;
+  --blue-dark: #b6cbff;
+}
+
+.dark body {
+  background: var(--paper);
+  color: var(--ink);
+}
+
+.dark .card {
+  background: #192334;
+  border-color: var(--line);
+}
+
+.dark .card:hover {
+  border-color: #53627a;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.24);
+}
+
+/* Keep existing utility-based pages and admin screens readable without changing their layouts. */
+.dark [class*="bg-white"],
+.dark [class*="bg-[#F8FAFC]"],
+.dark [class*="bg-[#F9FAFB]"],
+.dark [class*="bg-[#EEF3FF]"],
+.dark [class*="bg-slate-50"],
+.dark [class*="bg-gray-50"] {
+  background-color: var(--surface) !important;
+}
+
+.dark [class*="text-[#173B87]"],
+.dark [class*="text-[#2457C5]"],
+.dark [class*="text-blue-900"],
+.dark [class*="text-blue-800"] {
+  color: #a9c2ff !important;
+}
+
+.dark [class*="border-[#173B87]"],
+.dark [class*="border-[#2457C5]"] {
+  border-color: #526fae !important;
+}
+
+.dark input,
+.dark textarea,
+.dark select {
+  background-color: #192334;
+  color: var(--ink);
+  border-color: var(--line);
+}
+
+.dark input::placeholder,
+.dark textarea::placeholder {
+  color: #8794a8;
+}
+
+.dark option {
+  background: #192334;
+  color: var(--ink);
+}
+
+.dark table,
+.dark th,
+.dark td {
+  border-color: var(--line);
+}
+
+.dark hr {
+  border-color: var(--line);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  body,
+  .card,
+  header {
+    transition: background-color 160ms ease, color 160ms ease, border-color 160ms ease;
+  }
+}
