@@ -55,7 +55,7 @@ export const storySchema = z.object({
 
 export const radarSchema = z.object({
   title: z.string().min(3).max(180),
-  summary: z.string().min(10).max(500),
+  summary: z.string().min(10).max(1000),
   coverImage: z.string().url().optional(),
   kind: z.enum([
     'UPDATE',
