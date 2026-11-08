@@ -600,3 +600,14 @@ summary::-webkit-details-marker {
 :root.dark .admin-interface :where(button, a):focus-visible {
   outline-color: #83a8ff;
 }
+
+/* Attribute selectors avoid escaping Tailwind's colon-containing hover classes. */
+:root.dark [class~="hover:bg-gray-50"]:hover,
+:root.dark [class~="hover:bg-gray-100"]:hover,
+:root.dark [class~="hover:bg-blue-50"]:hover {
+  background-color: #293950 !important;
+}
+
+:root.dark [class~="hover:text-black"]:hover {
+  color: #ffffff !important;
+}
