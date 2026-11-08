@@ -478,3 +478,125 @@ summary::-webkit-details-marker {
 :root.dark .text-neutral-500 {
   color: var(--muted) !important;
 }
+
+/* Admin surfaces: map Tailwind's fixed light utilities to the active dark palette. */
+:root.dark .text-black,
+:root.dark .text-gray-900,
+:root.dark .text-gray-800,
+:root.dark .text-gray-700 {
+  color: var(--ink) !important;
+}
+
+:root.dark .text-gray-600,
+:root.dark .text-gray-500,
+:root.dark .text-gray-400 {
+  color: var(--muted) !important;
+}
+
+:root.dark .bg-gray-100,
+:root.dark .bg-slate-100,
+:root.dark .bg-neutral-100,
+:root.dark .bg-zinc-100,
+:root.dark .bg-stone-100 {
+  background-color: #263449 !important;
+  color: var(--ink);
+}
+
+:root.dark .bg-gray-200,
+:root.dark .bg-slate-200,
+:root.dark .bg-neutral-200,
+:root.dark .bg-zinc-200 {
+  background-color: #334155 !important;
+  color: var(--ink);
+}
+
+:root.dark .border-gray-300,
+:root.dark .border-gray-400,
+:root.dark .border-slate-300 {
+  border-color: #46556b !important;
+}
+
+:root.dark .divide-gray-100 > :not([hidden]) ~ :not([hidden]),
+:root.dark .divide-gray-200 > :not([hidden]) ~ :not([hidden]) {
+  border-color: var(--line) !important;
+}
+
+:root.dark .hover\\:bg-gray-50:hover,
+:root.dark .hover\\:bg-gray-100:hover,
+:root.dark .hover\\:bg-blue-50:hover {
+  background-color: #293950 !important;
+}
+
+:root.dark .hover\\:text-black:hover {
+  color: #ffffff !important;
+}
+
+:root.dark .border-black {
+  border-color: #a9c1ff !important;
+}
+
+:root.dark .text-blue-800,
+:root.dark .text-blue-700,
+:root.dark .text-blue-600 {
+  color: #a9c1ff !important;
+}
+
+:root.dark .border-red-100,
+:root.dark .border-red-200,
+:root.dark .border-red-300 {
+  border-color: #713b48 !important;
+}
+
+:root.dark .bg-red-50,
+:root.dark .bg-red-100 {
+  background-color: #3a222b !important;
+  color: #ffc0c6 !important;
+}
+
+:root.dark .text-red-800,
+:root.dark .text-red-700,
+:root.dark .text-red-600 {
+  color: #ff9ba5 !important;
+}
+
+:root.dark .bg-amber-50,
+:root.dark .bg-amber-100 {
+  background-color: #3a301e !important;
+  color: #f8d99b !important;
+}
+
+:root.dark .text-amber-900,
+:root.dark .text-amber-800,
+:root.dark .text-amber-700 {
+  color: #f8d99b !important;
+}
+
+:root.dark .bg-green-50,
+:root.dark .bg-green-100 {
+  background-color: #1d382e !important;
+  color: #a8e6c5 !important;
+}
+
+:root.dark .text-green-800,
+:root.dark .text-green-700 {
+  color: #a8e6c5 !important;
+}
+
+:root.dark .admin-interface {
+  background-color: var(--paper);
+  color: var(--ink);
+}
+
+:root.dark .admin-interface :where(input, textarea, select) {
+  background-color: #172235;
+  color: var(--ink);
+  border-color: #46556b;
+}
+
+:root.dark .admin-interface :where(input, textarea, select)::placeholder {
+  color: #8998ad;
+}
+
+:root.dark .admin-interface :where(button, a):focus-visible {
+  outline-color: #83a8ff;
+}
