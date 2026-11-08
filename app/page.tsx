@@ -28,6 +28,16 @@ export default async function Home() {
     coverImage: story.cover_image,
   }));
 
+  const { data: radarRows, error: radarError } = await getSupabaseAdmin()
+    .from('radar_items')
+    .select('id,slug,title,summary,cover_image,kind,event_date,location,link,published_at')
+    .eq('status', 'PUBLISHED')
+    .order('published_at', { ascending: false })
+    .limit(3);
+
+  if (radarError) console.error('Home page Radar query failed:', radarError.message);
+  const radarItems = radarRows ?? [];
+
   const { data: opportunityRows, error: opportunityError } = await getSupabaseAdmin()
     .from('opportunities')
     .select('id,title,organisation,type,description,deadline,application_url')
@@ -159,22 +169,72 @@ export default async function Home() {
           <LatestFeed />
         </section>
 
-        {/* The Radar - Coming Soon */}
+        {/* The Radar */}
         <section className="container py-6">
-          <div className="mb-3 border-b border-[var(--line)] pb-2">
-            <p className="kicker text-[#173B87]">Quick updates</p>
-            <h2 className="text-xl font-black">The Radar</h2>
+          <div className="mb-3 flex items-end justify-between border-b border-[var(--line)] pb-2">
+            <div>
+              <p className="kicker text-[#173B87]">Quick updates</p>
+              <h2 className="text-xl font-black">The Radar</h2>
+            </div>
           </div>
 
-          <div className="rounded-lg border border-[var(--line)] bg-[var(--surface)] px-5 py-6 text-center">
-            <p className="text-sm font-bold text-[#173B87]">
-              Coming Soon
+          {radarItems.length > 0 ? (
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              {radarItems.map((item) => (
+                <article key={item.id} className="card flex h-full flex-col overflow-hidden">
+                  {item.cover_image && (
+                    <img
+                      src={item.cover_image}
+                      alt=""
+                      loading="lazy"
+                      className="h-44 w-full object-cover"
+                    />
+                  )}
+                  <div className="flex flex-1 flex-col p-5">
+                    <div className="mb-3 flex flex-wrap items-center gap-2">
+                      <span className="kicker text-[#173B87]">
+                        {item.kind.replaceAll('_', ' ')}
+                      </span>
+                      {item.event_date && (
+                        <span className="text-xs text-[var(--muted)]">
+                          {new Date(item.event_date).toLocaleDateString('en-NG', {
+                            day: 'numeric',
+                            month: 'short',
+                            year: 'numeric',
+                          })}
+                        </span>
+                      )}
+                    </div>
+                    <h3 className="text-lg font-black leading-snug">{item.title}</h3>
+                    <p className="mt-2 line-clamp-4 text-sm leading-6 text-[var(--muted)]">
+                      {item.summary}
+                    </p>
+                    {item.location && (
+                      <p className="mt-3 text-xs font-semibold text-[var(--muted)]">
+                        {item.location}
+                      </p>
+                    )}
+                    {item.link && (
+                      <div className="mt-auto pt-5">
+                        <a
+                          href={item.link}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-sm font-bold text-[#173B87] underline underline-offset-4"
+                        >
+                          More information
+                        </a>
+                      </div>
+                    )}
+                  </div>
+                </article>
+              ))}
+            </div>
+          ) : (
+            <p className="rounded-lg border border-[var(--line)] bg-[var(--surface)] px-5 py-6 text-sm text-[var(--muted)]">
+              Campus updates, announcements and events will appear here as they are published.
             </p>
-            <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-[var(--muted)]">
-              We’re preparing a dedicated space for campus updates,
-              announcements and events. Check back soon.
-            </p>
-          </div>
+          )}
         </section>
 
         {/* Opportunities */}
