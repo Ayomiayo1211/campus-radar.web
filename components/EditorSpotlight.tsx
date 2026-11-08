@@ -22,20 +22,23 @@ export function EditorialSpotlight() {
 
   useEffect(() => {
     let cancelled = false;
+    setVisible(false);
+    if (pathname.startsWith('/admin')) return () => { cancelled = true; };
+
     fetch('/api/spotlight', { cache: 'no-store' })
       .then((response) => response.ok ? (response.json() as Promise<SpotlightResponse>) : null)
       .then((result) => {
-        if (cancelled || !result?.data) return;
-        setItem(result.data);
+        if (cancelled) return;
+        setItem(result?.data ?? null);
       })
       .catch((error) => console.error('Spotlight load failed', error));
+
     return () => { cancelled = true; };
-  }, []);
+  }, [pathname]);
 
   useEffect(() => {
-    setVisible(false);
     if (!item || pathname.startsWith('/admin')) return;
-    const timer = window.setTimeout(() => setVisible(true), 10000);
+    const timer = window.setTimeout(() => setVisible(true), 20000);
     return () => window.clearTimeout(timer);
   }, [pathname, item]);
 
