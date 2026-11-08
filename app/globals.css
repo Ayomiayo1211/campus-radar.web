@@ -361,3 +361,38 @@ summary::-webkit-details-marker {
     transition: background-color 160ms ease, color 160ms ease, border-color 160ms ease;
   }
 }
+
+
+.spotlight-back,
+.spotlight-page-heading {
+  color: #173b87;
+}
+
+.spotlight-page-eyebrow {
+  color: #b52e35;
+}
+
+.spotlight-page-muted {
+  color: #667085;
+}
+
+.dark .spotlight-back,
+.dark .spotlight-page-heading {
+  color: #b8ccff;
+}
+
+.dark .spotlight-page-eyebrow {
+  color: #ff8992;
+}
+
+.dark .spotlight-page-muted {
+  color: #aab8cc;
+}
+
+.dark .prose {
+  color: var(--ink);
+}
+
+.dark .prose :where(strong, b) {
+  color: #f3f6fc;
+}
