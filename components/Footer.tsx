@@ -5,7 +5,7 @@ import { NewsletterSignup } from '@/components/NewsletterSignup';
 
 export function Footer() {
   return (
-    <footer className="mt-20 border-t border-[var(--line)] bg-white text-[var(--ink)]">
+    <footer className="mt-20 border-t border-[var(--line)] bg-[var(--paper)] text-[var(--ink)]">
       <div className="container pt-10"><NewsletterSignup compact /></div>
       <div className="container grid gap-10 py-12 md:grid-cols-[1.4fr_.7fr_.9fr]">
         <div>
@@ -70,7 +70,7 @@ export function Footer() {
         </div>
       </div>
 
-      <div className="border-t border-[var(--line)] bg-[#F8FAFC]">
+      <div className="border-t border-[var(--line)] bg-[var(--surface)]">
         <div className="container flex flex-col gap-2 py-5 text-xs text-[var(--muted)] sm:flex-row sm:items-center sm:justify-between">
           <span>© {new Date().getFullYear()} Campus Radar.</span>
           <span>Stories that move campus.</span>
