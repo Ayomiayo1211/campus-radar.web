@@ -14,7 +14,7 @@ export function StoryCard({ story }: StoryCardProps) {
       <Link
         href={articleUrl}
         aria-label={`Read story: ${story.title}`}
-        className="card block overflow-hidden transition hover:-translate-y-0.5 hover:border-black focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--blue)] dark:hover:border-[#83A8FF]"
+        className="card group block overflow-hidden transition hover:-translate-y-0.5 hover:border-black focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--blue)] dark:hover:border-[#83A8FF]"
       >
         <div className="aspect-square story-image overflow-hidden bg-[var(--surface)]" aria-hidden="true">
           {story.image && (
