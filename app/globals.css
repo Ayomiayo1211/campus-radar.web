@@ -478,3 +478,136 @@ summary::-webkit-details-marker {
 :root.dark .text-neutral-500 {
   color: var(--muted) !important;
 }
+
+/* Newsroom admin: keep fixed Tailwind light utilities legible in dark mode. */
+:root.dark .admin-interface {
+  min-height: 100vh;
+  background: var(--paper);
+  color: var(--ink);
+}
+
+:root.dark .admin-interface .bg-white,
+:root.dark .admin-interface .bg-gray-50,
+:root.dark .admin-interface .bg-slate-50,
+:root.dark .admin-interface .bg-neutral-50 {
+  background-color: var(--surface) !important;
+  color: var(--ink);
+}
+
+:root.dark .admin-interface .bg-gray-100,
+:root.dark .admin-interface .bg-slate-100,
+:root.dark .admin-interface .bg-neutral-100 {
+  background-color: #263449 !important;
+  color: var(--ink);
+}
+
+:root.dark .admin-interface .bg-gray-200,
+:root.dark .admin-interface .bg-slate-200 {
+  background-color: #334155 !important;
+  color: var(--ink);
+}
+
+:root.dark .admin-interface .text-black,
+:root.dark .admin-interface .text-gray-900,
+:root.dark .admin-interface .text-gray-800,
+:root.dark .admin-interface .text-gray-700 {
+  color: var(--ink) !important;
+}
+
+:root.dark .admin-interface .text-gray-600,
+:root.dark .admin-interface .text-gray-500,
+:root.dark .admin-interface .text-gray-400 {
+  color: var(--muted) !important;
+}
+
+:root.dark .admin-interface .border-gray-100,
+:root.dark .admin-interface .border-gray-200,
+:root.dark .admin-interface .border-gray-300,
+:root.dark .admin-interface .border-slate-200 {
+  border-color: var(--line) !important;
+}
+
+:root.dark .admin-interface .divide-gray-100 > :not([hidden]) ~ :not([hidden]),
+:root.dark .admin-interface .divide-gray-200 > :not([hidden]) ~ :not([hidden]) {
+  border-color: var(--line) !important;
+}
+
+:root.dark .admin-interface [class~="hover:bg-gray-50"]:hover,
+:root.dark .admin-interface [class~="hover:bg-gray-100"]:hover,
+:root.dark .admin-interface [class~="hover:bg-blue-50"]:hover {
+  background-color: #293950 !important;
+}
+
+:root.dark .admin-interface [class~="hover:text-black"]:hover {
+  color: #ffffff !important;
+}
+
+:root.dark .admin-interface .border-black {
+  border-color: #a9c1ff !important;
+}
+
+:root.dark .admin-interface .text-blue-800,
+:root.dark .admin-interface .text-blue-700,
+:root.dark .admin-interface .text-blue-600 {
+  color: #a9c1ff !important;
+}
+
+:root.dark .admin-interface .bg-red-50,
+:root.dark .admin-interface .bg-red-100 {
+  background-color: #3a222b !important;
+  color: #ffc0c6 !important;
+}
+
+:root.dark .admin-interface .text-red-800,
+:root.dark .admin-interface .text-red-700,
+:root.dark .admin-interface .text-red-600 {
+  color: #ff9ba5 !important;
+}
+
+:root.dark .admin-interface .border-red-100,
+:root.dark .admin-interface .border-red-200,
+:root.dark .admin-interface .border-red-300 {
+  border-color: #713b48 !important;
+}
+
+:root.dark .admin-interface .bg-amber-50,
+:root.dark .admin-interface .bg-amber-100 {
+  background-color: #3a301e !important;
+  color: #f8d99b !important;
+}
+
+:root.dark .admin-interface .text-amber-900,
+:root.dark .admin-interface .text-amber-800,
+:root.dark .admin-interface .text-amber-700 {
+  color: #f8d99b !important;
+}
+
+:root.dark .admin-interface .bg-green-50,
+:root.dark .admin-interface .bg-green-100 {
+  background-color: #1d382e !important;
+  color: #a8e6c5 !important;
+}
+
+:root.dark .admin-interface .text-green-800,
+:root.dark .admin-interface .text-green-700 {
+  color: #a8e6c5 !important;
+}
+
+:root.dark .admin-interface :where(input, textarea, select) {
+  background-color: #172235;
+  color: var(--ink);
+  border-color: #46556b;
+}
+
+:root.dark .admin-interface :where(input, textarea, select)::placeholder {
+  color: #8998ad;
+}
+
+:root.dark .admin-interface option {
+  background: #172235;
+  color: var(--ink);
+}
+
+:root.dark .admin-interface :where(button, a):focus-visible {
+  outline-color: #83a8ff;
+}
