@@ -613,7 +613,7 @@ export default function EditRadarPage() {
 
               <div>
                 <label htmlFor="link" className={labelClass}>
-                  External Link
+                  External Link <span className="font-normal text-gray-500">(optional)</span>
                 </label>
                 <input
                   id="link"
