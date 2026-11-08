@@ -61,7 +61,7 @@ export function LatestFeed() {
   const visiblePosts = posts.slice(0, 2);
 
   return (
-    <section className="bg-[#F8FAFC]">
+    <section className="bg-[var(--surface)]">
       <div className="container py-6 md:py-8">
         <div className="flex flex-wrap items-end justify-between gap-3 border-b border-[var(--line)] pb-3">
           <div>
@@ -103,7 +103,7 @@ export function LatestFeed() {
                     target="_blank"
                     rel="noopener noreferrer"
                     aria-label={`Read ${post.title}`}
-                    className="w-24 shrink-0 self-start overflow-hidden rounded-md bg-white sm:w-28"
+                    className="w-24 shrink-0 self-start overflow-hidden rounded-md bg-[var(--surface)] sm:w-28"
                   >
                     <img
                       src={post.image}
