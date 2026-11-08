@@ -22,9 +22,9 @@ export function Header() {
             src="/campusradar.svg"
             alt="Campus Radar"
             width={220}
-            height={65}
+            height={92}
             priority
-            className="site-logo h-auto w-[155px] object-contain object-left sm:w-[180px]"
+            className="site-logo h-[65px] w-[155px] object-cover object-center sm:h-[75px] sm:w-[180px]"
           />
         </Link>
 
