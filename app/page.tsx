@@ -155,7 +155,7 @@ export default async function Home() {
         </section>
 
         {/* External publishing feeds */}
-        <section className="border-y border-[var(--line)] bg-[#F8FAFC] py-2">
+        <section className="border-y border-[var(--line)] bg-[var(--surface)] py-2">
           <LatestFeed />
         </section>
 
@@ -166,7 +166,7 @@ export default async function Home() {
             <h2 className="text-xl font-black">The Radar</h2>
           </div>
 
-          <div className="rounded-lg border border-[var(--line)] bg-[#F8FAFC] px-5 py-6 text-center">
+          <div className="rounded-lg border border-[var(--line)] bg-[var(--surface)] px-5 py-6 text-center">
             <p className="text-sm font-bold text-[#173B87]">
               Coming Soon
             </p>
@@ -210,7 +210,7 @@ export default async function Home() {
 
         {/* Secondary destinations */}
         <section className="container py-6">
-          <div className="flex flex-wrap items-center justify-between gap-4 rounded-lg border border-[var(--line)] bg-[#F8FAFC] p-4">
+          <div className="flex flex-wrap items-center justify-between gap-4 rounded-lg border border-[var(--line)] bg-[var(--surface)] p-4">
             <div>
               <h2 className="font-black text-[#173B87]">
                 More from Campus Radar
