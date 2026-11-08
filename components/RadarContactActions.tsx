@@ -16,7 +16,7 @@ export function RadarContactActions({ summary }: RadarContactActionsProps) {
       candidates
         .map((value) => ({ value: value.trim(), digits: value.replace(/\D/g, '') }))
         .filter((item) => item.digits.length >= 10 && item.digits.length <= 15)
-        .map((item) => [item.digits, item])
+        .map((item) => [item.digits, item] as const)
     ).values()
   );
 
