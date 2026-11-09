@@ -4,7 +4,7 @@ import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { StoryCard } from '@/components/StoryCard';
 import { LatestFeed } from '@/components/LatestFeed';
-import { RadarContactActions } from '@/components/RadarContactActions';
+import { RadarBanner } from '@/components/RadarBanner';
 import { getSupabaseAdmin } from '@/lib/server/supabase';
 
 export const dynamic = 'force-dynamic';
@@ -34,7 +34,7 @@ export default async function Home() {
     .select('id,slug,title,summary,cover_image,kind,event_date,location,link,published_at')
     .eq('status', 'PUBLISHED')
     .order('published_at', { ascending: false })
-    .limit(3);
+    .limit(10);
 
   if (radarError) console.error('Home page Radar query failed:', radarError.message);
   const radarItems = radarRows ?? [];
@@ -172,67 +172,21 @@ export default async function Home() {
 
         {/* The Radar */}
         <section className="container py-6">
-          <div className="mb-3 flex items-end justify-between border-b border-[var(--line)] pb-2">
+          <div className="mb-4 flex items-end justify-between border-b border-[var(--line)] pb-2">
             <div>
               <p className="kicker text-[#173B87]">Quick updates</p>
               <h2 className="text-xl font-black">The Radar</h2>
             </div>
+            <Link
+              href="/radar"
+              className="text-sm font-bold text-[#173B87] underline underline-offset-4"
+            >
+              View all
+            </Link>
           </div>
 
           {radarItems.length > 0 ? (
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {radarItems.map((item) => (
-                <article key={item.id} className="card relative flex h-full flex-col overflow-hidden transition hover:-translate-y-0.5 hover:border-black dark:hover:border-[#83A8FF]">
-                  <Link href={`/radar/${item.slug}`} aria-label={`Read Radar update: ${item.title}`} className="absolute inset-0 z-0 rounded-[inherit] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--blue)]" />
-                  {item.cover_image && (
-                    <img
-                      src={item.cover_image}
-                      alt=""
-                      loading="lazy"
-                      className="pointer-events-none h-44 w-full object-cover"
-                    />
-                  )}
-                  <div className="relative z-10 flex flex-1 flex-col p-5 pointer-events-none">
-                    <div className="mb-3 flex flex-wrap items-center gap-2">
-                      <span className="kicker text-[#173B87]">
-                        {item.kind.replaceAll('_', ' ')}
-                      </span>
-                      {item.event_date && (
-                        <span className="text-xs text-[var(--muted)]">
-                          {new Date(item.event_date).toLocaleDateString('en-NG', {
-                            day: 'numeric',
-                            month: 'short',
-                            year: 'numeric',
-                          })}
-                        </span>
-                      )}
-                    </div>
-                    <h3 className="text-lg font-black leading-snug">{item.title}</h3>
-                    <p className="mt-2 line-clamp-4 text-sm leading-6 text-[var(--muted)]">
-                      {item.summary}
-                    </p>
-                    <div className="pointer-events-auto"><RadarContactActions summary={item.summary}/></div>
-                    {item.location && (
-                      <p className="mt-3 text-xs font-semibold text-[var(--muted)]">
-                        {item.location}
-                      </p>
-                    )}
-                    {item.link && (
-                      <div className="pointer-events-auto mt-auto pt-5">
-                        <a
-                          href={item.link}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-sm font-bold text-[#173B87] underline underline-offset-4"
-                        >
-                          More information
-                        </a>
-                      </div>
-                    )}
-                  </div>
-                </article>
-              ))}
-            </div>
+            <RadarBanner items={radarItems} />
           ) : (
             <p className="rounded-lg border border-[var(--line)] bg-[var(--surface)] px-5 py-6 text-sm text-[var(--muted)]">
               Campus updates, announcements and events will appear here as they are published.
