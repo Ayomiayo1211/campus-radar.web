@@ -108,6 +108,12 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
       <Header />
 
       <main className="container min-h-screen max-w-4xl py-8">
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(articleStructuredData).replace(/</g, '\\u003c'),
+          }}
+        />
         <Link
           href="/news"
           className="text-sm font-bold text-[#173B87] hover:underline"
