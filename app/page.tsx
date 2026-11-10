@@ -1,5 +1,6 @@
 
 import Link from 'next/link';
+import type { Metadata } from 'next';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { StoryCard } from '@/components/StoryCard';
@@ -8,6 +9,10 @@ import { RadarBanner } from '@/components/RadarBanner';
 import { getSupabaseAdmin } from '@/lib/server/supabase';
 
 export const dynamic = 'force-dynamic';
+
+export const metadata: Metadata = {
+  alternates: { canonical: '/' },
+};
 
 export default async function Home() {
   const { data: rows, error } = await getSupabaseAdmin()
