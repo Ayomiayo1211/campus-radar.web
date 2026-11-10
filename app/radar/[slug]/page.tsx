@@ -12,8 +12,39 @@ type PageProps = { params: Promise<{ slug: string }> };
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params;
+  const { data: item } = await getSupabaseAdmin()
+    .from('radar_items')
+    .select('slug,title,summary,cover_image,kind')
+    .eq('slug', slug)
+    .eq('status', 'PUBLISHED')
+    .maybeSingle();
+
+  if (!item) return { title: { absolute: 'Update not found | Campus Radar' } };
+
+  const title = item.title;
+  const description = (item.summary || `Read this update from Campus Radar: ${title}.`).slice(0, 300);
   const canonical = `/radar/${slug}`;
-  return { alternates: { canonical }, openGraph: { url: canonical } };
+  const images = item.cover_image ? [{ url: item.cover_image, alt: title }] : [];
+
+  return {
+    title: { absolute: `${title} | Campus Radar` },
+    description,
+    alternates: { canonical },
+    openGraph: {
+      type: 'article',
+      title,
+      description,
+      url: canonical,
+      siteName: 'Campus Radar',
+      images,
+    },
+    twitter: {
+      card: images.length ? 'summary_large_image' : 'summary',
+      title,
+      description,
+      images: images.map((image) => image.url),
+    },
+  };
 }
 
 export default async function RadarItemPage({ params }: PageProps) {
