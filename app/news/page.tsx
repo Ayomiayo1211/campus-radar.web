@@ -1,4 +1,3 @@
-
 import Link from 'next/link';
 import type { Metadata } from 'next';
 import { getSupabaseAdmin } from '@/lib/server/supabase';
@@ -7,10 +6,25 @@ import { Footer } from '@/components/Footer';
 
 export const dynamic = 'force-dynamic';
 
+const pageTitle = 'Latest News | Campus Radar';
+const pageDescription = 'Read the latest news, reports and updates from the Federal University of Agriculture, Abeokuta (FUNAAB), and beyond.';
+
 export const metadata: Metadata = {
-  title: 'Latest News | Campus Radar',
-  description: 'News and updates from FUNAAB and beyond.',
+  title: { absolute: pageTitle },
+  description: pageDescription,
   alternates: { canonical: '/news' },
+  openGraph: {
+    type: 'website',
+    title: pageTitle,
+    description: pageDescription,
+    url: '/news',
+    siteName: 'Campus Radar',
+  },
+  twitter: {
+    card: 'summary',
+    title: pageTitle,
+    description: pageDescription,
+  },
 };
 
 export default async function NewsPage() {
