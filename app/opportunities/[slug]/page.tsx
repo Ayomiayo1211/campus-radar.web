@@ -59,10 +59,30 @@ export default async function OpportunityPage({ params }: PageProps) {
   if (error) console.error('Could not load opportunity detail:', error.message);
   if (!opportunity) notFound();
 
+  const structuredData = {
+    '@context': 'https://schema.org',
+    '@type': 'WebPage',
+    name: opportunity.title,
+    description: opportunity.description,
+    url: `https://www.campusradarfunaab.com.ng/opportunities/${encodeURIComponent(slug)}`,
+    publisher: {
+      '@type': 'Organization',
+      name: 'Campus Radar',
+      url: 'https://www.campusradarfunaab.com.ng/',
+    },
+    inLanguage: 'en',
+  };
+
   return (
     <>
       <Header />
       <main className="container min-h-[65vh] max-w-4xl py-10 md:py-14">
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(structuredData).replace(/</g, '\\u003c'),
+          }}
+        />
         <Link href="/opportunities" className="text-sm font-bold text-[#173B87] underline underline-offset-4">← Back to Opportunities</Link>
         <article className="mt-7">
           <div className="flex flex-wrap items-center gap-3">
