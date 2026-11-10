@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { Facebook, Instagram, Music2 } from 'lucide-react';
 
 type Props = { title: string; excerpt: string; coverImage: string; contentType: string; authorName: string; date?: string | null };
+const SIZE = 1200, BLUE = '#2C51D2', NAVY = '#233F9E', DOMAIN = 'campusradarfunaab.com.ng';
 
 function labelFor(type: string) {
   const labels: Record<string, string> = { NEWS: 'NEWS', THE_RADAR: 'THE RADAR', FEATURE: 'FEATURES', FEATURES: 'FEATURES', OPINION: 'OPINION', OPPORTUNITY: 'OPPORTUNITY' };
@@ -11,15 +12,31 @@ function labelFor(type: string) {
 function displayDate(value?: string | null) {
   return (value ? new Date(value) : new Date()).toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' }).toUpperCase();
 }
-function wrapText(ctx: CanvasRenderingContext2D, text: string, maxWidth: number) {
-  const lines: string[] = [];
+function wrapText(ctx: CanvasRenderingContext2D, value: string, maxWidth: number) {
+  const words = value.trim().split(/\s+/).filter(Boolean), lines: string[] = [];
   let line = '';
-  for (const word of text.trim().split(/\\s+/)) {
+  for (const word of words) {
     const next = line ? line + ' ' + word : word;
-    if (ctx.measureText(next).width > maxWidth && line) { lines.push(line); line = word; } else line = next;
+    if (line && ctx.measureText(next).width > maxWidth) { lines.push(line); line = word; } else line = next;
   }
   if (line) lines.push(line);
   return lines;
+}
+function fitLines(ctx: CanvasRenderingContext2D, value: string, maxWidth: number, maxLines: number, start: number, min: number, weight: number) {
+  for (let size = start; size >= min; size--) {
+    ctx.font = `${weight} ${size}px Arial, sans-serif`;
+    const lines = wrapText(ctx, value, maxWidth);
+    if (lines.length <= maxLines) return { lines, size };
+  }
+  ctx.font = `${weight} ${min}px Arial, sans-serif`;
+  const lines = wrapText(ctx, value, maxWidth).slice(0, maxLines);
+  const last = lines.length - 1;
+  if (last >= 0) {
+    let line = lines[last];
+    while (line && ctx.measureText(line + '…').width > maxWidth) line = line.slice(0, -1).trimEnd();
+    lines[last] = (line || '') + '…';
+  }
+  return { lines, size: min };
 }
 function loadImage(src: string) {
   return new Promise<HTMLImageElement>((resolve, reject) => {
@@ -30,6 +47,12 @@ function loadImage(src: string) {
     image.src = src;
   });
 }
+function drawCover(ctx: CanvasRenderingContext2D, image: HTMLImageElement) {
+  const scale = Math.max(SIZE / image.width, SIZE / image.height);
+  const width = image.width * scale, height = image.height * scale;
+  ctx.save(); ctx.beginPath(); ctx.rect(0, 0, SIZE, SIZE); ctx.clip();
+  ctx.drawImage(image, (SIZE - width) / 2, (SIZE - height) / 2, width, height); ctx.restore();
+}
 
 export default function ArticleThumbnail({ title, excerpt, coverImage, contentType, authorName, date }: Props) {
   const [downloading, setDownloading] = useState(false);
@@ -38,76 +61,76 @@ export default function ArticleThumbnail({ title, excerpt, coverImage, contentTy
   async function downloadThumbnail() {
     setDownloading(true); setDownloadError('');
     try {
-      const size = 1200;
-      const canvas = document.createElement('canvas'); canvas.width = size; canvas.height = size;
+      const canvas = document.createElement('canvas'); canvas.width = SIZE; canvas.height = SIZE;
       const ctx = canvas.getContext('2d');
       if (!ctx) throw new Error('Your browser could not prepare the thumbnail.');
-      ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, size, size);
-      if (coverImage) {
-        const photo = await loadImage(coverImage);
-        const scale = Math.max(size / photo.width, size / photo.height);
-        const width = photo.width * scale; const height = photo.height * scale;
-        ctx.drawImage(photo, (size - width) / 2, (size - height) / 2, width, height);
-      }
+      ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, SIZE, SIZE);
+      drawCover(ctx, await loadImage(coverImage));
 
-      // Figma frame 418:2 — original Campus Radar logo cropped from the repository SVG.
-      ctx.fillStyle = '#FAF8F2'; ctx.fillRect(52.5, 52.5, 223.6, 82.4);
+      ctx.fillStyle = '#FAF8F2'; ctx.fillRect(52, 52, 224, 83);
       const logo = await loadImage('/campusradar.svg');
-      ctx.save(); ctx.beginPath(); ctx.rect(69.8, 52.5, 188.5, 68.2); ctx.clip();
-      ctx.drawImage(logo, 69.8, -24.6, 188.5, 236); ctx.restore();
+      ctx.save(); ctx.beginPath(); ctx.rect(70, 53, 189, 68); ctx.clip();
+      ctx.drawImage(logo, 70, -25, 189, 236); ctx.restore();
 
       const dateText = displayDate(date);
-      ctx.font = '400 31px Arial';
-      const dateWidth = Math.max(355, ctx.measureText(dateText).width + 34);
-      const dateX = 1200 - 52.5 - dateWidth;
-      ctx.fillStyle = '#FAF8F2'; ctx.strokeStyle = '#233F9E'; ctx.lineWidth = 2.6;
-      ctx.beginPath(); ctx.roundRect(dateX, 52.5, dateWidth, 52, 26); ctx.fill(); ctx.stroke();
-      ctx.fillStyle = '#2C51D2'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-      ctx.fillText(dateText, dateX + dateWidth / 2, 78.5); ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
+      ctx.font = '400 30px Arial, sans-serif';
+      const dateWidth = Math.max(355, ctx.measureText(dateText).width + 42), dateX = SIZE - 52 - dateWidth;
+      ctx.fillStyle = '#FAF8F2'; ctx.strokeStyle = NAVY; ctx.lineWidth = 2.5;
+      ctx.beginPath(); ctx.roundRect(dateX, 52, dateWidth, 54, 27); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = BLUE; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillText(dateText, dateX + dateWidth / 2, 79);
 
-      const panelTop = 800;
-      const panel = ctx.createLinearGradient(0, panelTop, 0, 1122);
-      panel.addColorStop(0, 'rgba(44,81,210,0.78)'); panel.addColorStop(0.28, 'rgba(44,81,210,0.94)'); panel.addColorStop(1, '#2C51D2');
-      ctx.fillStyle = panel; ctx.fillRect(0, panelTop, size, 322);
+      const panelTop = 758, panel = ctx.createLinearGradient(0, panelTop, 0, 1122);
+      panel.addColorStop(0, 'rgba(44,81,210,0.82)'); panel.addColorStop(.18, 'rgba(44,81,210,0.97)'); panel.addColorStop(1, BLUE);
+      ctx.fillStyle = panel; ctx.fillRect(0, panelTop, SIZE, 364);
 
       const category = labelFor(contentType);
-      ctx.font = '400 37px Arial';
-      const categoryWidth = ctx.measureText(category).width + 34;
-      ctx.fillStyle = '#FAF8F2'; ctx.strokeStyle = '#233F9E'; ctx.lineWidth = 2.6;
-      ctx.beginPath(); ctx.roundRect(31.5, 705.5, categoryWidth, 48, 24); ctx.fill(); ctx.stroke();
-      ctx.fillStyle = '#2C51D2'; ctx.fillText(category, 47, 738);
+      ctx.font = '400 34px Arial, sans-serif';
+      const categoryWidth = ctx.measureText(category).width + 38;
+      ctx.fillStyle = '#FAF8F2'; ctx.strokeStyle = NAVY; ctx.lineWidth = 2.5;
+      ctx.beginPath(); ctx.roundRect(32, 710, categoryWidth, 48, 24); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = BLUE; ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic'; ctx.fillText(category, 49, 743);
 
-      ctx.fillStyle = '#FFFFFF'; ctx.font = '600 47px Arial';
-      const titleLines = wrapText(ctx, title || 'Your article headline', 1162).slice(0, 2);
-      titleLines.forEach((line, index) => ctx.fillText(line, 30, 864 + index * 52));
-      ctx.font = '400 29px Arial';
-      wrapText(ctx, excerpt || 'Your article summary will appear here.', 1100).slice(0, 2).forEach((line, index) => ctx.fillText(line, 31.5, 980 + index * 34));
-      ctx.font = '600 38px Arial'; ctx.textAlign = 'right';
-      ctx.fillText('By: ' + (authorName || 'Campus Radar'), 1074, 1084); ctx.textAlign = 'left';
+      const headline = fitLines(ctx, title || 'Your article headline', 1138, 2, 46, 34, 600);
+      ctx.font = `600 ${headline.size}px Arial, sans-serif`; ctx.fillStyle = '#fff';
+      headline.lines.forEach((line, index) => ctx.fillText(line, 32, 830 + index * 53));
 
-      ctx.fillStyle = '#FFFFFF'; ctx.fillRect(0, 1122, size, 78);
-      ctx.fillStyle = '#2C51D2'; ctx.font = '400 24px Arial'; ctx.textBaseline = 'middle';
-      ctx.fillText('READ MORE: www.campusradar.com', 52.5, 1161);
-      // Keep the social marks and handle in a dedicated, evenly spaced group.
+      const summary = fitLines(ctx, excerpt || 'Your article summary will appear here.', 1125, 2, 28, 23, 400);
+      ctx.font = `400 ${summary.size}px Arial, sans-serif`;
+      summary.lines.forEach((line, index) => ctx.fillText(line, 32, 951 + index * 34));
+
+      const credit = 'By: ' + (authorName || 'Campus Radar');
+      ctx.textAlign = 'right'; let creditSize = 36;
+      while (creditSize > 24) {
+        ctx.font = `600 ${creditSize}px Arial, sans-serif`;
+        if (ctx.measureText(credit).width <= 760) break;
+        creditSize--;
+      }
+      ctx.fillStyle = '#fff'; ctx.fillText(credit, 1165, 1083);
+
+      ctx.fillStyle = '#fff'; ctx.fillRect(0, 1122, SIZE, 78);
+      ctx.fillStyle = BLUE; ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+      ctx.font = '400 23px Arial, sans-serif'; ctx.fillText('READ MORE: www.' + DOMAIN, 52, 1161);
       const cy = 1161;
-      ctx.fillStyle = '#2C51D2'; ctx.beginPath(); ctx.arc(756, cy, 13, 0, Math.PI * 2); ctx.fill();
-      ctx.fillStyle = '#FFFFFF'; ctx.font = 'bold 21px Arial'; ctx.textAlign = 'center'; ctx.fillText('f', 756, cy + 1);
-      ctx.strokeStyle = '#2C51D2'; ctx.lineWidth = 3.2; ctx.lineCap = 'round';
-      ctx.beginPath(); ctx.moveTo(786, cy - 11); ctx.lineTo(807, cy + 11); ctx.moveTo(807, cy - 11); ctx.lineTo(786, cy + 11); ctx.stroke();
-      ctx.lineWidth = 4; ctx.beginPath(); ctx.moveTo(835, cy - 13); ctx.lineTo(835, cy + 5); ctx.moveTo(835, cy - 13); ctx.quadraticCurveTo(844, cy - 10, 848, cy - 5); ctx.stroke();
-      ctx.beginPath(); ctx.arc(830, cy + 7, 6, 0, Math.PI * 2); ctx.fillStyle = '#2C51D2'; ctx.fill();
-      ctx.strokeStyle = '#2C51D2'; ctx.lineWidth = 2.8; ctx.beginPath(); ctx.roundRect(861, cy - 12, 24, 24, 6); ctx.stroke();
-      ctx.beginPath(); ctx.arc(873, cy, 5.5, 0, Math.PI * 2); ctx.stroke();
-      ctx.beginPath(); ctx.arc(880, cy - 7, 1.4, 0, Math.PI * 2); ctx.fill();
-      ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic'; ctx.font = '400 20px Arial';
-      ctx.fillText('@campusradarfunaab', 900, 1169);
+      ctx.fillStyle = BLUE; ctx.beginPath(); ctx.arc(735, cy, 13, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#fff'; ctx.font = 'bold 21px Arial, sans-serif'; ctx.textAlign = 'center'; ctx.fillText('f', 735, cy + 1);
+      ctx.strokeStyle = BLUE; ctx.lineWidth = 3.2; ctx.lineCap = 'round'; ctx.beginPath();
+      ctx.moveTo(765, cy - 11); ctx.lineTo(786, cy + 11); ctx.moveTo(786, cy - 11); ctx.lineTo(765, cy + 11); ctx.stroke();
+      ctx.lineWidth = 4; ctx.beginPath(); ctx.moveTo(814, cy - 13); ctx.lineTo(814, cy + 5);
+      ctx.moveTo(814, cy - 13); ctx.quadraticCurveTo(823, cy - 10, 827, cy - 5); ctx.stroke();
+      ctx.beginPath(); ctx.arc(809, cy + 7, 6, 0, Math.PI * 2); ctx.fill();
+      ctx.strokeStyle = BLUE; ctx.lineWidth = 2.8; ctx.beginPath(); ctx.roundRect(840, cy - 12, 24, 24, 6); ctx.stroke();
+      ctx.beginPath(); ctx.arc(852, cy, 5.5, 0, Math.PI * 2); ctx.stroke();
+      ctx.beginPath(); ctx.arc(859, cy - 7, 1.4, 0, Math.PI * 2); ctx.fill();
+      ctx.textAlign = 'left'; ctx.font = '400 19px Arial, sans-serif'; ctx.fillText('@campusradarfunaab', 878, 1162);
 
       const blob = await new Promise<Blob>((resolve, reject) => canvas.toBlob(value => value ? resolve(value) : reject(new Error('Could not export the thumbnail.')), 'image/png'));
-      const url = URL.createObjectURL(blob); const anchor = document.createElement('a'); anchor.href = url;
-      anchor.download = (title || 'campus-radar-thumbnail').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') + '.png';
-      anchor.click(); URL.revokeObjectURL(url);
-    } catch (error) { setDownloadError(error instanceof Error ? error.message : 'Thumbnail export failed.'); }
-    finally { setDownloading(false); }
+      const url = URL.createObjectURL(blob), anchor = document.createElement('a');
+      anchor.href = url; anchor.download = (title || 'campus-radar-thumbnail').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') + '.png';
+      anchor.click(); window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+    } catch (error) {
+      setDownloadError(error instanceof Error ? error.message : 'Thumbnail export failed.');
+    } finally { setDownloading(false); }
   }
 
   return (
@@ -119,25 +142,23 @@ export default function ArticleThumbnail({ title, excerpt, coverImage, contentTy
       <div className="mx-auto aspect-square w-full max-w-[520px] overflow-hidden bg-white text-white shadow-sm">
         <div className="relative h-full w-full">
           {coverImage ? <img src={coverImage} alt="" className="absolute inset-0 h-full w-full object-cover" /> : <div className="absolute inset-0 bg-[#2C51D2]" />}
-          <div className="absolute left-[4.37%] top-[4.37%] h-[6.87%] w-[18.64%] overflow-hidden bg-[#FAF8F2]">
-            <img src="/campusradar.svg" alt="Campus Radar" className="absolute left-[7.75%] top-[-93.63%] h-[286.5%] w-[84.27%] max-w-none" />
+          <div className="absolute left-[4.33%] top-[4.33%] h-[6.92%] w-[18.67%] overflow-hidden bg-[#FAF8F2]"><img src="/campusradar.svg" alt="Campus Radar" className="absolute left-[7.75%] top-[-93.63%] h-[286.5%] w-[84.27%] max-w-none" /></div>
+          <div className="absolute right-[4.33%] top-[4.33%] max-w-[52%] rounded-full border border-[#233F9E] bg-[#FAF8F2] px-[2%] py-[0.8%] text-center text-[clamp(8px,2.1vw,15px)] leading-tight text-[#2C51D2]">{displayDate(date)}</div>
+          <div className="absolute inset-x-0 top-[63.17%] h-[30.33%] bg-gradient-to-b from-[#2C51D2]/85 via-[#2C51D2]/[0.97] to-[#2C51D2]" />
+          <div className="absolute left-[2.67%] top-[59.17%] max-w-[70%] rounded-full border border-[#233F9E] bg-[#FAF8F2] px-[1.6%] py-[0.55%] text-[clamp(9px,2vw,16px)] leading-tight text-[#2C51D2]">{labelFor(contentType)}</div>
+          <div className="absolute inset-x-[2.67%] top-[68.5%] h-[22%] overflow-hidden">
+            <h3 className="line-clamp-2 break-words text-[clamp(16px,3.8vw,31px)] font-semibold leading-[1.08]">{title || 'Your article headline'}</h3>
+            <p className="mt-[1.6%] line-clamp-2 break-words text-[clamp(9px,2.25vw,17px)] leading-[1.15]">{excerpt || 'Your article summary will appear here.'}</p>
           </div>
-          <div className="absolute right-[12.3%] top-[4.37%] rounded-full border-[1.5px] border-[#233F9E] bg-[#FAF8F2] px-[1.3%] py-[0.45%] text-[clamp(8px,2.25vw,17px)] font-normal leading-tight text-[#2C51D2]">{displayDate(date)}</div>
-          <div className="absolute inset-x-0 top-[66.67%] h-[26.77%] bg-gradient-to-b from-[#2C51D2]/80 via-[#2C51D2]/95 to-[#2C51D2]" />
-          <div className="absolute left-[2.63%] top-[58.8%] rounded-full border-[1.5px] border-[#233F9E] bg-[#FAF8F2] px-[1.25%] py-[0.25%] text-[clamp(9px,2.3vw,18px)] font-normal leading-tight text-[#2C51D2]">{labelFor(contentType)}</div>
-          <div className="absolute left-[2.5%] right-[2.5%] top-[68.1%]">
-            <h3 className="line-clamp-2 text-[clamp(18px,4.05vw,34px)] font-semibold leading-[1.08]">{title || 'Your article headline'}</h3>
-            <p className="mt-[1.2%] line-clamp-2 text-[clamp(10px,2.45vw,19px)] leading-[1.1]">{excerpt || 'Your article summary will appear here.'}</p>
-          </div>
-          <p className="absolute right-[3.1%] top-[87.2%] text-[clamp(10px,3.05vw,23px)] font-semibold leading-none">By: {authorName || 'Campus Radar'}</p>
-          <div className="absolute inset-x-0 bottom-0 flex h-[6.56%] items-center justify-between gap-2 bg-white px-[4.37%] text-[#2C51D2]">
-            <span className="shrink-0 whitespace-nowrap text-[clamp(8px,1.9vw,15px)] font-normal leading-none">READ MORE: www.campusradar.com</span>
-            <div className="flex shrink-0 items-center gap-[clamp(3px,0.65vw,7px)]">
-              <Facebook className="h-[clamp(11px,2.4vw,17px)] w-[clamp(11px,2.4vw,17px)]" strokeWidth={2.4} fill="#2C51D2" color="#2C51D2" />
-              <span className="text-[clamp(10px,1.8vw,14px)] font-semibold leading-none">X</span>
-              <Music2 className="h-[clamp(11px,2.4vw,17px)] w-[clamp(11px,2.4vw,17px)]" strokeWidth={2.4} />
-              <Instagram className="h-[clamp(11px,2.4vw,17px)] w-[clamp(11px,2.4vw,17px)]" strokeWidth={2.2} />
-              <span className="whitespace-nowrap text-[clamp(7px,1.55vw,12px)] leading-none">@campusradarfunaab</span>
+          <p className="absolute bottom-[9.4%] right-[2.9%] max-w-[65%] truncate text-right text-[clamp(10px,2.8vw,21px)] font-semibold leading-none">By: {authorName || 'Campus Radar'}</p>
+          <div className="absolute inset-x-0 bottom-0 flex h-[6.5%] items-center justify-between gap-2 bg-white px-[4.33%] text-[#2C51D2]">
+            <span className="min-w-0 truncate text-[clamp(7px,1.65vw,13px)] leading-none">READ MORE: www.{DOMAIN}</span>
+            <div className="flex shrink-0 items-center gap-[clamp(3px,0.55vw,6px)]">
+              <Facebook className="h-[clamp(10px,2.1vw,15px)] w-[clamp(10px,2.1vw,15px)]" strokeWidth={2.4} fill={BLUE} color={BLUE} />
+              <span className="text-[clamp(9px,1.7vw,13px)] font-semibold leading-none">X</span>
+              <Music2 className="h-[clamp(10px,2.1vw,15px)] w-[clamp(10px,2.1vw,15px)]" strokeWidth={2.4} />
+              <Instagram className="h-[clamp(10px,2.1vw,15px)] w-[clamp(10px,2.1vw,15px)]" strokeWidth={2.2} />
+              <span className="whitespace-nowrap text-[clamp(6px,1.35vw,10px)] leading-none">@campusradarfunaab</span>
             </div>
           </div>
         </div>
