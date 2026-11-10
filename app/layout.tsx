@@ -16,7 +16,7 @@ export const metadata: Metadata = {
   title: 'Campus Radar — FUNAAB',
   description:
     'Student-focused media and information platform for the Federal University of Agriculture, Abeokuta.',
-  metadataBase: new URL('https://campus-radar-v1.campusradarfunaab.workers.dev'),
+  metadataBase: new URL('https://www.campusradarfunaab.com.ng'),
   openGraph: {
     type: 'website',
     siteName: 'Campus Radar',
