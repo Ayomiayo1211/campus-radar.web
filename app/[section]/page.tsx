@@ -5,11 +5,34 @@ import {Footer} from '@/components/Footer';
 import {StoryCard} from '@/components/StoryCard';
 import {RadarContactActions} from '@/components/RadarContactActions';
 import type {Story} from '@/lib/data';
+import type {Metadata} from 'next';
 import {getSupabaseAdmin} from '@/lib/server/supabase';
 
 export const dynamic='force-dynamic';
 const dateLabel=(value:string|null)=>value?new Date(value).toLocaleDateString('en-NG',{day:'numeric',month:'short',year:'numeric'}):'';
 const editorialLabel=(value:string|null)=>value?value.charAt(0)+value.slice(1).toLowerCase():'Editorial';
+
+type SectionParams = { params: Promise<{ section: string }> };
+
+export async function generateMetadata({params}:SectionParams):Promise<Metadata>{
+ const {section}=await params;
+ const metadataBySection:Record<string,{title:string;description:string}> = {
+  radar:{title:'The Radar | Campus Radar',description:'Campus events, announcements, updates and useful information for FUNAAB students.'},
+  opportunities:{title:'Opportunities | Campus Radar',description:'Explore scholarships, internships, competitions, fellowships and other opportunities for students.'},
+  features:{title:'Features | Campus Radar',description:'In-depth stories, campus experiences and perspectives from the FUNAAB community.'},
+  opinion:{title:'Opinion | Campus Radar',description:'Commentary, viewpoints and student perspectives on issues that matter to the FUNAAB community.'},
+ };
+ const page=metadataBySection[section];
+ if(!page)return {title:{absolute:'Page not found | Campus Radar'}};
+ const canonical=`/${section}`;
+ return {
+  title:{absolute:page.title},
+  description:page.description,
+  alternates:{canonical},
+  openGraph:{type:'website',title:page.title,description:page.description,url:canonical,siteName:'Campus Radar'},
+  twitter:{card:'summary',title:page.title,description:page.description},
+ };
+}
 
 export default async function Section({params}:{params:Promise<{section:string}>}){
  const {section}=await params;
