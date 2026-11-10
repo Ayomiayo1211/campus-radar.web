@@ -60,10 +60,34 @@ export default async function RadarItemPage({ params }: PageProps) {
   if (!item) notFound();
 
   const date = item.event_date || item.published_at;
+  const structuredData = {
+    '@context': 'https://schema.org',
+    '@type': 'Article',
+    headline: item.title,
+    description: item.summary,
+    mainEntityOfPage: `https://www.campusradarfunaab.com.ng/radar/${encodeURIComponent(slug)}`,
+    datePublished: item.published_at || undefined,
+    image: item.cover_image ? [item.cover_image] : undefined,
+    publisher: {
+      '@type': 'Organization',
+      name: 'Campus Radar',
+      logo: {
+        '@type': 'ImageObject',
+        url: 'https://www.campusradarfunaab.com.ng/campusradar.svg',
+      },
+    },
+    inLanguage: 'en',
+  };
   return (
     <>
       <Header />
       <main className="container min-h-[65vh] max-w-4xl py-10 md:py-14">
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(structuredData).replace(/</g, '\\u003c'),
+          }}
+        />
         <Link href="/radar" className="text-sm font-bold text-[#173B87] underline underline-offset-4">← Back to The Radar</Link>
         <article className="mt-7">
           <div className="flex flex-wrap items-center gap-3">
