@@ -85,6 +85,28 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
       displayOrder: image.display_order,
     })).sort((a, b) => a.displayOrder - b.displayOrder),
   };
+  const articleStructuredData = {
+    '@context': 'https://schema.org',
+    '@type': 'NewsArticle',
+    headline: story.title,
+    description: story.excerpt || `Read ${story.title} on Campus Radar.`,
+    mainEntityOfPage: `https://www.campusradarfunaab.com.ng/news/${encodeURIComponent(slug)}`,
+    datePublished: row.published_at || undefined,
+    author: story.authorName
+      ? { '@type': 'Person', name: story.authorName }
+      : { '@type': 'Organization', name: 'Campus Radar' },
+    publisher: {
+      '@type': 'Organization',
+      name: 'Campus Radar',
+      logo: {
+        '@type': 'ImageObject',
+        url: 'https://www.campusradarfunaab.com.ng/campusradar.svg',
+      },
+    },
+    image: story.coverImage ? [story.coverImage] : undefined,
+    articleSection: story.contentType.replaceAll('_', ' '),
+    inLanguage: 'en',
+  };
   const paragraphs = story.body.split(/\n\s*\n/);
   const manuallyPlacedUrls = new Set(Array.from(story.body.matchAll(/\{\{gallery-image:([^}]+)\}\}/g), (match) => {
     try { return decodeURIComponent(match[1]); } catch { return ''; }
