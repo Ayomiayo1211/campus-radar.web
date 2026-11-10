@@ -1,10 +1,17 @@
 
 import Link from 'next/link';
+import type { Metadata } from 'next';
 import { getSupabaseAdmin } from '@/lib/server/supabase';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 
 export const dynamic = 'force-dynamic';
+
+export const metadata: Metadata = {
+  title: 'Latest News | Campus Radar',
+  description: 'News and updates from FUNAAB and beyond.',
+  alternates: { canonical: '/news' },
+};
 
 export default async function NewsPage() {
   const { data: rows, error } = await getSupabaseAdmin()
