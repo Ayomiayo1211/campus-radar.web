@@ -11,8 +11,38 @@ type PageProps = { params: Promise<{ slug: string }> };
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params;
+  const now = new Date().toISOString();
+  const { data: opportunity } = await getSupabaseAdmin()
+    .from('opportunities')
+    .select('slug,title,organisation,type,description,deadline,application_url')
+    .eq('slug', slug)
+    .eq('status', 'PUBLISHED')
+    .or(`deadline.is.null,deadline.gt.${now}`)
+    .maybeSingle();
+
+  if (!opportunity) return { title: { absolute: 'Opportunity not found | Campus Radar' } };
+
+  const title = opportunity.title;
+  const description = (opportunity.description || `Explore this opportunity from ${opportunity.organisation || 'Campus Radar'}.`).slice(0, 300);
   const canonical = `/opportunities/${slug}`;
-  return { alternates: { canonical }, openGraph: { url: canonical } };
+
+  return {
+    title: { absolute: `${title} | Campus Radar` },
+    description,
+    alternates: { canonical },
+    openGraph: {
+      type: 'article',
+      title,
+      description,
+      url: canonical,
+      siteName: 'Campus Radar',
+    },
+    twitter: {
+      card: 'summary',
+      title,
+      description,
+    },
+  };
 }
 
 export default async function OpportunityPage({ params }: PageProps) {
