@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import type { Metadata } from 'next';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { getSupabaseAdmin } from '@/lib/server/supabase';
@@ -7,6 +8,12 @@ import { getSupabaseAdmin } from '@/lib/server/supabase';
 export const dynamic = 'force-dynamic';
 
 type PageProps = { params: Promise<{ slug: string }> };
+
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const { slug } = await params;
+  const canonical = `/opportunities/${slug}`;
+  return { alternates: { canonical }, openGraph: { url: canonical } };
+}
 
 export default async function OpportunityPage({ params }: PageProps) {
   const { slug } = await params;
