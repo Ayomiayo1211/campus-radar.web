@@ -24,6 +24,13 @@ export const metadata: Metadata = {
     description:
       'Student-focused media and information platform for the Federal University of Agriculture, Abeokuta.',
   },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Campus Radar — FUNAAB',
+    description:
+      'Student-focused media and information platform for the Federal University of Agriculture, Abeokuta.',
+    images: ['/opengraph-image'],
+  },
 };
 
 const siteStructuredData = {
