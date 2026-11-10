@@ -152,11 +152,13 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
           </div>
 
           {story.coverImage && (
-            <figure className="mb-8">
+            <figure className="mb-8 overflow-hidden rounded-xl bg-[var(--surface)]">
               <img
                 src={story.coverImage}
                 alt={story.title}
-                className="mx-auto aspect-square h-auto max-h-none w-full max-w-[700px] rounded-xl object-contain"
+                loading="eager"
+                fetchPriority="high"
+                className="aspect-[16/9] h-auto max-h-[560px] w-full object-cover"
               />
             </figure>
           )}
