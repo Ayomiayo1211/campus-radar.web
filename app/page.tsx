@@ -165,11 +165,6 @@ export default async function Home() {
           )}
         </section>
 
-        {/* External publishing feeds */}
-        <section className="border-y border-[var(--line)] bg-[var(--surface)] py-2">
-          <LatestFeed />
-        </section>
-
         {/* The Radar */}
         <section className="container py-6">
           <div className="mb-4 flex items-end justify-between border-b border-[var(--line)] pb-2">
@@ -226,6 +221,11 @@ export default async function Home() {
               <p className="rounded-lg border border-[var(--line)] bg-[var(--surface)] px-5 py-6 text-sm text-[var(--muted)]">New scholarships, fellowships, competitions and other opportunities will appear here when published.</p>
             )}
           </div>
+        </section>
+
+        {/* External publishing feeds */}
+        <section className="border-y border-[var(--line)] bg-[var(--surface)] py-2">
+          <LatestFeed />
         </section>
 
         {/* Secondary destinations */}
