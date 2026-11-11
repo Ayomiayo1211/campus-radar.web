@@ -11,6 +11,7 @@ type Story = {
   authorName: string;
   assignedEditorId?: string | null;
   assignedReporterId?: string | null;
+  assignedNote?: string | null;
   updatedAt: string;
 };
 type Person = { id: string; name: string; email: string; role?: string };
@@ -121,7 +122,7 @@ export default function NewsroomAssignmentsPage() {
                       <div className="mb-2 flex flex-wrap gap-2"><span className="rounded-full bg-gray-100 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide text-gray-600">{story.status}</span>{story.assignedEditorId && <span className="rounded-full bg-blue-50 px-2.5 py-1 text-[11px] font-medium text-blue-800">With editor</span>}{story.assignedReporterId && <span className="rounded-full bg-amber-50 px-2.5 py-1 text-[11px] font-medium text-amber-800">Reporter assigned</span>}</div>
                       <h3 className="text-lg font-semibold text-gray-950">{story.title}</h3>
                       <p className="mt-1 text-sm text-gray-600">{story.excerpt}</p>
-                      <p className="mt-3 text-xs text-gray-500">By {story.authorName} · Updated {new Date(story.updatedAt).toLocaleString()}</p>
+                      <p className="mt-3 text-xs text-gray-500">By {story.authorName} · Updated {new Date(story.updatedAt).toLocaleString()}</p>{story.assignedNote && <p className="mt-3 rounded-lg border border-blue-100 bg-blue-50 px-3 py-2 text-sm text-blue-900"><strong>Assignment note:</strong> {story.assignedNote}</p>}
                     </div>
                     <Link href={`/admin/stories/${story.id}`} className="rounded-lg border border-gray-300 px-3 py-2 text-sm font-medium text-gray-800 hover:bg-gray-50">Open story</Link>
                   </div>
