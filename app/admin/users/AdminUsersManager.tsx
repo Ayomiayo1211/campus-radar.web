@@ -3,7 +3,8 @@ import { FormEvent,useCallback,useEffect,useState } from 'react';
 type AdminUser={id:string;name:string;email:string;role:'SUPER_ADMIN'|'SENIOR_EDITOR'|'EDITOR'|'REPORTER';isActive:boolean;createdAt:string};
 type Invitation={id:string;email:string;role:'EDITOR'|'REPORTER';expires_at:string};
 type Result={error?:string;users?:AdminUser[];invitations?:Invitation[];user?:AdminUser;message?:string};
-const roles=[{value:'REPORTER',label:'Reporter'},{value:'EDITOR',label:'Editor'},{value:'SENIOR_EDITOR',label:'Senior Editor'}] as const;\nconst invitationRoles=roles.filter(x=>x.value!=='SENIOR_EDITOR');
+const roles=[{value:'REPORTER',label:'Reporter'},{value:'EDITOR',label:'Editor'},{value:'SENIOR_EDITOR',label:'Senior Editor'}] as const;
+const invitationRoles=roles.filter(x=>x.value!=='SENIOR_EDITOR');
 export default function AdminUsersManager(){
  const [users,setUsers]=useState<AdminUser[]>([]),[invitations,setInvitations]=useState<Invitation[]>([]),[loading,setLoading]=useState(true),[saving,setSaving]=useState(false),[error,setError]=useState(''),[message,setMessage]=useState(''),[email,setEmail]=useState(''),[role,setRole]=useState<'EDITOR'|'REPORTER'>('REPORTER');
  const loadUsers=useCallback(async()=>{setLoading(true);setError('');try{const r=await fetch('/api/admin/users',{cache:'no-store'}),d=await r.json() as Result;if(!r.ok)throw new Error(d.error||'Could not load accounts.');setUsers(d.users??[]);setInvitations(d.invitations??[]);}catch(e){setError(e instanceof Error?e.message:'Could not load accounts.');}finally{setLoading(false);}},[]);
