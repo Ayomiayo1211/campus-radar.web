@@ -20,6 +20,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: 'website',
     siteName: 'Campus Radar',
+    images: ['/campus-radar-og.svg'],
     title: 'Campus Radar — FUNAAB',
     description:
       'Student-focused media and information platform for the Federal University of Agriculture, Abeokuta.',
@@ -29,7 +30,7 @@ export const metadata: Metadata = {
     title: 'Campus Radar — FUNAAB',
     description:
       'Student-focused media and information platform for the Federal University of Agriculture, Abeokuta.',
-    images: ['/opengraph-image'],
+    images: ['/campus-radar-og.svg'],
   },
 };
 
