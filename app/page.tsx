@@ -6,6 +6,7 @@ import { Footer } from '@/components/Footer';
 import { StoryCard } from '@/components/StoryCard';
 import { LatestFeed } from '@/components/LatestFeed';
 import { RadarBanner } from '@/components/RadarBanner';
+import { TodayTicker } from '@/components/TodayTicker';
 import { getSupabaseAdmin } from '@/lib/server/supabase';
 
 export const dynamic = 'force-dynamic';
@@ -54,6 +55,22 @@ export default async function Home() {
 
   if (opportunityError) console.error('Home page opportunities query failed:', opportunityError.message);
   const opportunities = opportunityRows ?? [];
+
+  const todayParts = new Intl.DateTimeFormat('en-GB', { timeZone: 'Africa/Lagos', year: 'numeric', month: '2-digit', day: '2-digit' }).formatToParts(new Date());
+  const todayValues = Object.fromEntries(todayParts.map((part) => [part.type, part.value]));
+  const todayKey = `${todayValues.year}-${todayValues.month}-${todayValues.day}`;
+  const tomorrowKey = new Date(Date.UTC(Number(todayValues.year), Number(todayValues.month) - 1, Number(todayValues.day) + 1)).toISOString().slice(0, 10);
+  const todayStart = new Date(`${todayKey}T00:00:00+01:00`).toISOString();
+  const tomorrowStart = new Date(`${tomorrowKey}T00:00:00+01:00`).toISOString();
+
+  const [{ data: todayEvents }, { data: todayDeadlines }] = await Promise.all([
+    getSupabaseAdmin().from('radar_items').select('slug,title').eq('status', 'PUBLISHED').not('event_date', 'is', null).gte('event_date', todayStart).lt('event_date', tomorrowStart).order('event_date', { ascending: true }).limit(30),
+    getSupabaseAdmin().from('opportunities').select('slug,title').eq('status', 'PUBLISHED').gte('deadline', `${todayKey}T00:00:00.000Z`).lte('deadline', `${todayKey}T23:59:59.999Z`).order('deadline', { ascending: true }).limit(30),
+  ]);
+  const todayItems = [
+    ...(todayEvents ?? []).map((item) => ({ title: item.title, href: `/radar/${item.slug}`, type: 'Event' as const })),
+    ...(todayDeadlines ?? []).map((item) => ({ title: item.title, href: `/opportunities/${item.slug}`, type: 'Deadline' as const })),
+  ];
 
   const topStories = publishedStories.slice(0, 3);
   const latestStories = publishedStories.slice(3, 8);
@@ -263,6 +280,7 @@ export default async function Home() {
         </section>
       </main>
 
+      <TodayTicker items={todayItems} />
       <Footer />
     </>
   );
