@@ -6,7 +6,7 @@ import { notifyEditorsOfStorySubmission } from '@/lib/server/story-notifications
 import { sendPublishedStoryNewsletter } from '@/lib/server/engagement';
 
 type RouteContext = { params: Promise<{ id: string }> };
-const ROLES = ['SUPER_ADMIN', 'EDITOR', 'REPORTER'] as const;
+const ROLES = ['SUPER_ADMIN', 'SENIOR_EDITOR', 'EDITOR', 'REPORTER'] as const;
 
 function snapshot(story: any) {
   return {
@@ -32,7 +32,7 @@ export async function GET(_request: NextRequest, { params }: RouteContext) {
   if (story.status !== 'PUBLISHED' && !user) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
-  if (user?.role === 'REPORTER' && story.status !== 'PUBLISHED' && story.author_id !== user.id) {
+  if (user?.role === 'REPORTER' && story.status !== 'PUBLISHED' && story.author_id !== user.id && story.assigned_reporter_id !== user.id) {
     return NextResponse.json({ error: 'You cannot access this story' }, { status: 403 });
   }
 
@@ -78,7 +78,7 @@ export async function PATCH(request: NextRequest, { params }: RouteContext) {
       error: `This story is locked by ${owner?.name || 'another editor'}. You can view its history, but cannot make changes.`,
     }, { status: 423 });
   }
-  if (user.role === 'REPORTER' && (existing.author_id !== user.id || !['DRAFT', 'REVIEW'].includes(existing.status))) {
+  if (user.role === 'REPORTER' && ((existing.author_id !== user.id && existing.assigned_reporter_id !== user.id) || !['DRAFT', 'REVIEW'].includes(existing.status))) {
     return NextResponse.json({ error: 'You can only edit your own draft or review stories' }, { status: 403 });
   }
   if (user.role !== 'REPORTER' && existing.editing_locked_by !== user.id) {
