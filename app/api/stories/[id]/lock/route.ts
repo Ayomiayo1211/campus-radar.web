@@ -4,7 +4,7 @@ import { requireRole } from '@/lib/server/auth';
 
 type RouteContext = { params: Promise<{ id: string }> };
 
-const EDITORS = ['EDITOR', 'SUPER_ADMIN'] as const;
+const EDITORS = ['EDITOR', 'SENIOR_EDITOR', 'SUPER_ADMIN'] as const;
 
 export async function POST(_request: NextRequest, { params }: RouteContext) {
   const { id } = await params;
