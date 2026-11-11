@@ -613,3 +613,42 @@ summary::-webkit-details-marker {
 }
 
 /* Floating Today's Radar widget */
+
+
+/* Today's Radar floating campus activity widget */
+.today-radar-root { position: fixed; right: max(18px, env(safe-area-inset-right)); bottom: max(18px, env(safe-area-inset-bottom)); z-index: 80; display: flex; flex-direction: column; align-items: flex-end; gap: 12px; pointer-events: none; }
+.today-radar-root > * { pointer-events: auto; }
+.today-radar-launcher { display: flex; align-items: center; gap: 10px; min-height: 62px; padding: 8px 14px 8px 9px; border: 1px solid rgba(36,87,197,.24); border-radius: 999px; color: #101828; background: rgba(255,255,255,.97); box-shadow: 0 12px 36px rgba(16,24,40,.2); backdrop-filter: blur(16px); transition: transform .2s ease, box-shadow .2s ease; }
+.today-radar-launcher:hover { transform: translateY(-2px); box-shadow: 0 16px 40px rgba(16,24,40,.24); }
+.today-radar-launcher.is-open { border-color: #2457c5; }
+.today-radar-count { display: grid; place-items: center; min-width: 25px; height: 25px; padding: 0 6px; border-radius: 999px; color: #fff; background: #e63946; font-size: 11px; font-weight: 900; }
+.today-radar-mark { position: relative; display: inline-block; flex: 0 0 auto; width: 43px; height: 43px; overflow: hidden; border: 1px solid rgba(131,168,255,.55); border-radius: 50%; background: radial-gradient(circle, #2457c5 0%, #173b87 72%); box-shadow: inset 0 0 14px rgba(0,0,0,.22); }
+.today-radar-ring { position: absolute; border: 1px solid rgba(255,255,255,.3); border-radius: 50%; }
+.today-radar-ring-one { inset: 7px; }.today-radar-ring-two { inset: 14px; }.today-radar-ring-three { inset: 20px; }
+.today-radar-sweep { position: absolute; inset: 1px; border-radius: 50%; background: conic-gradient(from 0deg, transparent 0deg 292deg, rgba(120,210,255,.05) 300deg, rgba(120,210,255,.8) 358deg, transparent 360deg); animation: today-radar-spin 4s linear infinite; }
+.today-radar-core { position: absolute; top: 50%; left: 50%; width: 4px; height: 4px; border-radius: 50%; background: #fff; transform: translate(-50%,-50%); box-shadow: 0 0 8px #fff; }
+.today-radar-blip { position: absolute; width: 4px; height: 4px; border-radius: 50%; background: #ff6672; box-shadow: 0 0 7px #ff6672; animation: today-radar-blink 1.8s ease-in-out infinite; }
+.today-radar-blip-one { top: 10px; left: 24px; }.today-radar-blip-two { top: 25px; left: 10px; animation-delay: .6s; }.today-radar-blip-three { top: 29px; right: 10px; animation-delay: 1.1s; }
+.today-radar-mark-active .today-radar-blip { animation-duration: 1.1s; }
+.today-radar-panel { width: min(390px, calc(100vw - 28px)); max-height: min(72vh, 680px); overflow: auto; border: 1px solid var(--line); border-radius: 20px; color: var(--ink); background: var(--paper); box-shadow: 0 24px 70px rgba(16,24,40,.26); animation: today-radar-enter .2s ease-out; }
+.today-radar-panel-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 17px 17px 14px; border-bottom: 1px solid var(--line); }
+.today-radar-panel-head .today-radar-mark { width: 48px; height: 48px; }
+.today-radar-eyebrow { color: var(--accent); font-size: 9px; font-weight: 900; letter-spacing: .15em; }
+.today-radar-close { display: grid; place-items: center; width: 34px; height: 34px; border: 1px solid var(--line); border-radius: 50%; color: var(--muted); font-size: 23px; line-height: 1; }
+.today-radar-feature { margin: 13px 13px 0; padding: 14px; border: 1px solid rgba(36,87,197,.2); border-radius: 14px; background: linear-gradient(135deg, rgba(36,87,197,.09), rgba(230,57,70,.045)); }
+.today-radar-type { display: inline-flex; padding: 4px 7px; border-radius: 5px; color: #173b87; background: rgba(36,87,197,.12); font-size: 9px; font-weight: 900; letter-spacing: .08em; }
+.today-radar-type-deadline { color: #b42332; background: rgba(230,57,70,.12); }
+.today-radar-dot-nav { width: 6px; height: 6px; padding: 0; border-radius: 999px; background: var(--line); transition: width .2s ease, background .2s ease; }
+.today-radar-dot-nav.is-active { width: 19px; background: #e63946; }
+.today-radar-list { padding: 14px 13px 8px; }
+.today-radar-list-label { margin: 0 3px 7px; color: var(--muted); font-size: 9px; font-weight: 900; letter-spacing: .13em; }
+.today-radar-list-item { display: flex; align-items: center; gap: 10px; padding: 10px 8px; border-bottom: 1px solid var(--line); border-radius: 8px; transition: background .15s ease; }
+.today-radar-list-item:hover, .today-radar-list-item.is-featured { background: var(--surface); }
+.today-radar-list-icon { display: grid; place-items: center; flex: 0 0 auto; width: 27px; height: 27px; border-radius: 8px; color: #173b87; background: rgba(36,87,197,.12); font-size: 10px; font-weight: 900; }
+.today-radar-list-icon.is-deadline { color: #b42332; background: rgba(230,57,70,.12); }
+.today-radar-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 4px; padding: 13px 17px; border-top: 1px solid var(--line); color: var(--blue-dark); font-size: 12px; font-weight: 900; }
+.dark .today-radar-launcher { color: var(--ink); background: rgba(25,35,52,.97); border-color: rgba(131,168,255,.3); }
+@keyframes today-radar-spin { to { transform: rotate(360deg); } }
+@keyframes today-radar-blink { 0%,100% { opacity: .45; transform: scale(.8); } 50% { opacity: 1; transform: scale(1.5); } }
+@keyframes today-radar-enter { from { opacity: 0; transform: translateY(8px) scale(.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
+@media (prefers-reduced-motion: reduce) { .today-radar-sweep,.today-radar-blip { animation: none !important; } .today-radar-panel { animation: none !important; } }
