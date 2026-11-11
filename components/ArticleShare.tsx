@@ -14,11 +14,11 @@ export function ArticleShare({ title, excerpt, shortCode, sharePath }: ArticleSh
   const [url, setUrl] = useState('');
 
   useEffect(() => {
-    setUrl(shortCode ? new URL(`/s/${shortCode}`, window.location.origin).toString() : sharePath ? new URL(sharePath, window.location.origin).toString() : window.location.href);
+    setUrl(shortCode ? new URL(`/cr/${shortCode}`, window.location.origin).toString() : sharePath ? new URL(sharePath, window.location.origin).toString() : window.location.href);
   }, [shortCode, sharePath]);
 
   async function shareArticle() {
-    const currentUrl = shortCode ? new URL(`/s/${shortCode}`, window.location.origin).toString() : sharePath ? new URL(sharePath, window.location.origin).toString() : window.location.href;
+    const currentUrl = shortCode ? new URL(`/cr/${shortCode}`, window.location.origin).toString() : sharePath ? new URL(sharePath, window.location.origin).toString() : window.location.href;
     if (navigator.share) {
       try {
         await navigator.share({ title, text: excerpt, url: currentUrl });
