@@ -2,7 +2,8 @@
 alter table public.stories
   add column if not exists assigned_editor_id uuid references public.users(id) on delete set null,
   add column if not exists assigned_reporter_id uuid references public.users(id) on delete set null,
-  add column if not exists assigned_by_id uuid references public.users(id) on delete set null;
+  add column if not exists assigned_by_id uuid references public.users(id) on delete set null,
+  add column if not exists assigned_note text;
 
 create index if not exists stories_assigned_editor_idx
   on public.stories(assigned_editor_id) where assigned_editor_id is not null;
