@@ -53,8 +53,8 @@ export async function POST(request: NextRequest, { params }: RouteContext) {
   }
 
   const updates = type === 'EDITOR_REVIEW'
-    ? { assigned_editor_id: target.id, assigned_by_id: actor.id, status: 'REVIEW', editing_locked_by: null, editing_locked_at: null, updated_at: new Date().toISOString() }
-    : { assigned_reporter_id: target.id, assigned_by_id: actor.id, status: story.status === 'REVIEW' ? 'DRAFT' : story.status, editing_locked_by: null, editing_locked_at: null, updated_at: new Date().toISOString() };
+    ? { assigned_editor_id: target.id, assigned_by_id: actor.id, assigned_note: note, status: 'REVIEW', editing_locked_by: null, editing_locked_at: null, updated_at: new Date().toISOString() }
+    : { assigned_reporter_id: target.id, assigned_by_id: actor.id, assigned_note: note, status: story.status === 'REVIEW' ? 'DRAFT' : story.status, editing_locked_by: null, editing_locked_at: null, updated_at: new Date().toISOString() };
   const { error: updateError } = await db.from('stories').update(updates).eq('id', id);
   if (updateError) return NextResponse.json({ error: 'Could not save the assignment.' }, { status: 500 });
 
