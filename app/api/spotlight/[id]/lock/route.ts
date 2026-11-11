@@ -3,7 +3,7 @@ import { getSupabaseAdmin } from '@/lib/server/supabase';
 import { requireRole } from '@/lib/server/auth';
 
 type Ctx = { params: Promise<{ id: string }> };
-const EDITORS = ['EDITOR', 'SUPER_ADMIN'] as const;
+const EDITORS = ['EDITOR', 'SENIOR_EDITOR', 'SUPER_ADMIN'] as const;
 
 export async function POST(_request: NextRequest, { params }: Ctx) {
   const { id } = await params;
