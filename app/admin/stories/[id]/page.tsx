@@ -12,6 +12,7 @@ import {
 import { useParams, useRouter } from 'next/navigation';
 import imageCompression from 'browser-image-compression';
 import ArticleThumbnail from '@/components/ArticleThumbnail';
+import NewsroomWritingEditor from '@/components/NewsroomWritingEditor';
 
 type Story = {
   id: string;
@@ -499,7 +500,7 @@ export default function EditStoryPage() {
 
               <div>
                 <label htmlFor="body" className="mb-2 block text-sm font-medium text-gray-900">Story Body</label>
-                <textarea ref={bodyInputRef} id="body" value={body} onChange={(event) => setBody(event.target.value)} required rows={14} className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm leading-6 outline-none focus:border-black" />
+                <NewsroomWritingEditor value={body} onChange={setBody} textareaRef={bodyInputRef} disabled={!canEdit} minRows={28} />
               </div>
 
               <div>
