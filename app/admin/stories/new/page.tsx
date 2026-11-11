@@ -44,6 +44,7 @@ export default function NewStoryPage() {
   const [commercialStatus, setCommercialStatus] =
     useState('EDITORIAL');
   const [status, setStatus] = useState('DRAFT');
+  const [currentUserRole, setCurrentUserRole] = useState('');
   const [featured, setFeatured] = useState(false);
   const [authorName, setAuthorName] = useState('');
   const [coverImage, setCoverImage] = useState('');
@@ -95,6 +96,7 @@ export default function NewStoryPage() {
 
   useEffect(() => {
     loadMedia();
+    fetch('/api/auth/session', { cache: 'no-store' }).then(response => response.json()).then(result => setCurrentUserRole(result.user?.role ?? '')).catch(() => setCurrentUserRole(''));
   }, []);
 
   async function prepareImage(file: File) {
