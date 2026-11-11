@@ -172,7 +172,7 @@ export async function PATCH(request: NextRequest, { params }: RouteContext) {
 export async function DELETE(_request: NextRequest, { params }: RouteContext) {
   const { id } = await params;
   let user;
-  try { user = await requireRole(['SUPER_ADMIN', 'EDITOR']); }
+  try { user = await requireRole(['SUPER_ADMIN', 'SENIOR_EDITOR', 'EDITOR']); }
   catch { return NextResponse.json({ error: 'Unauthorized' }, { status: 401 }); }
 
   const db = getSupabaseAdmin();
