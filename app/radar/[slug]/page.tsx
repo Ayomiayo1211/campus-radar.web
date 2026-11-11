@@ -91,7 +91,7 @@ export default async function RadarItemPage({ params }: PageProps) {
           }}
         />
         <Link href="/radar" className="text-sm font-bold text-[#173B87] underline underline-offset-4">← Back to The Radar</Link>
-        <article className="mt-7">
+        {item.event_date && <CountdownTimer date={item.event_date} kind="event" />}\n        <article className="mt-5">
           <div className="flex flex-wrap items-center gap-3">
             <span className="kicker text-[var(--accent)]">{item.kind.replaceAll('_', ' ')}</span>
             <span className="kicker text-[var(--muted)]">{item.commercial_status === 'EDITORIAL' ? 'Editorial' : item.commercial_status.charAt(0) + item.commercial_status.slice(1).toLowerCase()}</span>
