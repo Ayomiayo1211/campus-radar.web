@@ -26,7 +26,7 @@ export default function NewsroomAssignmentsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
-  const [targets, setTargets] = useState<Record<string, string>>({});
+  const [targets, setTargets] = useState<Record<string, string>>({});\n  const [editorTargets, setEditorTargets] = useState<Record<string, string>>({});
   const [notes, setNotes] = useState<Record<string, string>>({});
   const [busy, setBusy] = useState<string | null>(null);
 
@@ -125,12 +125,25 @@ export default function NewsroomAssignmentsPage() {
                     <Link href={`/admin/stories/${story.id}`} className="rounded-lg border border-gray-300 px-3 py-2 text-sm font-medium text-gray-800 hover:bg-gray-50">Open story</Link>
                   </div>
                   {(canAllocate || canSendToEditor) && (
-                    <div className="mt-5 grid gap-3 rounded-xl bg-gray-50 p-4 sm:grid-cols-[1fr_1.2fr_auto] sm:items-end">
-                      <div><label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-gray-500">{canAllocate ? 'Allocate to reporter' : 'Send to editor'}</label>
-                        <select value={targets[story.id] || ''} onChange={e => setTargets(v => ({ ...v, [story.id]: e.target.value }))} className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm"><option value="">Choose recipient</option>{(canAllocate ? data.reporters : data.editors).map(person => <option key={person.id} value={person.id}>{person.name}{person.role ? ` · ${person.role.replace('_', ' ')}` : ''}</option>)}</select>
-                      </div>
-                      <div><label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-gray-500">Note (optional)</label><input value={notes[story.id] || ''} onChange={e => setNotes(v => ({ ...v, [story.id]: e.target.value }))} maxLength={1000} placeholder="Add instructions or context" className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm"/></div>
-                      <button type="button" onClick={() => void assign(story, canAllocate ? 'REPORTER_TASK' : 'EDITOR_REVIEW')} disabled={busy === story.id || !targets[story.id]} className="rounded-lg bg-[#173B87] px-4 py-2.5 text-sm font-semibold text-white hover:bg-[#102d68] disabled:opacity-50">{busy === story.id ? 'Sending...' : canAllocate ? 'Allocate story' : 'Send to editor'}</button>
+                    <div className="mt-5 space-y-3 rounded-xl bg-gray-50 p-4">
+                      {canAllocate && (
+                        <div className="grid gap-3 sm:grid-cols-[1fr_1.2fr_auto] sm:items-end">
+                          <div><label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-gray-500">Allocate to reporter</label>
+                            <select value={targets[story.id] || ''} onChange={e => setTargets(v => ({ ...v, [story.id]: e.target.value }))} className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm"><option value="">Choose reporter</option>{data.reporters.map(person => <option key={person.id} value={person.id}>{person.name}</option>)}</select>
+                          </div>
+                          <div><label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-gray-500">Assignment note</label><input value={notes[story.id] || ''} onChange={e => setNotes(v => ({ ...v, [story.id]: e.target.value }))} maxLength={1000} placeholder="Add instructions or context" className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm"/></div>
+                          <button type="button" onClick={() => void assign(story, 'REPORTER_TASK')} disabled={busy === story.id || !targets[story.id]} className="rounded-lg bg-[#173B87] px-4 py-2.5 text-sm font-semibold text-white hover:bg-[#102d68] disabled:opacity-50">{busy === story.id ? 'Sending...' : 'Allocate story'}</button>
+                        </div>
+                      )}
+                      {canSendToEditor && (
+                        <div className="grid gap-3 sm:grid-cols-[1fr_1.2fr_auto] sm:items-end">
+                          <div><label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-gray-500">Send to editor</label>
+                            <select value={editorTargets[story.id] || ''} onChange={e => setEditorTargets(v => ({ ...v, [story.id]: e.target.value }))} className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm"><option value="">Choose editor</option>{data.editors.filter(person => person.id !== data.currentUser.id).map(person => <option key={person.id} value={person.id}>{person.name}{person.role ? ` · ${person.role.replace('_', ' ')}` : ''}</option>)}</select>
+                          </div>
+                          <div><label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-gray-500">Editorial note</label><input value={notes[story.id] || ''} onChange={e => setNotes(v => ({ ...v, [story.id]: e.target.value }))} maxLength={1000} placeholder="Add instructions or context" className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm"/></div>
+                          <button type="button" onClick={() => { setTargets(v => ({ ...v, [story.id]: editorTargets[story.id] || '' })); void assign(story, 'EDITOR_REVIEW'); }} disabled={busy === story.id || !editorTargets[story.id]} className="rounded-lg border border-[#173B87] bg-white px-4 py-2.5 text-sm font-semibold text-[#173B87] hover:bg-blue-50 disabled:opacity-50">{busy === story.id ? 'Sending...' : 'Send for review'}</button>
+                        </div>
+                      )}
                     </div>
                   )}
                 </article>
