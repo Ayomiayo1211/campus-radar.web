@@ -624,8 +624,7 @@ export default function EditStoryPage() {
                 <select id="status" value={status} onChange={(event) => setStatus(event.target.value)} className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm outline-none focus:border-black">
                   <option value="DRAFT">Draft</option>
                   <option value="REVIEW">Review</option>
-                  <option value="PUBLISHED">Published</option>
-                  <option value="ARCHIVED">Archived</option>
+                  {story?.currentUserRole !== 'REPORTER' && <><option value="PUBLISHED">Published</option><option value="ARCHIVED">Archived</option></>}
                 </select>
               </div>
             </div>
