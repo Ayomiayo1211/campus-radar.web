@@ -5,7 +5,7 @@ export const dynamic = 'force-dynamic';
 
 export async function GET() {
   try {
-    const user = await requireRole(['SUPER_ADMIN', 'EDITOR', 'REPORTER']);
+    const user = await requireRole(['SUPER_ADMIN', 'SENIOR_EDITOR', 'EDITOR', 'REPORTER']);
     return NextResponse.json({
       authenticated: true,
       user: { id: user.id, name: user.name, email: user.email, role: user.role },

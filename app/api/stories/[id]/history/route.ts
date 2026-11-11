@@ -7,13 +7,13 @@ type RouteContext = { params: Promise<{ id: string }> };
 export async function GET(_request: NextRequest, { params }: RouteContext) {
   const { id } = await params;
   let user;
-  try { user = await requireRole(['SUPER_ADMIN', 'EDITOR', 'REPORTER']); }
+  try { user = await requireRole(['SUPER_ADMIN', 'SENIOR_EDITOR', 'EDITOR', 'REPORTER']); }
   catch { return NextResponse.json({ error: 'Unauthorized' }, { status: 401 }); }
 
   const db = getSupabaseAdmin();
   if (user.role === 'REPORTER') {
-    const { data: story } = await db.from('stories').select('author_id').eq('id', id).maybeSingle();
-    if (!story || story.author_id !== user.id) {
+    const { data: story } = await db.from('stories').select('author_id,assigned_reporter_id').eq('id', id).maybeSingle();
+    if (!story || (story.author_id !== user.id && story.assigned_reporter_id !== user.id)) {
       return NextResponse.json({ error: 'You cannot view this story history.' }, { status: 403 });
     }
   }

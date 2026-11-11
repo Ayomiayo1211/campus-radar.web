@@ -15,7 +15,7 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   let user;
-  try { user = await requireRole(['SUPER_ADMIN', 'EDITOR']); }
+  try { user = await requireRole(['SUPER_ADMIN', 'SENIOR_EDITOR', 'EDITOR']); }
   catch { return NextResponse.json({ error: 'Editors only' }, { status: 403 }); }
   let b: any;
   try { b = await request.json(); } catch { return NextResponse.json({ error: 'Invalid request' }, { status: 400 }); }

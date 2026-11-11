@@ -12,6 +12,7 @@ import {
 import { useRouter } from 'next/navigation';
 import imageCompression from 'browser-image-compression';
 import ArticleThumbnail from '@/components/ArticleThumbnail';
+import NewsroomWritingEditor from '@/components/NewsroomWritingEditor';
 
 type Media = {
   id: string;
@@ -43,6 +44,7 @@ export default function NewStoryPage() {
   const [commercialStatus, setCommercialStatus] =
     useState('EDITORIAL');
   const [status, setStatus] = useState('DRAFT');
+  const [currentUserRole, setCurrentUserRole] = useState('');
   const [featured, setFeatured] = useState(false);
   const [authorName, setAuthorName] = useState('');
   const [coverImage, setCoverImage] = useState('');
@@ -94,6 +96,7 @@ export default function NewStoryPage() {
 
   useEffect(() => {
     loadMedia();
+    fetch('/api/auth/session', { cache: 'no-store' }).then(response => response.json()).then(result => setCurrentUserRole(result.user?.role ?? '')).catch(() => setCurrentUserRole(''));
   }, []);
 
   async function prepareImage(file: File) {
@@ -447,15 +450,7 @@ export default function NewStoryPage() {
                 <label htmlFor="body" className="mb-2 block text-sm font-medium text-gray-900">
                   Story Body
                 </label>
-                <textarea
-                  id="body"
-                  value={body}
-                  onChange={(event) => setBody(event.target.value)}
-                  required
-                  rows={14}
-                  className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm leading-6 outline-none focus:border-black"
-                  placeholder="Write the full story..."
-                />
+                <NewsroomWritingEditor value={body} onChange={setBody} placeholder="Write the full story..." minRows={28} />
               </div>
 
               <div>
@@ -803,8 +798,7 @@ export default function NewStoryPage() {
                 >
                   <option value="DRAFT">Draft</option>
                   <option value="REVIEW">Review</option>
-                  <option value="PUBLISHED">Published</option>
-                  <option value="ARCHIVED">Archived</option>
+                  {currentUserRole !== 'REPORTER' && <><option value="PUBLISHED">Published</option><option value="ARCHIVED">Archived</option></>}
                 </select>
               </div>
             </div>

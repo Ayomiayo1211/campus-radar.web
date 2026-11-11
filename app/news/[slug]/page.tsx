@@ -10,6 +10,83 @@ import { ArticleEngagement } from '@/components/ArticleEngagement';
 
 export const dynamic = 'force-dynamic';
 
+function renderInlineMarkdown(value: string) {
+  const tokens = value.split(/(\*\*[^*]+\*\*|\*[^*]+\*|\[[^\]]+\]\(https?:\/\/[^)\s]+\))/g);
+  return tokens.map((token, index) => {
+    if (token.startsWith('**') && token.endsWith('**')) return <strong key={index}>{token.slice(2, -2)}</strong>;
+    if (token.startsWith('*') && token.endsWith('*')) return <em key={index}>{token.slice(1, -1)}</em>;
+    const link = token.match(/^\[([^\]]+)\]\((https?:\/\/[^)\s]+)\)$/);
+    if (link) return <a key={index} href={link[2]} target="_blank" rel="noopener noreferrer" className="font-medium text-[#173B87] underline">{link[1]}</a>;
+    return token;
+  });
+}
+
+function renderStoryParagraph(block: string) {
+  const lines = block.split('\n');
+  const nodes: import('react').ReactNode[] = [];
+  let index = 0;
+
+  while (index < lines.length) {
+    const line = lines[index];
+    const heading = line.match(/^(#{1,3})\s+(.+)$/);
+    if (heading) {
+      const content = renderInlineMarkdown(heading[2]);
+      nodes.push(heading[1].length === 3
+        ? <h3 key={index} className="mb-3 mt-7 text-xl font-bold">{content}</h3>
+        : <h2 key={index} className={heading[1].length === 1 ? "mb-3 mt-8 text-3xl font-bold tracking-tight" : "mb-3 mt-8 text-2xl font-bold tracking-tight"}>{content}</h2>);
+      index += 1;
+      continue;
+    }
+
+    if (/^>\s?/.test(line)) {
+      const group: string[] = [];
+      while (index < lines.length && /^>\s?/.test(lines[index])) {
+        group.push(lines[index].replace(/^>\s?/, ''));
+        index += 1;
+      }
+      nodes.push(<blockquote key={index} className="my-6 border-l-4 border-[#173B87] pl-5 italic text-[var(--muted)]">{group.map((text, itemIndex) => <span key={itemIndex}>{itemIndex > 0 ? <br /> : null}{renderInlineMarkdown(text)}</span>)}</blockquote>);
+      continue;
+    }
+
+    if (/^-\s+/.test(line)) {
+      const group: string[] = [];
+      while (index < lines.length && /^-\s+/.test(lines[index])) {
+        group.push(lines[index].replace(/^-\s+/, ''));
+        index += 1;
+      }
+      nodes.push(<ul key={index} className="my-4 list-disc space-y-2 pl-6">{group.map((text, itemIndex) => <li key={itemIndex}>{renderInlineMarkdown(text)}</li>)}</ul>);
+      continue;
+    }
+
+    if (/^\d+\.\s+/.test(line)) {
+      const group: string[] = [];
+      while (index < lines.length && /^\d+\.\s+/.test(lines[index])) {
+        group.push(lines[index].replace(/^\d+\.\s+/, ''));
+        index += 1;
+      }
+      nodes.push(<ol key={index} className="my-4 list-decimal space-y-2 pl-6">{group.map((text, itemIndex) => <li key={itemIndex}>{renderInlineMarkdown(text)}</li>)}</ol>);
+      continue;
+    }
+
+    if (/^---+$/.test(line.trim())) {
+      nodes.push(<hr key={index} className="my-8 border-[var(--line)]" />);
+      index += 1;
+      continue;
+    }
+
+    const paragraph: string[] = [];
+    while (index < lines.length && !/^(#{1,3}\s+|>\s?|-\s+|\d+\.\s+|---+$)/.test(lines[index])) {
+      paragraph.push(lines[index]);
+      index += 1;
+    }
+    if (paragraph.length) {
+      nodes.push(<p key={index} className="whitespace-pre-wrap">{paragraph.map((text, itemIndex) => <span key={itemIndex}>{itemIndex > 0 ? <br /> : null}{renderInlineMarkdown(text)}</span>)}</p>);
+    }
+  }
+
+  return <>{nodes}</>;
+}
+
 type ArticlePageProps = {
   params: Promise<{ slug: string }>;
 };
@@ -205,7 +282,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
               }
               return (
                 <div key={index}>
-                  {marker ? (manuallyPlacedImage ? renderGalleryImage(manuallyPlacedImage, "manual-" + index) : null) : <p className="whitespace-pre-wrap">{paragraph}</p>}
+                  {marker ? (manuallyPlacedImage ? renderGalleryImage(manuallyPlacedImage, "manual-" + index) : null) : renderStoryParagraph(paragraph)}
                   {(automaticPlacement.get(index) ?? []).map((image) => renderGalleryImage(image, "auto-" + image.id))}
                 </div>
               );

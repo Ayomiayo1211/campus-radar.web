@@ -12,6 +12,7 @@ import {
 import { useParams, useRouter } from 'next/navigation';
 import imageCompression from 'browser-image-compression';
 import ArticleThumbnail from '@/components/ArticleThumbnail';
+import NewsroomWritingEditor from '@/components/NewsroomWritingEditor';
 
 type Story = {
   id: string;
@@ -426,6 +427,9 @@ export default function EditStoryPage() {
               <p className="mt-2 text-xs text-gray-500">Worked on by: {workedBy.length ? workedBy.join(', ') : 'No recorded activity yet'}</p>
             </div>
             <div className="flex gap-2">
+              {story.currentUserRole === 'REPORTER' && (
+                <button type="button" onClick={() => window.location.reload()} className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium">Refresh latest version</button>
+              )}
               {!story.editingLockedBy && story.currentUserRole !== 'REPORTER' && (
                 <button type="button" onClick={() => void claimStory()} disabled={lockBusy} className="rounded-lg bg-[#173B87] px-4 py-2 text-sm font-semibold text-white disabled:opacity-50">
                   {lockBusy ? 'Claiming...' : 'Start working'}
@@ -499,7 +503,7 @@ export default function EditStoryPage() {
 
               <div>
                 <label htmlFor="body" className="mb-2 block text-sm font-medium text-gray-900">Story Body</label>
-                <textarea ref={bodyInputRef} id="body" value={body} onChange={(event) => setBody(event.target.value)} required rows={14} className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm leading-6 outline-none focus:border-black" />
+                <NewsroomWritingEditor value={body} onChange={setBody} textareaRef={bodyInputRef} disabled={!canEdit} minRows={28} />
               </div>
 
               <div>
@@ -623,8 +627,7 @@ export default function EditStoryPage() {
                 <select id="status" value={status} onChange={(event) => setStatus(event.target.value)} className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm outline-none focus:border-black">
                   <option value="DRAFT">Draft</option>
                   <option value="REVIEW">Review</option>
-                  <option value="PUBLISHED">Published</option>
-                  <option value="ARCHIVED">Archived</option>
+                  {story?.currentUserRole !== 'REPORTER' && <><option value="PUBLISHED">Published</option><option value="ARCHIVED">Archived</option></>}
                 </select>
               </div>
             </div>

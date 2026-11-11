@@ -4,7 +4,7 @@ import { requireRole } from '@/lib/server/auth';
 
 export async function GET() {
   let user;
-  try { user = await requireRole(['SUPER_ADMIN', 'EDITOR']); }
+  try { user = await requireRole(['SUPER_ADMIN', 'SENIOR_EDITOR', 'EDITOR']); }
   catch { return NextResponse.json({ error: 'Editors only' }, { status: 403 }); }
   const db = getSupabaseAdmin() as any;
   const { data, error } = await db.from('spotlights').select('*').order('created_at', { ascending: false });

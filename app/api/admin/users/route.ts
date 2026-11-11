@@ -4,7 +4,8 @@ import { getSupabaseAdmin } from '@/lib/server/supabase';
 import { requireRole } from '@/lib/server/auth';
 import { sendGmailMessage } from '@/lib/server/gmail';
 import { getCloudflareContext } from '@opennextjs/cloudflare';
-const ROLES = ['EDITOR', 'REPORTER'] as const;
+const INVITABLE_ROLES = ['EDITOR', 'REPORTER'] as const;
+const ASSIGNABLE_ROLES = ['EDITOR', 'REPORTER', 'SENIOR_EDITOR'] as const;
 const authError = (e: unknown) => e instanceof Error && e.message === 'Forbidden' ? NextResponse.json({error:'Master Admin access required'},{status:403}) : NextResponse.json({error:'Authentication required'},{status:401});
 const safe = (u: any) => ({id:u.id,name:u.name,email:u.email,role:u.role,isActive:u.is_active,createdAt:u.created_at});
 export async function GET() {
@@ -21,7 +22,7 @@ export async function POST(request:NextRequest) {
  let actor; try { actor=await requireRole(['SUPER_ADMIN']); } catch(e) { return authError(e); }
  let body:any; try { body=await request.json(); } catch { return NextResponse.json({error:'Invalid request body'},{status:400}); }
  const email=typeof body?.email==='string'?body.email.trim().toLowerCase():'', role=body?.role;
- if(!/^\S+@\S+\.\S+$/.test(email)||email.length>254||!ROLES.includes(role))return NextResponse.json({error:'Provide a valid email address and role'},{status:400});
+ if(!/^\S+@\S+\.\S+$/.test(email)||email.length>254||!INVITABLE_ROLES.includes(role))return NextResponse.json({error:'Provide a valid email address and role'},{status:400});
  const db=getSupabaseAdmin();
  const {data:existing,error:lookupError}=await db.from('users').select('id').eq('email',email).maybeSingle();
  if(lookupError)return NextResponse.json({error:'Could not verify email address'},{status:500});
@@ -53,7 +54,7 @@ export async function PATCH(request:NextRequest) {
  let body:any;try{body=await request.json();}catch{return NextResponse.json({error:'Invalid request body'},{status:400});}
  const id=typeof body?.id==='string'?body.id:'',role=body?.role,isActive=body?.isActive;
  if(!id)return NextResponse.json({error:'User ID is required'},{status:400});
- if(role!==undefined&&!ROLES.includes(role))return NextResponse.json({error:'Only Editor and Reporter roles can be assigned here'},{status:400});
+ if(role!==undefined&&!ASSIGNABLE_ROLES.includes(role))return NextResponse.json({error:'Choose Reporter, Editor, or Senior Editor'},{status:400});
  if(isActive!==undefined&&typeof isActive!=='boolean')return NextResponse.json({error:'Invalid account status'},{status:400});
  if(role===undefined&&isActive===undefined)return NextResponse.json({error:'No changes supplied'},{status:400});
  if(id===actor.id)return NextResponse.json({error:'The Master Admin account cannot be changed here'},{status:400});
