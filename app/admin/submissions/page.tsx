@@ -47,8 +47,8 @@ export default function NewsroomAssignmentsPage() {
 
   useEffect(() => { void load(); }, [load]);
 
-  async function assign(story: Story, type: 'EDITOR_REVIEW' | 'REPORTER_TASK') {
-    const assigneeId = targets[story.id];
+  async function assign(story: Story, type: 'EDITOR_REVIEW' | 'REPORTER_TASK', selectedTarget?: string) {
+    const assigneeId = selectedTarget || targets[story.id];
     if (!assigneeId) { setError('Choose a recipient first.'); return; }
     setBusy(story.id);
     setError('');
