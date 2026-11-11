@@ -86,7 +86,8 @@ export default async function OpportunityPage({ params }: PageProps) {
           }}
         />
         <Link href="/opportunities" className="text-sm font-bold text-[#173B87] underline underline-offset-4">← Back to Opportunities</Link>
-        <article className="mt-7">
+        {opportunity.deadline && <CountdownTimer date={opportunity.deadline} kind="deadline" />}
+        <article className="mt-5">
           <div className="flex flex-wrap items-center gap-3">
             <span className="kicker text-[var(--accent)]">{opportunity.type.replaceAll('_', ' ')}</span>
             {opportunity.commercial_status !== 'EDITORIAL' && <span className="kicker text-[var(--muted)]">{opportunity.commercial_status.charAt(0) + opportunity.commercial_status.slice(1).toLowerCase()}</span>}
@@ -95,7 +96,7 @@ export default async function OpportunityPage({ params }: PageProps) {
           <p className="mt-4 text-lg font-bold text-[var(--muted)]">{opportunity.organisation}</p>
           <div className="mt-8 max-w-3xl">
             <p className="whitespace-pre-line text-lg leading-8 text-[var(--ink)]">{opportunity.description}</p>
-            {opportunity.deadline && <><p className="mt-7 border-t border-[var(--line)] pt-5 text-sm font-bold text-[var(--muted)]">APPLICATION DEADLINE · {new Date(opportunity.deadline).toLocaleDateString('en-NG', { day: 'numeric', month: 'long', year: 'numeric' })}</p><CountdownTimer date={opportunity.deadline} kind="deadline" /></>}
+            {opportunity.deadline && <><p className="mt-7 border-t border-[var(--line)] pt-5 text-sm font-bold text-[var(--muted)]">APPLICATION DEADLINE · {new Date(opportunity.deadline).toLocaleDateString('en-NG', { day: 'numeric', month: 'long', year: 'numeric' })}</p></>}
             {opportunity.application_url && <a href={opportunity.application_url} target="_blank" rel="noopener noreferrer" className="mt-6 inline-flex rounded-md bg-[#173B87] px-5 py-3 text-sm font-bold text-white hover:opacity-90">Apply / Learn more</a>}
           </div>
           <div className="mt-8 border-t border-[var(--line)] pt-6">
