@@ -17,10 +17,6 @@ export default function NewsroomWritingEditor({
 }: Props) {
   const internalRef = useRef<HTMLTextAreaElement>(null);
   const editorRef = textareaRef ?? internalRef;
-  const [fontFamily, setFontFamily] = [undefined, undefined] as any;
-  const [fontSize, setFontSize] = [undefined, undefined] as any;
-  const [lineHeight, setLineHeight] = [undefined, undefined] as any;
-  const [width, setWidth] = [undefined, undefined] as any;
   // Keep visual preferences local to the writing session.
   const styleState = useRef({ fontFamily: 'Georgia', fontSize: '17', lineHeight: '1.9', width: 'wide' });
   const refresh = () => {
