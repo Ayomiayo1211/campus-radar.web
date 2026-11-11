@@ -45,7 +45,10 @@ export async function POST(request: NextRequest, { params }: RouteContext) {
     return NextResponse.json({ error: 'Reporter assignments must go to a Reporter account.' }, { status: 400 });
   }
 
-  if (story.editing_locked_by && story.editing_locked_by !== actor.id) {\n    return NextResponse.json({ error: 'This story is currently being edited by another editor. Ask them to release it before reassigning.' }, { status: 423 });\n  }\n  if (story.status === 'PUBLISHED' || story.status === 'ARCHIVED') {
+  if (story.editing_locked_by && story.editing_locked_by !== actor.id) {
+    return NextResponse.json({ error: 'This story is currently being edited by another editor. Ask them to release it before reassigning.' }, { status: 423 });
+  }
+  if (story.status === 'PUBLISHED' || story.status === 'ARCHIVED') {
     return NextResponse.json({ error: 'Published or archived stories cannot be reassigned.' }, { status: 409 });
   }
 
