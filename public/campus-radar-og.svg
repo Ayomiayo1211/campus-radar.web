@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+<rect width="1200" height="630" fill="#102b66"/>
+<circle cx="1120" cy="85" r="300" fill="none" stroke="#ffffff" stroke-opacity=".12" stroke-width="2"/>
+<circle cx="1120" cy="85" r="215" fill="none" stroke="#ffffff" stroke-opacity=".10" stroke-width="2"/>
+<rect x="76" y="72" width="18" height="54" rx="9" fill="#f2b544"/>
+<text x="118" y="112" fill="#ffffff" font-family="Arial,sans-serif" font-size="34" font-weight="800" letter-spacing="-1">CAMPUS RADAR</text>
+<text x="76" y="265" fill="#f2b544" font-family="Arial,sans-serif" font-size="22" font-weight="700" letter-spacing="5">FUNAAB · CAMPUS &amp; BEYOND</text>
+<text x="76" y="370" fill="#ffffff" font-family="Arial,sans-serif" font-size="76" font-weight="800">Stories that</text>
+<text x="76" y="455" fill="#ffffff" font-family="Arial,sans-serif" font-size="76" font-weight="800">move campus.</text>
+<text x="78" y="510" fill="#dce6fb" font-family="Arial,sans-serif" font-size="27">Student news, campus updates and opportunities.</text>
+<path d="M76 555H1124" stroke="#ffffff" stroke-opacity=".28"/>
+<text x="76" y="595" fill="#dce6fb" font-family="Arial,sans-serif" font-size="19">www.campusradarfunaab.com.ng</text>
+<text x="1124" y="595" fill="#f2b544" font-family="Arial,sans-serif" font-size="19" font-weight="700" text-anchor="end">INFORM · CONNECT · ENGAGE</text>
+</svg>
