@@ -4,6 +4,7 @@ import type { Metadata } from 'next';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { ShareActions } from '@/components/ShareActions';
+import { CountdownTimer } from '@/components/CountdownTimer';
 import { getSupabaseAdmin } from '@/lib/server/supabase';
 
 export const dynamic = 'force-dynamic';
@@ -94,7 +95,7 @@ export default async function OpportunityPage({ params }: PageProps) {
           <p className="mt-4 text-lg font-bold text-[var(--muted)]">{opportunity.organisation}</p>
           <div className="mt-8 max-w-3xl">
             <p className="whitespace-pre-line text-lg leading-8 text-[var(--ink)]">{opportunity.description}</p>
-            {opportunity.deadline && <p className="mt-7 border-t border-[var(--line)] pt-5 text-sm font-bold text-[var(--muted)]">APPLICATION DEADLINE · {new Date(opportunity.deadline).toLocaleDateString('en-NG', { day: 'numeric', month: 'long', year: 'numeric' })}</p>}
+            {opportunity.deadline && <><p className="mt-7 border-t border-[var(--line)] pt-5 text-sm font-bold text-[var(--muted)]">APPLICATION DEADLINE · {new Date(opportunity.deadline).toLocaleDateString('en-NG', { day: 'numeric', month: 'long', year: 'numeric' })}</p><CountdownTimer date={opportunity.deadline} kind="deadline" /></>}
             {opportunity.application_url && <a href={opportunity.application_url} target="_blank" rel="noopener noreferrer" className="mt-6 inline-flex rounded-md bg-[#173B87] px-5 py-3 text-sm font-bold text-white hover:opacity-90">Apply / Learn more</a>}
           </div>
           <div className="mt-8 border-t border-[var(--line)] pt-6">
