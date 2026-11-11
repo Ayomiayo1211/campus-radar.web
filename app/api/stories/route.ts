@@ -5,7 +5,7 @@ import { requireRole } from '@/lib/server/auth';
 import { storySchema } from '@/lib/validation/content';
 import { notifyEditorsOfStorySubmission } from '@/lib/server/story-notifications';
 import { sendPublishedStoryNewsletter } from '@/lib/server/engagement';
-const ALL_ROLES = ['SUPER_ADMIN', 'EDITOR', 'REPORTER'] as const;
+const ALL_ROLES = ['SUPER_ADMIN', 'SENIOR_EDITOR', 'EDITOR', 'REPORTER'] as const;
 
 export async function GET(request: NextRequest) {
   const params = request.nextUrl.searchParams;
@@ -21,7 +21,7 @@ export async function GET(request: NextRequest) {
   let query = db.from('stories').select('*, tags:story_tags(*), images:story_images(*)')
     .order(admin ? 'created_at' : 'published_at', { ascending: false }).limit(limit);
   if (!admin) query = query.eq('status', 'PUBLISHED');
-  if (admin && user?.role === 'REPORTER') query = query.eq('author_id', user.id).in('status', ['DRAFT', 'REVIEW']);
+  if (admin && user?.role === 'REPORTER') query = query.or(`author_id.eq.${user.id},assigned_reporter_id.eq.${user.id}`).in('status', ['DRAFT', 'REVIEW']);
   const type = params.get('type')?.toUpperCase();
   if (type) query = query.eq('content_type', type);
   const { data, error } = await query;
