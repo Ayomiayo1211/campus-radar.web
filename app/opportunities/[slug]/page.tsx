@@ -86,7 +86,8 @@ export default async function OpportunityPage({ params }: PageProps) {
           }}
         />
         <Link href="/opportunities" className="text-sm font-bold text-[#173B87] underline underline-offset-4">← Back to Opportunities</Link>
-        {opportunity.deadline && <CountdownTimer date={opportunity.deadline} kind="deadline" />}\n        <article className="mt-5">
+        {opportunity.deadline && <CountdownTimer date={opportunity.deadline} kind="deadline" />}
+        <article className="mt-5">
           <div className="flex flex-wrap items-center gap-3">
             <span className="kicker text-[var(--accent)]">{opportunity.type.replaceAll('_', ' ')}</span>
             {opportunity.commercial_status !== 'EDITORIAL' && <span className="kicker text-[var(--muted)]">{opportunity.commercial_status.charAt(0) + opportunity.commercial_status.slice(1).toLowerCase()}</span>}
