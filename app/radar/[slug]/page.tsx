@@ -91,7 +91,8 @@ export default async function RadarItemPage({ params }: PageProps) {
           }}
         />
         <Link href="/radar" className="text-sm font-bold text-[#173B87] underline underline-offset-4">← Back to The Radar</Link>
-        {item.event_date && <CountdownTimer date={item.event_date} kind="event" />}\n        <article className="mt-5">
+        {item.event_date && <CountdownTimer date={item.event_date} kind="event" />}
+        <article className="mt-5">
           <div className="flex flex-wrap items-center gap-3">
             <span className="kicker text-[var(--accent)]">{item.kind.replaceAll('_', ' ')}</span>
             <span className="kicker text-[var(--muted)]">{item.commercial_status === 'EDITORIAL' ? 'Editorial' : item.commercial_status.charAt(0) + item.commercial_status.slice(1).toLowerCase()}</span>
@@ -102,7 +103,7 @@ export default async function RadarItemPage({ params }: PageProps) {
           <div className="mt-8 max-w-3xl">
             <p className="whitespace-pre-line text-lg leading-8 text-[var(--ink)]">{item.summary}</p>
             <RadarContactActions summary={item.summary} />
-            {item.event_date && <CountdownTimer date={item.event_date} kind="event" />}
+            {item.event_date && }
             {item.location && <p className="mt-5 text-sm font-semibold text-[var(--muted)]">Location · {item.location}</p>}
             {item.link && <a href={item.link} target="_blank" rel="noopener noreferrer" className="mt-6 inline-flex rounded-md bg-[#173B87] px-5 py-3 text-sm font-bold text-white hover:opacity-90">More information</a>}
           </div>
