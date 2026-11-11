@@ -23,15 +23,68 @@ function renderInlineMarkdown(value: string) {
 
 function renderStoryParagraph(block: string) {
   const lines = block.split('\n');
-  const first = lines[0] ?? '';
-  if (/^###\s+/.test(first)) return <h3 className="mb-3 mt-7 text-xl font-bold">{renderInlineMarkdown(first.replace(/^###\s+/, ''))}</h3>;
-  if (/^##\s+/.test(first)) return <h2 className="mb-3 mt-8 text-2xl font-bold tracking-tight">{renderInlineMarkdown(first.replace(/^##\s+/, ''))}</h2>;
-  if (/^#\s+/.test(first)) return <h2 className="mb-3 mt-8 text-3xl font-bold tracking-tight">{renderInlineMarkdown(first.replace(/^#\s+/, ''))}</h2>;
-  if (lines.every(line => /^>\s?/.test(line))) return <blockquote className="my-6 border-l-4 border-[#173B87] pl-5 italic text-[var(--muted)]">{lines.map((line, index) => <span key={index}>{index > 0 ? <br /> : null}{renderInlineMarkdown(line.replace(/^>\s?/, ''))}</span>)}</blockquote>;
-  if (lines.every(line => /^-\s+/.test(line))) return <ul className="my-4 list-disc space-y-2 pl-6">{lines.map((line, index) => <li key={index}>{renderInlineMarkdown(line.replace(/^-\s+/, ''))}</li>)}</ul>;
-  if (lines.every(line => /^\d+\.\s+/.test(line))) return <ol className="my-4 list-decimal space-y-2 pl-6">{lines.map((line, index) => <li key={index}>{renderInlineMarkdown(line.replace(/^\d+\.\s+/, ''))}</li>)}</ol>;
-  if (/^---+$/.test(first.trim())) return <hr className="my-8 border-[var(--line)]" />;
-  return <p className="whitespace-pre-wrap">{lines.map((line, index) => <span key={index}>{index > 0 ? <br /> : null}{renderInlineMarkdown(line)}</span>)}</p>;
+  const nodes: import('react').ReactNode[] = [];
+  let index = 0;
+
+  while (index < lines.length) {
+    const line = lines[index];
+    const heading = line.match(/^(#{1,3})\s+(.+)$/);
+    if (heading) {
+      const content = renderInlineMarkdown(heading[2]);
+      nodes.push(heading[1].length === 3
+        ? <h3 key={index} className="mb-3 mt-7 text-xl font-bold">{content}</h3>
+        : <h2 key={index} className={heading[1].length === 1 ? "mb-3 mt-8 text-3xl font-bold tracking-tight" : "mb-3 mt-8 text-2xl font-bold tracking-tight"}>{content}</h2>);
+      index += 1;
+      continue;
+    }
+
+    if (/^>\s?/.test(line)) {
+      const group: string[] = [];
+      while (index < lines.length && /^>\s?/.test(lines[index])) {
+        group.push(lines[index].replace(/^>\s?/, ''));
+        index += 1;
+      }
+      nodes.push(<blockquote key={index} className="my-6 border-l-4 border-[#173B87] pl-5 italic text-[var(--muted)]">{group.map((text, itemIndex) => <span key={itemIndex}>{itemIndex > 0 ? <br /> : null}{renderInlineMarkdown(text)}</span>)}</blockquote>);
+      continue;
+    }
+
+    if (/^-\s+/.test(line)) {
+      const group: string[] = [];
+      while (index < lines.length && /^-\s+/.test(lines[index])) {
+        group.push(lines[index].replace(/^-\s+/, ''));
+        index += 1;
+      }
+      nodes.push(<ul key={index} className="my-4 list-disc space-y-2 pl-6">{group.map((text, itemIndex) => <li key={itemIndex}>{renderInlineMarkdown(text)}</li>)}</ul>);
+      continue;
+    }
+
+    if (/^\d+\.\s+/.test(line)) {
+      const group: string[] = [];
+      while (index < lines.length && /^\d+\.\s+/.test(lines[index])) {
+        group.push(lines[index].replace(/^\d+\.\s+/, ''));
+        index += 1;
+      }
+      nodes.push(<ol key={index} className="my-4 list-decimal space-y-2 pl-6">{group.map((text, itemIndex) => <li key={itemIndex}>{renderInlineMarkdown(text)}</li>)}</ol>);
+      continue;
+    }
+
+    if (/^---+$/.test(line.trim())) {
+      nodes.push(<hr key={index} className="my-8 border-[var(--line)]" />);
+      index += 1;
+      continue;
+    }
+
+    const paragraph: string[] = [];
+    while (index < lines.length && !/^(#{1,3}\s+|>\s?|-\s+|\d+\.\s+|---+$)/.test(lines[index])) {
+      paragraph.push(lines[index]);
+      index += 1;
+    }
+    if (paragraph.length) {
+      nodes.push(<p key={index} className="whitespace-pre-wrap">{paragraph.map((text, itemIndex) => <span key={itemIndex}>{itemIndex > 0 ? <br /> : null}{renderInlineMarkdown(text)}</span>)}</p>);
+    }
+  }
+
+  return <>{nodes}</>;
 }
 
 type ArticlePageProps = {
