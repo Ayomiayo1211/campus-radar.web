@@ -798,8 +798,7 @@ export default function NewStoryPage() {
                 >
                   <option value="DRAFT">Draft</option>
                   <option value="REVIEW">Review</option>
-                  <option value="PUBLISHED">Published</option>
-                  <option value="ARCHIVED">Archived</option>
+                  {currentUserRole !== 'REPORTER' && <><option value="PUBLISHED">Published</option><option value="ARCHIVED">Archived</option></>}
                 </select>
               </div>
             </div>
