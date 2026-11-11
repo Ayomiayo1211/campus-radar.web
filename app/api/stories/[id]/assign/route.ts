@@ -27,7 +27,7 @@ export async function POST(request: NextRequest, { params }: RouteContext) {
 
   const db = getSupabaseAdmin();
   const [{ data: story, error: storyError }, { data: target, error: targetError }] = await Promise.all([
-    db.from('stories').select('id,title,status,author_id,assigned_editor_id,assigned_reporter_id').eq('id', id).maybeSingle(),
+    db.from('stories').select('id,title,status,author_id,assigned_editor_id,assigned_reporter_id,editing_locked_by').eq('id', id).maybeSingle(),
     db.from('users').select('id,name,role,is_active').eq('id', assigneeId).maybeSingle(),
   ]);
   if (storyError || targetError) return NextResponse.json({ error: 'Could not verify the story or recipient.' }, { status: 500 });
@@ -45,13 +45,13 @@ export async function POST(request: NextRequest, { params }: RouteContext) {
     return NextResponse.json({ error: 'Reporter assignments must go to a Reporter account.' }, { status: 400 });
   }
 
-  if (story.status === 'PUBLISHED' || story.status === 'ARCHIVED') {
+  if (story.editing_locked_by && story.editing_locked_by !== actor.id) {\n    return NextResponse.json({ error: 'This story is currently being edited by another editor. Ask them to release it before reassigning.' }, { status: 423 });\n  }\n  if (story.status === 'PUBLISHED' || story.status === 'ARCHIVED') {
     return NextResponse.json({ error: 'Published or archived stories cannot be reassigned.' }, { status: 409 });
   }
 
   const updates = type === 'EDITOR_REVIEW'
-    ? { assigned_editor_id: target.id, assigned_by_id: actor.id, status: 'REVIEW', updated_at: new Date().toISOString() }
-    : { assigned_reporter_id: target.id, assigned_by_id: actor.id, status: story.status === 'REVIEW' ? 'DRAFT' : story.status, updated_at: new Date().toISOString() };
+    ? { assigned_editor_id: target.id, assigned_by_id: actor.id, status: 'REVIEW', editing_locked_by: null, editing_locked_at: null, updated_at: new Date().toISOString() }
+    : { assigned_reporter_id: target.id, assigned_by_id: actor.id, status: story.status === 'REVIEW' ? 'DRAFT' : story.status, editing_locked_by: null, editing_locked_at: null, updated_at: new Date().toISOString() };
   const { error: updateError } = await db.from('stories').update(updates).eq('id', id);
   if (updateError) return NextResponse.json({ error: 'Could not save the assignment.' }, { status: 500 });
 
