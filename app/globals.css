@@ -650,3 +650,24 @@ summary::-webkit-details-marker {
 @keyframes today-radar-blink { 0%,100% { opacity: .45; transform: scale(.8); } 50% { opacity: 1; transform: scale(1.5); } }
 @keyframes today-radar-enter { from { opacity: 0; transform: translateY(8px) scale(.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
 @media (prefers-reduced-motion: reduce) { .today-radar-sweep,.today-radar-blip { animation: none !important; } .today-radar-panel { animation: none !important; } }
+
+
+/* Stronger red presence: red is a co-primary Campus Radar brand colour. */
+.today-radar-launcher { border-color: rgba(230,57,70,.48); border-left: 4px solid #e63946; }
+.today-radar-launcher.is-open { border-color: #e63946; box-shadow: 0 14px 38px rgba(230,57,70,.18), 0 12px 36px rgba(16,24,40,.16); }
+.today-radar-mark { border-color: rgba(230,57,70,.75); background: radial-gradient(circle at 35% 30%, #e63946 0%, #b42332 27%, #173b87 76%); box-shadow: inset 0 0 14px rgba(0,0,0,.25), 0 0 0 3px rgba(230,57,70,.12); }
+.today-radar-ring { border-color: rgba(255,220,224,.48); }
+.today-radar-sweep { background: conic-gradient(from 0deg, transparent 0deg 286deg, rgba(230,57,70,.08) 300deg, rgba(230,57,70,.9) 358deg, transparent 360deg); }
+.today-radar-blip { background: #ff4050; box-shadow: 0 0 8px #ff4050, 0 0 14px rgba(230,57,70,.7); }
+.today-radar-panel { border-top: 3px solid #e63946; }
+.today-radar-feature { border-color: rgba(230,57,70,.3); background: linear-gradient(125deg, rgba(230,57,70,.13), rgba(36,87,197,.075) 58%, rgba(230,57,70,.07)); }
+.today-radar-list-item.is-featured { box-shadow: inset 3px 0 0 #e63946; }
+.today-radar-list-item:hover { background: rgba(230,57,70,.055); }
+.today-radar-footer { color: #c92f3b; }
+.today-radar-footer span { color: #e63946; }
+.today-radar-launcher-copy > span:first-child { color: #e63946; }
+.dark .today-radar-launcher { border-color: rgba(255,102,114,.55); border-left-color: #ff6672; }
+.dark .today-radar-panel { border-top-color: #ff6672; }
+.dark .today-radar-feature { border-color: rgba(255,102,114,.38); background: linear-gradient(125deg, rgba(230,57,70,.2), rgba(36,87,197,.13) 58%, rgba(230,57,70,.1)); }
+.dark .today-radar-footer { color: #ff8992; }
+.dark .today-radar-list-item.is-featured { box-shadow: inset 3px 0 0 #ff6672; }
