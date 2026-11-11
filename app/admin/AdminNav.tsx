@@ -23,7 +23,7 @@ type SessionResponse = {
 
 export default function AdminNav() {
   const pathname = usePathname();
-  const [canEditSpotlight, setCanEditSpotlight] = useState(false);
+  const [canEditSpotlight, setCanEditSpotlight] = useState(false);\n  const [canManageUsers, setCanManageUsers] = useState(false);
 
   useEffect(() => {
     fetch('/api/auth/session', { cache: 'no-store' })
@@ -33,7 +33,7 @@ export default function AdminNav() {
           ['SUPER_ADMIN', 'EDITOR'].includes(session.user?.role ?? '')
         );
       })
-      .catch(() => setCanEditSpotlight(false));
+      .catch(() => { setCanEditSpotlight(false); setCanManageUsers(false); });
   }, []);
 
   return (
@@ -41,7 +41,7 @@ export default function AdminNav() {
       <div className="mx-auto flex max-w-6xl gap-6 overflow-x-auto px-6">
         {links
           .filter(
-            (link) => link.href !== '/admin/spotlight' || canEditSpotlight
+            (link) => (link.href !== '/admin/spotlight' || canEditSpotlight) && (link.href !== '/admin/users' || canManageUsers)
           )
           .map((link) => {
             const active =
