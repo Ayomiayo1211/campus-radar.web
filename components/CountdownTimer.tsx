@@ -11,7 +11,7 @@ function getTarget(date: string, kind: CountdownTimerProps['kind']) {
   if (kind === 'deadline') {
     // Opportunity deadlines are stored as date-only values represented at UTC day-end.
     // Rebuild the deadline at the end of that calendar day in the visitor's local timezone.
-    const match = date.match(/^(\\d{4})-(\\d{2})-(\\d{2})/);
+    const match = date.match(/^(\d{4})-(\d{2})-(\d{2})/);
     if (match) {
       return new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3]), 23, 59, 59, 999);
     }
