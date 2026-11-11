@@ -427,6 +427,9 @@ export default function EditStoryPage() {
               <p className="mt-2 text-xs text-gray-500">Worked on by: {workedBy.length ? workedBy.join(', ') : 'No recorded activity yet'}</p>
             </div>
             <div className="flex gap-2">
+              {story.currentUserRole === 'REPORTER' && (
+                <button type="button" onClick={() => window.location.reload()} className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium">Refresh latest version</button>
+              )}
               {!story.editingLockedBy && story.currentUserRole !== 'REPORTER' && (
                 <button type="button" onClick={() => void claimStory()} disabled={lockBusy} className="rounded-lg bg-[#173B87] px-4 py-2 text-sm font-semibold text-white disabled:opacity-50">
                   {lockBusy ? 'Claiming...' : 'Start working'}
