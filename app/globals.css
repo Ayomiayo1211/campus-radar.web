@@ -611,3 +611,5 @@ summary::-webkit-details-marker {
 :root.dark .admin-interface :where(button, a):focus-visible {
   outline-color: #83a8ff;
 }
+
+/* Floating Today's Radar widget */
