@@ -26,7 +26,8 @@ export default function NewsroomAssignmentsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
-  const [targets, setTargets] = useState<Record<string, string>>({});\n  const [editorTargets, setEditorTargets] = useState<Record<string, string>>({});
+  const [targets, setTargets] = useState<Record<string, string>>({});
+  const [editorTargets, setEditorTargets] = useState<Record<string, string>>({});
   const [notes, setNotes] = useState<Record<string, string>>({});
   const [busy, setBusy] = useState<string | null>(null);
 
