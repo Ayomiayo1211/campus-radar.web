@@ -5,6 +5,7 @@ import { Inter } from 'next/font/google';
 import { EditorialSpotlight } from '@/components/EditorSpotlight';
 import { ThemeProvider } from '@/components/ThemeProvider';
 import { OpportunityDeadlineNudge } from '@/components/OpportunityDeadlineNudge';
+import { TodayRadarFeed } from '@/components/TodayRadarFeed';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -73,7 +74,7 @@ const themeInitScript = `
 })();
 `;
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
@@ -92,6 +93,7 @@ export default function RootLayout({
           {children}
           <EditorialSpotlight />
           <OpportunityDeadlineNudge />
+          <TodayRadarFeed />
         </ThemeProvider>
       </body>
     </html>
