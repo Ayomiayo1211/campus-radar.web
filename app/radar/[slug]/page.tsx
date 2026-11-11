@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
+import { ShareActions } from '@/components/ShareActions';
 import { RadarContactActions } from '@/components/RadarContactActions';
 import { getSupabaseAdmin } from '@/lib/server/supabase';
 
@@ -102,6 +103,9 @@ export default async function RadarItemPage({ params }: PageProps) {
             <RadarContactActions summary={item.summary} />
             {item.location && <p className="mt-5 text-sm font-semibold text-[var(--muted)]">Location · {item.location}</p>}
             {item.link && <a href={item.link} target="_blank" rel="noopener noreferrer" className="mt-6 inline-flex rounded-md bg-[#173B87] px-5 py-3 text-sm font-bold text-white hover:opacity-90">More information</a>}
+          </div>
+          <div className="mt-8 border-t border-[var(--line)] pt-6">
+            <ShareActions title={item.title} text={item.summary} path={`/radar/${slug}`} />
           </div>
         </article>
       </main>
