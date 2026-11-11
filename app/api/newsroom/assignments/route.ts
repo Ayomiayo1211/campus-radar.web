@@ -11,7 +11,7 @@ export async function GET() {
 
   const db = getSupabaseAdmin();
   let query = db.from('stories')
-    .select('id,title,slug,excerpt,status,author_name,author_id,assigned_editor_id,assigned_reporter_id,created_at,updated_at')
+    .select('id,title,slug,excerpt,status,author_name,author_id,assigned_editor_id,assigned_reporter_id,assigned_note,created_at,updated_at')
     .neq('status', 'ARCHIVED')
     .order('updated_at', { ascending: false })
     .limit(100);
