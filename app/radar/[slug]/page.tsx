@@ -4,6 +4,7 @@ import type { Metadata } from 'next';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { ShareActions } from '@/components/ShareActions';
+import { CountdownTimer } from '@/components/CountdownTimer';
 import { RadarContactActions } from '@/components/RadarContactActions';
 import { getSupabaseAdmin } from '@/lib/server/supabase';
 
@@ -101,6 +102,7 @@ export default async function RadarItemPage({ params }: PageProps) {
           <div className="mt-8 max-w-3xl">
             <p className="whitespace-pre-line text-lg leading-8 text-[var(--ink)]">{item.summary}</p>
             <RadarContactActions summary={item.summary} />
+            {item.event_date && <CountdownTimer date={item.event_date} kind="event" />}
             {item.location && <p className="mt-5 text-sm font-semibold text-[var(--muted)]">Location · {item.location}</p>}
             {item.link && <a href={item.link} target="_blank" rel="noopener noreferrer" className="mt-6 inline-flex rounded-md bg-[#173B87] px-5 py-3 text-sm font-bold text-white hover:opacity-90">More information</a>}
           </div>
