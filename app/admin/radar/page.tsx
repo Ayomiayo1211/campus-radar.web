@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { ShareActions } from '@/components/ShareActions';
 
 type RadarItem = {
   id: string;
@@ -173,12 +174,17 @@ export default function RadarPage() {
                       </div>
                     </div>
 
-                    <Link
-                      href={`/admin/radar/${item.id}`}
-                      className="shrink-0 rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium hover:bg-gray-50"
-                    >
-                      Edit
-                    </Link>
+                    <div className="flex shrink-0 flex-wrap items-center gap-2">
+                      {item.status === 'PUBLISHED' && (
+                        <ShareActions title={item.title} text={item.summary} path={`/radar/${item.slug}`} />
+                      )}
+                      <Link
+                        href={`/admin/radar/${item.id}`}
+                        className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium hover:bg-gray-50"
+                      >
+                        Edit
+                      </Link>
+                    </div>
                   </div>
                 </article>
               ))}
