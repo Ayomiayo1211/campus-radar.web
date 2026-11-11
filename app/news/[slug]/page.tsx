@@ -10,6 +10,30 @@ import { ArticleEngagement } from '@/components/ArticleEngagement';
 
 export const dynamic = 'force-dynamic';
 
+function renderInlineMarkdown(value: string) {
+  const tokens = value.split(/(\\*\\*[^*]+\\*\\*|\\*[^*]+\\*|\\[[^\\]]+\\]\\(https?:\\/\\/[^)\\s]+\\))/g);
+  return tokens.map((token, index) => {
+    if (token.startsWith('**') && token.endsWith('**')) return <strong key={index}>{token.slice(2, -2)}</strong>;
+    if (token.startsWith('*') && token.endsWith('*')) return <em key={index}>{token.slice(1, -1)}</em>;
+    const link = token.match(/^\\[([^\\]]+)\\]\\((https?:\\/\\/[^)\\s]+)\\)$/);
+    if (link) return <a key={index} href={link[2]} target="_blank" rel="noopener noreferrer" className="font-medium text-[#173B87] underline">{link[1]}</a>;
+    return token;
+  });
+}
+
+function renderStoryParagraph(block: string) {
+  const lines = block.split('\\n');
+  const first = lines[0] ?? '';
+  if (/^###\\s+/.test(first)) return <h3 className="mb-3 mt-7 text-xl font-bold">{renderInlineMarkdown(first.replace(/^###\\s+/, ''))}</h3>;
+  if (/^##\\s+/.test(first)) return <h2 className="mb-3 mt-8 text-2xl font-bold tracking-tight">{renderInlineMarkdown(first.replace(/^##\\s+/, ''))}</h2>;
+  if (/^#\\s+/.test(first)) return <h2 className="mb-3 mt-8 text-3xl font-bold tracking-tight">{renderInlineMarkdown(first.replace(/^#\\s+/, ''))}</h2>;
+  if (lines.every(line => /^>\\s?/.test(line))) return <blockquote className="my-6 border-l-4 border-[#173B87] pl-5 italic text-[var(--muted)]">{lines.map((line, index) => <span key={index}>{index > 0 ? <br /> : null}{renderInlineMarkdown(line.replace(/^>\\s?/, ''))}</span>)}</blockquote>;
+  if (lines.every(line => /^-\\s+/.test(line))) return <ul className="my-4 list-disc space-y-2 pl-6">{lines.map((line, index) => <li key={index}>{renderInlineMarkdown(line.replace(/^-\\s+/, ''))}</li>)}</ul>;
+  if (lines.every(line => /^\\d+\\.\\s+/.test(line))) return <ol className="my-4 list-decimal space-y-2 pl-6">{lines.map((line, index) => <li key={index}>{renderInlineMarkdown(line.replace(/^\\d+\\.\\s+/, ''))}</li>)}</ol>;
+  if (/^---+$/.test(first.trim())) return <hr className="my-8 border-[var(--line)]" />;
+  return <p className="whitespace-pre-wrap">{lines.map((line, index) => <span key={index}>{index > 0 ? <br /> : null}{renderInlineMarkdown(line)}</span>)}</p>;
+}
+
 type ArticlePageProps = {
   params: Promise<{ slug: string }>;
 };
@@ -205,7 +229,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
               }
               return (
                 <div key={index}>
-                  {marker ? (manuallyPlacedImage ? renderGalleryImage(manuallyPlacedImage, "manual-" + index) : null) : <p className="whitespace-pre-wrap">{paragraph}</p>}
+                  {marker ? (manuallyPlacedImage ? renderGalleryImage(manuallyPlacedImage, "manual-" + index) : null) : renderStoryParagraph(paragraph)}
                   {(automaticPlacement.get(index) ?? []).map((image) => renderGalleryImage(image, "auto-" + image.id))}
                 </div>
               );
