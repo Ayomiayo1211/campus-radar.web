@@ -96,7 +96,7 @@ export default function NewStoryPage() {
 
   useEffect(() => {
     loadMedia();
-    fetch('/api/auth/session', { cache: 'no-store' }).then(response => response.json()).then((result: { user?: { role?: string } }) => setCurrentUserRole(result.user?.role ?? '')).catch(() => setCurrentUserRole(''));
+    fetch('/api/auth/session', { cache: 'no-store' }).then(response => response.json() as Promise<{ user?: { role?: string } }>).then(result => setCurrentUserRole(result.user?.role ?? '')).catch(() => setCurrentUserRole(''));
   }, []);
 
   async function prepareImage(file: File) {
