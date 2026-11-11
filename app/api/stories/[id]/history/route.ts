@@ -12,7 +12,7 @@ export async function GET(_request: NextRequest, { params }: RouteContext) {
 
   const db = getSupabaseAdmin();
   if (user.role === 'REPORTER') {
-    const { data: story } = await db.from('stories').select('author_id').eq('id', id).maybeSingle();
+    const { data: story } = await db.from('stories').select('author_id,assigned_reporter_id').eq('id', id).maybeSingle();
     if (!story || (story.author_id !== user.id && story.assigned_reporter_id !== user.id)) {
       return NextResponse.json({ error: 'You cannot view this story history.' }, { status: 403 });
     }
