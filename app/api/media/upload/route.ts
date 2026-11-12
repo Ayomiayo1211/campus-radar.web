@@ -11,7 +11,7 @@ function detectImageFormat(bytes:Uint8Array):string|null{
  return null;
 }
 export async function POST(request:NextRequest){
- try{await requireRole(['SUPER_ADMIN','EDITOR','REPORTER']);}catch(error){const forbidden=error instanceof Error&&error.message==='Forbidden';return NextResponse.json({error:forbidden?'You do not have permission to upload media':'Authentication required'},{status:forbidden?403:401});}
+ try{await requireRole(['SUPER_ADMIN','SENIOR_EDITOR','EDITOR','REPORTER']);}catch(error){const forbidden=error instanceof Error&&error.message==='Forbidden';return NextResponse.json({error:forbidden?'You do not have permission to upload media':'Authentication required'},{status:forbidden?403:401});}
  const form=await request.formData();const file=form.get('file');
  if(!(file instanceof File))return NextResponse.json({error:'No image file provided'},{status:400});
  if(!file.size)return NextResponse.json({error:'The image file is empty'},{status:400});
