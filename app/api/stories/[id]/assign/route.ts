@@ -80,5 +80,5 @@ export async function POST(request: NextRequest, { params }: RouteContext) {
     });
   }
 
-  return NextResponse.json({ message: type === 'EDITOR_REVIEW' ? `Sent to ${target.name} for editorial review.` : `Assigned to ${target.name}. The reporter has been emailed.` });
+  return NextResponse.json({ message: type === 'EDITOR_REVIEW' ? `Sent to ${target.name} for editorial review.` : `Assigned to ${target.name}.` });
 }
