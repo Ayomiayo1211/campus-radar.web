@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/server/supabase';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET() {
   try {
     const parts = new Intl.DateTimeFormat('en-CA', {
