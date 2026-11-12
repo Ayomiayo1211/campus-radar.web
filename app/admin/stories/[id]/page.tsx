@@ -625,7 +625,7 @@ export default function EditStoryPage() {
               <div>
                 <label htmlFor="status" className="mb-2 block text-sm font-medium text-gray-900">Status</label>
                 <select id="status" value={status} onChange={(event) => setStatus(event.target.value)} className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm outline-none focus:border-black">
-                  <option value="DRAFT">Draft</option>
+                  <option value="DRAFT" disabled={story?.currentUserRole === 'REPORTER' && story?.status === 'REVIEW'}>Draft</option>
                   <option value="REVIEW">Review</option>
                   {story?.currentUserRole !== 'REPORTER' && <><option value="PUBLISHED">Published</option><option value="ARCHIVED">Archived</option></>}
                 </select>
