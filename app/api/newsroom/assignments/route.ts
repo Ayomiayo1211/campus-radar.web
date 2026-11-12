@@ -20,8 +20,6 @@ export async function GET() {
     query = query.or(`author_id.eq.${user.id},assigned_reporter_id.eq.${user.id}`).in('status', ['DRAFT', 'REVIEW']);
   } else if (user.role === 'EDITOR') {
     query = query.or(`assigned_editor_id.eq.${user.id},and(status.eq.REVIEW,assigned_editor_id.is.null)`);
-  } else if (user.role === 'SENIOR_EDITOR') {
-    query = query.or(`assigned_editor_id.eq.${user.id},assigned_reporter_id.not.is.null,and(status.eq.REVIEW,assigned_editor_id.is.null)`);
   }
 
   const [{ data: stories, error }, { data: reporters, error: reportersError }, { data: editors, error: editorsError }] = await Promise.all([
