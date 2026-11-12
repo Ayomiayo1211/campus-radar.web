@@ -42,11 +42,13 @@ export async function TodayRadarFeed() {
       title: item.title,
       href: `/radar/${item.slug}`,
       type: 'Event' as const,
-      timeLabel: new Date(item.event_date).toLocaleTimeString('en-NG', {
-        timeZone: 'Africa/Lagos',
-        hour: 'numeric',
-        minute: '2-digit',
-      }),
+      timeLabel: item.event_date
+        ? new Date(item.event_date).toLocaleTimeString('en-NG', {
+            timeZone: 'Africa/Lagos',
+            hour: 'numeric',
+            minute: '2-digit',
+          })
+        : 'Time TBA',
     })),
     ...(deadlines ?? []).map((item) => ({
       title: item.title,
