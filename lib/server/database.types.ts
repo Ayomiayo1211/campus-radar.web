@@ -1064,7 +1064,7 @@ export type Database = {
         Args: { p_password_hash: string; p_token_hash: string }
         Returns: boolean
       }
-      set_current_spotlight: { Args: { p_story_id: string }; Returns: boolean }
+      set_current_spotlight: { Args: { p_story_id: string | null }; Returns: boolean }
     }
     Enums: {
       [_ in never]: never
