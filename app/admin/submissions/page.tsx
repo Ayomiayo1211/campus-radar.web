@@ -37,9 +37,9 @@ export default function NewsroomAssignmentsPage() {
     setError('');
     try {
       const response = await fetch('/api/newsroom/assignments', { cache: 'no-store' });
-      const result = await response.json();
+      const result = await response.json() as Inbox & { error?: string };
       if (!response.ok) throw new Error(result.error || 'Could not load newsroom work.');
-      setData(result as Inbox);
+      setData(result);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Could not load newsroom work.');
     } finally {
@@ -61,7 +61,7 @@ export default function NewsroomAssignmentsPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ type, assigneeId, note: notes[story.id] || '' }),
       });
-      const result = await response.json();
+      const result = await response.json() as { error?: string; message?: string };
       if (!response.ok) throw new Error(result.error || 'Could not route this story.');
       setNotice(result.message || 'Story routed.');
       await load();

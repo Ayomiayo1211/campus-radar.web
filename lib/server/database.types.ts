@@ -553,6 +553,10 @@ export type Database = {
       }
       stories: {
         Row: {
+          assigned_by_id: string | null
+          assigned_editor_id: string | null
+          assigned_note: string | null
+          assigned_reporter_id: string | null
           author_id: string | null
           author_name: string
           body: string
@@ -576,6 +580,10 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          assigned_by_id?: string | null
+          assigned_editor_id?: string | null
+          assigned_note?: string | null
+          assigned_reporter_id?: string | null
           author_id?: string | null
           author_name: string
           body: string
@@ -599,6 +607,10 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          assigned_by_id?: string | null
+          assigned_editor_id?: string | null
+          assigned_note?: string | null
+          assigned_reporter_id?: string | null
           author_id?: string | null
           author_name?: string
           body?: string
@@ -623,6 +635,27 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "stories_assigned_by_id_fkey"
+            columns: ["assigned_by_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "stories_assigned_editor_id_fkey"
+            columns: ["assigned_editor_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "stories_assigned_reporter_id_fkey"
+            columns: ["assigned_reporter_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "stories_author_id_fkey"
             columns: ["author_id"]
             isOneToOne: false
@@ -634,6 +667,64 @@ export type Database = {
             columns: ["editing_locked_by"]
             isOneToOne: false
             referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      story_assignment_history: {
+        Row: {
+          assigned_by_id: string | null
+          assigned_by_name: string
+          assigned_to_id: string | null
+          assigned_to_name: string
+          assignment_type: string
+          created_at: string
+          id: string
+          note: string | null
+          story_id: string
+        }
+        Insert: {
+          assigned_by_id?: string | null
+          assigned_by_name: string
+          assigned_to_id?: string | null
+          assigned_to_name: string
+          assignment_type: string
+          created_at?: string
+          id?: string
+          note?: string | null
+          story_id: string
+        }
+        Update: {
+          assigned_by_id?: string | null
+          assigned_by_name?: string
+          assigned_to_id?: string | null
+          assigned_to_name?: string
+          assignment_type?: string
+          created_at?: string
+          id?: string
+          note?: string | null
+          story_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "story_assignment_history_assigned_by_id_fkey"
+            columns: ["assigned_by_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "story_assignment_history_assigned_to_id_fkey"
+            columns: ["assigned_to_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "story_assignment_history_story_id_fkey"
+            columns: ["story_id"]
+            isOneToOne: false
+            referencedRelation: "stories"
             referencedColumns: ["id"]
           },
         ]
@@ -677,8 +768,9 @@ export type Database = {
           display_name: string
           email: string
           id: string
+          spotlight_id: string | null
           status: string
-          story_id: string
+          story_id: string | null
           updated_at: string
         }
         Insert: {
@@ -687,8 +779,9 @@ export type Database = {
           display_name: string
           email: string
           id?: string
+          spotlight_id?: string | null
           status?: string
-          story_id: string
+          story_id?: string | null
           updated_at?: string
         }
         Update: {
@@ -697,11 +790,19 @@ export type Database = {
           display_name?: string
           email?: string
           id?: string
+          spotlight_id?: string | null
           status?: string
-          story_id?: string
+          story_id?: string | null
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "story_comments_spotlight_id_fkey"
+            columns: ["spotlight_id"]
+            isOneToOne: false
+            referencedRelation: "spotlights"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "story_comments_story_id_fkey"
             columns: ["story_id"]
