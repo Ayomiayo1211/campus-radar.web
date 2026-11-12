@@ -1,7 +1,12 @@
+import { connection } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/server/supabase';
 import { TodayRadar, type TodayRadarItem } from '@/components/TodayRadarWidget';
 
 export async function TodayRadarFeed() {
+  // This feed depends on request-time environment variables and today's date.
+  // Keep it out of static prerendering (including the generated not-found page).
+  await connection();
+
   const parts = new Intl.DateTimeFormat('en-CA', {
     timeZone: 'Africa/Lagos',
     year: 'numeric',
