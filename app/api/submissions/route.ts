@@ -2,7 +2,7 @@ import { NextRequest,NextResponse } from 'next/server';
 import { getSupabaseAdmin, toCamelCase } from '@/lib/server/supabase';
 import { requireRole } from '@/lib/server/auth';
 import { submissionSchema } from '@/lib/validation/content';
-const REVIEW_ROLES=['SUPER_ADMIN','EDITOR'] as const;
+const REVIEW_ROLES=['SUPER_ADMIN','SENIOR_EDITOR','EDITOR'] as const;
 export async function GET(request:NextRequest){
  try{await requireRole([...REVIEW_ROLES]);}catch{return NextResponse.json({error:'Unauthorized'},{status:401});}
  const p=request.nextUrl.searchParams,status=p.get('status'),n=Number(p.get('limit')??20),limit=Number.isFinite(n)?Math.min(Math.max(Math.floor(n),1),50):20;
