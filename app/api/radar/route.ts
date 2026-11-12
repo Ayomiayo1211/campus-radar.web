@@ -3,7 +3,7 @@ import { getSupabaseAdmin, toCamelCase } from '@/lib/server/supabase';
 import { slugify } from '@/lib/server/slug';
 import { requireRole } from '@/lib/server/auth';
 import { radarSchema } from '@/lib/validation/content';
-const MANAGERS=['SUPER_ADMIN','EDITOR'] as const;
+const MANAGERS=['SUPER_ADMIN','SENIOR_EDITOR','EDITOR'] as const;
 export async function GET(request:NextRequest){
  const p=request.nextUrl.searchParams, admin=p.get('admin')==='true';
  if(admin){try{await requireRole([...MANAGERS]);}catch{return NextResponse.json({error:'Unauthorized'},{status:401});}}

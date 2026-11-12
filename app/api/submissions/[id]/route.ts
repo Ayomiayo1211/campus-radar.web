@@ -2,7 +2,7 @@ import {NextRequest,NextResponse} from 'next/server';
 import {getSupabaseAdmin} from '@/lib/server/supabase';
 import {requireRole} from '@/lib/server/auth';
 type RouteContext={params:Promise<{id:string}>};
-const REVIEW_ROLES=['SUPER_ADMIN','EDITOR'] as const;
+const REVIEW_ROLES=['SUPER_ADMIN','SENIOR_EDITOR','EDITOR'] as const;
 export async function PATCH(request:NextRequest,{params}:RouteContext){
  let actor;try{actor=await requireRole([...REVIEW_ROLES]);}catch{return NextResponse.json({error:'Unauthorized'},{status:401});}
  const {id}=await params;let body:unknown;try{body=await request.json();}catch{return NextResponse.json({error:'Invalid JSON body'},{status:400});}
