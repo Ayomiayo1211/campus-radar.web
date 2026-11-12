@@ -94,6 +94,9 @@ export async function PATCH(request: NextRequest, { params }: RouteContext) {
   if (user.role === 'REPORTER' && !['DRAFT', 'REVIEW'].includes(d.status)) {
     return NextResponse.json({ error: 'Reporters cannot publish or archive stories' }, { status: 403 });
   }
+  if (user.role === 'REPORTER' && existing.status === 'REVIEW' && d.status !== 'REVIEW') {
+    return NextResponse.json({ error: 'A story already submitted for editorial review cannot be withdrawn by its reporter. An editor must return it for revisions.' }, { status: 403 });
+  }
 
   const beforeSnapshot = snapshot(existing);
   let updateQuery = db.from('stories').update({
