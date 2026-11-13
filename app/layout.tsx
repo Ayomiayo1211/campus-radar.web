@@ -18,6 +18,11 @@ export const metadata: Metadata = {
   description:
     'Student-focused media and information platform for the Federal University of Agriculture, Abeokuta.',
   metadataBase: new URL('https://www.campusradarfunaab.com.ng'),
+  icons: {
+    icon: [{ url: '/campusradar.svg', type: 'image/svg+xml' }],
+    shortcut: ['/campusradar.svg'],
+    apple: [{ url: '/campusradar.svg', type: 'image/svg+xml' }],
+  },
   openGraph: {
     type: 'website',
     siteName: 'Campus Radar',
