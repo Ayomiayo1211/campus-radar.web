@@ -62,7 +62,7 @@ export async function GET() {
     return NextResponse.json({ error: 'Could not load newsroom resources.' }, { status: 500 });
   }
 
-  const uploaderIds = [...new Set((data ?? []).map((item: any) => item.uploaded_by).filter(Boolean))];
+  const uploaderIds: string[] = [...new Set<string>((data ?? []).map((item: any) => item.uploaded_by).filter((id: unknown): id is string => typeof id === 'string'))];
   const { data: uploaders } = uploaderIds.length
     ? await db.from('users').select('id,name').in('id', uploaderIds)
     : { data: [] };
