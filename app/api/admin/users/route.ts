@@ -33,13 +33,16 @@ export async function POST(request:NextRequest) {
  if(revokeError)return NextResponse.json({error:'Could not replace previous invitation'},{status:500});
  const {data:invite,error:insertError}=await (db as any).from('admin_invitations').insert({email,role,token_hash:tokenHash,invited_by:actor.id,expires_at:expiresAt}).select('id').single();
  if(insertError||!invite)return NextResponse.json({error:'Could not create invitation'},{status:500});
- const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL || request.nextUrl.origin).replace(/\/$/, '');
+ const env = getCloudflareContext().env as unknown as Record<string, unknown>;
+ const configuredSiteUrl = typeof env.NEXT_PUBLIC_SITE_URL === 'string' ? env.NEXT_PUBLIC_SITE_URL : process.env.NEXT_PUBLIC_SITE_URL;
+ const siteUrl = (configuredSiteUrl || request.nextUrl.origin).replace(/\/$/, '');
  const link=`${siteUrl}/admin/accept-invitation?token=${encodeURIComponent(token)}`;
  try {
   await sendGmailMessage({
    to: email,
    subject: 'Your Campus Radar newsroom invitation',
    html: `<div style="font-family:Arial,sans-serif;line-height:1.6;color:#171717"><h2>Campus Radar newsroom invitation</h2><p>You have been invited as a <strong>${role==='EDITOR'?'Editor':'Reporter'}</strong>.</p><p>Use this secure link to create your account password. It expires in 48 hours and can only be used once.</p><p><a href="${link}" style="display:inline-block;padding:12px 18px;background:#111;color:#fff;text-decoration:none;border-radius:6px">Create your account</a></p><p>If you were not expecting this invitation, ignore this email.</p></div>`,
+   env,
   });
  } catch(error) {
   const diagnostic = error instanceof Error ? error.message : 'Unknown error';
