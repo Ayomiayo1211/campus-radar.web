@@ -121,7 +121,9 @@ export async function POST(request: NextRequest) {
 
   const titleInput = String(form.get('title') ?? '').trim();
   const description = String(form.get('description') ?? '').trim();
-  const title = (titleInput || file.name.replace(/\\.[^.]+$/, '')).slice(0, 160);
+  const lastDot = file.name.lastIndexOf('.');
+  const fallbackTitle = lastDot > 0 ? file.name.slice(0, lastDot) : file.name;
+  const title = (titleInput || fallbackTitle).slice(0, 160);
   if (description.length > 1000) return NextResponse.json({ error: 'Description must be 1,000 characters or fewer.' }, { status: 400 });
 
   const db = getSupabaseAdmin();
