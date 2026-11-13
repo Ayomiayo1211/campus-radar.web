@@ -9,7 +9,7 @@ export async function GET(request:NextRequest){
  if(admin){try{await requireRole([...MANAGERS]);}catch{return NextResponse.json({error:'Unauthorized'},{status:401});}}
  const n=Number(p.get('limit')??20), limit=Number.isFinite(n)?Math.min(Math.max(n,1),50):20;
  let q=getSupabaseAdmin().from('radar_items').select('*').order(admin?'created_at':'published_at',{ascending:false}).limit(limit);
- if(!admin)q=q.eq('status','PUBLISHED');
+ if(!admin){const now=new Date().toISOString();q=q.eq('status','PUBLISHED').or(`event_date.is.null,event_date.gt.${now}`);}
  const {data,error}=await q; if(error)return NextResponse.json({error:'Could not load Radar items'},{status:500});
  return NextResponse.json({data:toCamelCase(data??[])});
 }
