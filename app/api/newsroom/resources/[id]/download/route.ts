@@ -21,7 +21,7 @@ export async function GET(_request: Request, context: { params: Promise<{ id: st
 
   const { data, error: signedUrlError } = await db.storage
     .from('campus-radar-resources')
-    .createSignedUrl(resource.storage_path, 60, { download: resource.original_file_name });
+    .createSignedUrl(resource.storage_path, 60);
 
   if (signedUrlError || !data?.signedUrl) {
     console.error('Could not create newsroom resource download URL:', signedUrlError?.message);
