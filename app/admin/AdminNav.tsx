@@ -10,6 +10,7 @@ const links = [
   { label: 'Stories', href: '/admin/stories' },
   { label: 'The Radar', href: '/admin/radar' },
   { label: 'Media', href: '/admin/media' },
+  { label: 'Resources', href: '/admin/newsroom/resources' },
   { label: 'Opportunities', href: '/admin/opportunities' },
   { label: 'Submissions', href: '/admin/submissions' },
   { label: 'Users', href: '/admin/users' },
