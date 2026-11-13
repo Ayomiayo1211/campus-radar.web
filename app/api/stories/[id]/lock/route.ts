@@ -1,12 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/server/supabase';
 import { requireRole } from '@/lib/server/auth';
+import { notifySeniorEditorsStoryStarted } from '@/lib/server/newsroom-notifications';
 
 type RouteContext = { params: Promise<{ id: string }> };
 
 const EDITORS = ['EDITOR', 'SENIOR_EDITOR', 'SUPER_ADMIN'] as const;
 
-export async function POST(_request: NextRequest, { params }: RouteContext) {
+export async function POST(request: NextRequest, { params }: RouteContext) {
   const { id } = await params;
   let user;
   try { user = await requireRole([...EDITORS]); }
@@ -53,6 +54,11 @@ export async function POST(_request: NextRequest, { params }: RouteContext) {
     await db.from('stories').update({ editing_locked_by: null, editing_locked_at: null })
       .eq('id', id).eq('editing_locked_by', user.id);
     return NextResponse.json({ error: 'The lock could not be recorded. Please try again.' }, { status: 500 });
+  }
+
+  const { data: storyForNotice } = await db.from('stories').select('id,title').eq('id', id).maybeSingle();
+  if (storyForNotice) {
+    await notifySeniorEditorsStoryStarted({ story: storyForNotice, actor: { id: user.id, name: user.name }, requestOrigin: request.nextUrl.origin });
   }
 
   return NextResponse.json({ data: { lockedBy: user.id, lockedAt: now, alreadyOwned: false } });

@@ -79,6 +79,7 @@ export default function StoriesPage() {
           </div>
 
           <div className="flex flex-wrap gap-2">
+          <Link href="/admin/newsroom" className="rounded-lg border border-[#173B87] px-4 py-2 text-sm font-medium text-[#173B87] hover:bg-blue-50">Newsroom Desk</Link>
           <Link href="/admin/engagement" className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium hover:bg-gray-50">Comments & Newsletter</Link>
           <Link
             href="/admin/stories/new"

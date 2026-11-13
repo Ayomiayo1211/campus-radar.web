@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/server/supabase';
 import { requireRole } from '@/lib/server/auth';
+import { notifyTaskAssigned } from '@/lib/server/newsroom-notifications';
 
 type RouteContext = { params: Promise<{ id: string }> };
 const STAFF = ['SUPER_ADMIN', 'SENIOR_EDITOR', 'EDITOR', 'REPORTER'] as const;
@@ -28,7 +29,7 @@ export async function POST(request: NextRequest, { params }: RouteContext) {
   const db = getSupabaseAdmin();
   const [{ data: story, error: storyError }, { data: target, error: targetError }] = await Promise.all([
     db.from('stories').select('id,title,status,author_id,assigned_editor_id,assigned_reporter_id,editing_locked_by').eq('id', id).maybeSingle(),
-    db.from('users').select('id,name,role,is_active').eq('id', assigneeId).maybeSingle(),
+    db.from('users').select('id,name,email,role,is_active').eq('id', assigneeId).maybeSingle(),
   ]);
   if (storyError || targetError) return NextResponse.json({ error: 'Could not verify the story or recipient.' }, { status: 500 });
   if (!story) return NextResponse.json({ error: 'Story not found.' }, { status: 404 });
@@ -68,6 +69,16 @@ export async function POST(request: NextRequest, { params }: RouteContext) {
     note,
   });
   if (historyError) return NextResponse.json({ error: 'Assignment saved, but its activity could not be recorded. Contact a Super Admin.' }, { status: 500 });
+
+  if (target.email) {
+    await notifyTaskAssigned({
+      story: { id: story.id, title: story.title },
+      recipient: { email: target.email, name: target.name },
+      actor: { id: actor.id, name: actor.name },
+      note,
+      requestOrigin: request.nextUrl.origin,
+    });
+  }
 
   return NextResponse.json({ message: type === 'EDITOR_REVIEW' ? `Sent to ${target.name} for editorial review.` : `Assigned to ${target.name}.` });
 }
