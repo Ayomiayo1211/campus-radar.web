@@ -66,7 +66,7 @@ export async function GET() {
   const { data: uploaders } = uploaderIds.length
     ? await db.from('users').select('id,name').in('id', uploaderIds)
     : { data: [] };
-  const names = new Map((uploaders ?? []).map(person => [person.id, person.name]));
+  const names = new Map<string, string>((uploaders ?? []).map(person => [person.id, person.name] as [string, string]));
 
   return NextResponse.json({
     resources: (data ?? []).map((item: any) => ({
@@ -78,7 +78,7 @@ export async function GET() {
       fileCategory: item.file_category,
       fileSize: Number(item.file_size),
       uploadedBy: item.uploaded_by,
-      uploaderName: names.get(item.uploaded_by) ?? 'Former newsroom member',
+      uploaderName: (item.uploaded_by ? names.get(item.uploaded_by) : undefined) ?? 'Former newsroom member',
       createdAt: item.created_at,
     })),
     currentUser: { id: user.id, role: user.role },
