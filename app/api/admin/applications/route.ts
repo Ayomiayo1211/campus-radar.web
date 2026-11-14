@@ -20,7 +20,7 @@ export async function GET(request: NextRequest) {
   }
 
   const status = request.nextUrl.searchParams.get('status');
-  const db = getSupabaseAdmin();
+  const db = getSupabaseAdmin() as any;
   let query = db.from('member_applications').select('*').order('created_at', { ascending: false }).limit(300);
 
   if (status && STATUSES.includes(status as typeof STATUSES[number])) {
@@ -56,7 +56,7 @@ export async function PATCH(request: NextRequest) {
     return NextResponse.json({ error: 'Provide a valid application and status.' }, { status: 400 });
   }
 
-  const { data, error } = await getSupabaseAdmin()
+  const { data, error } = await (getSupabaseAdmin() as any)
     .from('member_applications')
     .update({
       status: input.status,
