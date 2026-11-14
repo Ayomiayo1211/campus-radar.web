@@ -1,5 +1,3 @@
-'use server';
-
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { getSupabaseAdmin } from '@/lib/server/supabase';
@@ -19,7 +17,7 @@ const applicationSchema = z.object({
   whyTeam: z.string().trim().max(2000).optional().default(''),
   skills: z.string().trim().max(3000).optional().default(''),
   portfolio: z.string().trim().max(500).optional().default(''),
-  priorRole: z.enum(['Yes', 'No']).optional(),
+  priorRole: z.enum(['Yes', 'No']).or(z.literal('')).optional(),
   heardFrom: z.string().trim().max(80).optional().default(''),
   hours: z.enum(['1–3 hrs', '4–6 hrs', '7–10 hrs', '10+ hrs']),
   acknowledged: z.literal(true),
