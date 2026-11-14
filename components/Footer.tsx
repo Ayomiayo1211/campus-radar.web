@@ -42,7 +42,8 @@ export function Footer() {
           <div className="kicker text-[#173B87]">Community</div>
           <p className="mt-4 text-sm leading-6 text-[var(--muted)]">
             Have a tip, event, opportunity or story? Send information to
-            the newsroom.
+            the newsroom. You can also email us at{' '}
+            <a className="font-semibold text-[#173B87] underline underline-offset-4" href="mailto:hello@campusradarfunaab.com.ng">hello@campusradarfunaab.com.ng</a>.
           </p>
           <Link
             className="mt-4 inline-block text-sm font-bold text-[#173B87] underline underline-offset-4 hover:text-[var(--accent)]"
