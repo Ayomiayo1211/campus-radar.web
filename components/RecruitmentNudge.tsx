@@ -42,7 +42,7 @@ export function RecruitmentNudge() {
       className="fixed bottom-5 right-5 z-[70] w-[calc(100vw-2rem)] max-w-[390px] sm:bottom-6 sm:right-6"
     >
       <div className="relative overflow-hidden rounded-2xl border border-[#173B87]/20 bg-[var(--paper)] p-5 shadow-[0_18px_60px_rgba(10,25,60,0.22)]">
-        <div className="absolute inset-x-0 top-0 h-1 bg-[#173B87]" />
+        <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-[#173B87] via-[#2457C5] to-[#E63946]" />
         <button
           type="button"
           onClick={dismiss}
@@ -52,7 +52,7 @@ export function RecruitmentNudge() {
           ×
         </button>
         <p className="kicker pr-8 text-[#173B87]">Campus Radar · 2026/2027</p>
-        <h2 className="mt-2 pr-5 text-xl font-black leading-tight text-[var(--foreground)]">
+        <h2 className="mt-2 pr-5 text-xl font-black leading-tight text-[var(--ink)]">
           We need more hands on deck.
         </h2>
         <p className="mt-2 text-sm leading-6 text-[var(--muted)]">
@@ -69,7 +69,7 @@ export function RecruitmentNudge() {
           <button
             type="button"
             onClick={dismiss}
-            className="text-sm font-semibold text-[var(--muted)] underline underline-offset-4 hover:text-[var(--foreground)]"
+            className="text-sm font-semibold text-[var(--muted)] underline underline-offset-4 hover:text-[var(--ink)]"
           >
             Maybe later
           </button>
