@@ -44,7 +44,8 @@ function escapeHtml(value: string) {
 async function notifyTrackEditors(value: z.infer<typeof applicationSchema>) {
   try {
     const db = getSupabaseAdmin() as any;
-    const selectedTeams = [...new Set(value.teams)];
+    type Team = (typeof TEAMS)[number];
+    const selectedTeams: Team[] = [...new Set(value.teams)];
     const { data: memberships, error: membershipError } = await db
       .from('user_teams')
       .select('user_id,team')
@@ -73,10 +74,10 @@ async function notifyTrackEditors(value: z.infer<typeof applicationSchema>) {
       return;
     }
 
-    const teamsByUser = new Map<string, string[]>();
+    const teamsByUser = new Map<string, Team[]>();
     for (const membership of memberships ?? []) {
       const current = teamsByUser.get(membership.user_id) ?? [];
-      current.push(membership.team);
+      current.push(membership.team as Team);
       teamsByUser.set(membership.user_id, current);
     }
 
@@ -90,7 +91,7 @@ async function notifyTrackEditors(value: z.infer<typeof applicationSchema>) {
     }) => {
       const relevantTeams = (teamsByUser.get(recipient.id) ?? []).filter(team => selectedTeams.includes(team));
       const trackNames = relevantTeams.map(team => TEAM_LABELS[team] ?? team).join(', ');
-      const subject = `New Campus Radar application: ${value.fullName} (${trackNames})`;
+      const subject = `New Campus Radar application (${trackNames})`;
       const html = `
         <div style="margin:0;padding:32px 16px;background:#f7f9fc;font-family:Arial,sans-serif;color:#101828">
           <div style="max-width:600px;margin:0 auto;overflow:hidden;border:1px solid #dce4f0;border-radius:14px;background:#ffffff">
