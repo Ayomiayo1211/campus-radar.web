@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { randomBytes, createHash } from 'node:crypto';
 import { getSupabaseAdmin } from '@/lib/server/supabase';
 import { requireRole } from '@/lib/server/auth';
-import { sendGmailMessage } from '@/lib/server/gmail';
+import { sendEmail } from '@/lib/server/email';
 import { getCloudflareContext } from '@opennextjs/cloudflare';
 const INVITABLE_ROLES = ['EDITOR', 'REPORTER'] as const;
 const ASSIGNABLE_ROLES = ['EDITOR', 'REPORTER', 'SENIOR_EDITOR'] as const;
@@ -38,7 +38,7 @@ export async function POST(request:NextRequest) {
  const siteUrl = (configuredSiteUrl || request.nextUrl.origin).replace(/\/$/, '');
  const link=`${siteUrl}/admin/accept-invitation?token=${encodeURIComponent(token)}`;
  try {
-  await sendGmailMessage({
+  await sendEmail({
    to: email,
    subject: 'Your Campus Radar newsroom invitation',
    html: `<div style="font-family:Arial,sans-serif;line-height:1.6;color:#171717"><h2>Campus Radar newsroom invitation</h2><p>You have been invited as a <strong>${role==='EDITOR'?'Editor':'Reporter'}</strong>.</p><p>Use this secure link to create your account password. It expires in 48 hours and can only be used once.</p><p><a href="${link}" style="display:inline-block;padding:12px 18px;background:#111;color:#fff;text-decoration:none;border-radius:6px">Create your account</a></p><p>If you were not expecting this invitation, ignore this email.</p></div>`,
@@ -46,9 +46,9 @@ export async function POST(request:NextRequest) {
   });
  } catch(error) {
   const diagnostic = error instanceof Error ? error.message : 'Unknown error';
-  console.error('[admin invitation] Gmail delivery failed:', diagnostic);
+  console.error('[admin invitation] Resend delivery failed:', diagnostic);
   await (db as any).from('admin_invitations').update({revoked_at:new Date().toISOString()}).eq('id',invite.id);
-  return NextResponse.json({ error: 'Invitation email could not be sent.', diagnostic: { stage: 'gmail_delivery', message: diagnostic } }, { status: 502 });
+  return NextResponse.json({ error: 'Invitation email could not be sent.', diagnostic: { stage: 'resend_delivery', message: diagnostic } }, { status: 502 });
  }
  return NextResponse.json({message:`Invitation sent to ${email}`},{status:201});
 }
