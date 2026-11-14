@@ -13,6 +13,7 @@ const links = [
   { label: 'Resources', href: '/admin/newsroom/resources' },
   { label: 'Opportunities', href: '/admin/opportunities' },
   { label: 'Submissions', href: '/admin/submissions' },
+  { label: 'Applications', href: '/admin/applications' },
   { label: 'Users', href: '/admin/users' },
 ];
 
@@ -34,6 +35,7 @@ export default function AdminNav() {
       <div className="mx-auto flex max-w-6xl gap-6 overflow-x-auto px-6">
         {links.filter(link =>
           (link.href !== '/admin/spotlight' || ['SUPER_ADMIN', 'SENIOR_EDITOR', 'EDITOR'].includes(role)) &&
+          (link.href !== '/admin/applications' || ['SUPER_ADMIN', 'SENIOR_EDITOR', 'EDITOR'].includes(role)) &&
           (link.href !== '/admin/users' || role === 'SUPER_ADMIN')
         ).map(link => {
           const active = pathname === link.href || (link.href !== '/admin' && pathname.startsWith(link.href));
