@@ -194,6 +194,8 @@ export default async function Home() {
           )}
         </section>
 
+        <RecruitmentFrequencyBanner />
+
         {/* Opportunities */}
         <section className="border-y border-[var(--line)] bg-[var(--surface)]">
           <div className="container py-6">
