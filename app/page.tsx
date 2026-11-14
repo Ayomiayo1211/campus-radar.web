@@ -6,6 +6,7 @@ import { Footer } from '@/components/Footer';
 import { StoryCard } from '@/components/StoryCard';
 import { LatestFeed } from '@/components/LatestFeed';
 import { RadarBanner } from '@/components/RadarBanner';
+import { RecruitmentFrequencyBanner } from '@/components/RecruitmentFrequencyBanner';
 import { getSupabaseAdmin } from '@/lib/server/supabase';
 
 export const dynamic = 'force-dynamic';
