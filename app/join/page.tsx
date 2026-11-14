@@ -1,6 +1,6 @@
 'use client';
 
-import { FormEvent, useState } from 'react';
+import { FormEvent, useEffect, useState } from 'react';
 import styles from './join.module.css';
 
 const teams = [
@@ -17,6 +17,15 @@ const hours = ['1–3 hrs', '4–6 hrs', '7–10 hrs', '10+ hrs'];
 
 export default function JoinPage() {
   const [selectedTeams, setSelectedTeams] = useState<string[]>([]);
+  const [activeTeam, setActiveTeam] = useState<string>('EDITORIAL');
+
+  useEffect(() => {
+    const requested = new URLSearchParams(window.location.search).get('team')?.toUpperCase();
+    if (requested && teams.some(team => team.value === requested)) {
+      setSelectedTeams(current => current.includes(requested) ? current : [...current, requested]);
+      setActiveTeam(requested);
+    }
+  }, []);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [submitted, setSubmitted] = useState(false);
@@ -75,16 +84,40 @@ export default function JoinPage() {
   return (
     <main className={styles.page}>
       <header className={styles.hero}>
-        <div className={styles.radar} aria-hidden="true">
-          <span className={styles.ring} /><span className={styles.ring} /><span className={styles.ring} />
-          <span className={styles.sweep} /><span className={styles.blipOne} /><span className={styles.blipTwo} /><span className={styles.blipThree} />
-          <span className={styles.core} />
-        </div>
         <p className={styles.eyebrow}>Campus Radar · FUNAAB</p>
-        <h1>New Member Application</h1>
-        <p className={styles.heroSub}>You're on our radar. Tell us about yourself and where you'd like to plug in. It takes about five minutes.</p>
-        <p className={styles.session}>2026/2027 SESSION</p>
+        <p className={styles.signal}>INCOMING SIGNAL <span>● LIVE</span></p>
+        <h1>Choose Your <em>Frequency.</em></h1>
+        <p className={styles.heroSub}>Every story needs a signal. Find the team that matches your interests, skills or curiosity. You do not need to have everything figured out to get started.</p>
+        <p className={styles.session}>2026/2027 · RECRUITMENT</p>
       </header>
+
+      <section className={styles.frequency} aria-labelledby="frequency-heading">
+        <div className={styles.frequencyIntro}>
+          <p className={styles.sectorTag}>Six teams · One newsroom</p>
+          <h2 id="frequency-heading">Tune into a team.</h2>
+          <p>Select a point on the radar to explore what happens behind that frequency. You can apply to more than one team.</p>
+        </div>
+        <div className={styles.radarStage}>
+          <div className={styles.radarGraphic} aria-hidden="true">
+            <span className={styles.radarRing} /><span className={styles.radarRing} /><span className={styles.radarRing} /><span className={styles.radarSweep} />
+            <span className={styles.radarCore}>CR</span>
+            {teams.map((team, index) => <span key={team.value} className={styles.radarDot} style={{ '--angle': `${index * 60 - 90}deg` } as React.CSSProperties} />)}
+          </div>
+          <div className={styles.frequencyPoints}>
+            {teams.map((team, index) => (
+              <button key={team.value} type="button" className={`${styles.frequencyPoint} ${activeTeam === team.value ? styles.frequencyPointActive : ''} ${selectedTeams.includes(team.value) ? styles.frequencyPointSelected : ''}`} onClick={() => setActiveTeam(team.value)} aria-pressed={activeTeam === team.value}>
+                <span className={styles.pointIndex}>0{index + 1}</span><span>{team.label}</span>{selectedTeams.includes(team.value) && <span className={styles.pointCheck}>✓</span>}
+              </button>
+            ))}
+          </div>
+        </div>
+        {teams.filter(team => team.value === activeTeam).map(team => (
+          <div className={styles.teamDetail} key={team.value} aria-live="polite">
+            <div><p className={styles.detailEyebrow}>FREQUENCY · {String(teams.findIndex(item => item.value === team.value) + 1).padStart(2, '0')}</p><h3>{team.label}</h3><p>{team.detail}</p></div>
+            <button type="button" className={styles.selectFrequency} onClick={() => toggleTeam(team.value)}>{selectedTeams.includes(team.value) ? 'Remove team −' : 'Select this team +'}</button>
+          </div>
+        ))}
+      </section>
 
       {submitted ? (
         <section className={styles.success} role="status">
