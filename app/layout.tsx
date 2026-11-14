@@ -6,6 +6,7 @@ import { EditorialSpotlight } from '@/components/EditorSpotlight';
 import { ThemeProvider } from '@/components/ThemeProvider';
 import { OpportunityDeadlineNudge } from '@/components/OpportunityDeadlineNudge';
 import { TodayRadarFeed } from '@/components/TodayRadarFeed';
+import { RecruitmentNudge } from '@/components/RecruitmentNudge';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -99,6 +100,7 @@ export default async function RootLayout({
           <EditorialSpotlight />
           <OpportunityDeadlineNudge />
           <TodayRadarFeed />
+          <RecruitmentNudge />
         </ThemeProvider>
       </body>
     </html>
