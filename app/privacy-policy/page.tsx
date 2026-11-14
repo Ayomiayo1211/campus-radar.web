@@ -66,7 +66,7 @@ export default function PrivacyPolicyPage() {
         </section>
         <section>
           <h2>10. Contact</h2>
-          <p>For privacy questions or requests, contact the Campus Radar newsroom at <a href="mailto:hello@campusradarfunaab.com.ng">campusradarfunaab@gmail.com</a>.</p>
+          <p>For privacy questions or requests, contact the Campus Radar newsroom at <a href="mailto:hello@campusradarfunaab.com.ng">hello@campusradarfunaab.com.ng</a>.</p>
         </section>
       </div>
     </main>
