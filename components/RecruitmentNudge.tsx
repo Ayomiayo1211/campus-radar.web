@@ -39,7 +39,7 @@ export function RecruitmentNudge() {
   return (
     <aside
       aria-label="Campus Radar recruitment"
-      className="fixed bottom-5 right-5 z-[70] w-[min( calc(100vw-2rem), 390px)] sm:bottom-6 sm:right-6"
+      className="fixed bottom-5 right-5 z-[70] w-[calc(100vw-2rem)] max-w-[390px] sm:bottom-6 sm:right-6"
     >
       <div className="relative overflow-hidden rounded-2xl border border-[#173B87]/20 bg-[var(--paper)] p-5 shadow-[0_18px_60px_rgba(10,25,60,0.22)]">
         <div className="absolute inset-x-0 top-0 h-1 bg-[#173B87]" />
@@ -47,7 +47,7 @@ export function RecruitmentNudge() {
           type="button"
           onClick={dismiss}
           aria-label="Dismiss recruitment prompt"
-          className="absolute right-3 top-3 flex h-8 w-8 items-center justify-center rounded-full text-lg text-[var(--muted)] transition hover:bg-[var(--surface)] hover:text-[var(--foreground)]"
+          className="absolute right-3 top-3 flex h-8 w-8 items-center justify-center rounded-full text-lg text-[var(--muted)] transition hover:bg-[var(--surface)] hover:text-[var(--ink)]"
         >
           ×
         </button>
