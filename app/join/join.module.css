@@ -73,3 +73,35 @@
 @keyframes join-blip { 0%,100% { opacity: 0; transform: scale(.5); } 50% { opacity: 1; transform: scale(1); } }
 @media (max-width: 520px) { .page { padding-inline: 14px; } .hero { padding-top: 28px; } .radar { width: 140px; height: 140px; } .sector { padding: 18px 15px; } .gridTwo { grid-template-columns: 1fr; gap: 0; } }
 @media (prefers-reduced-motion: reduce) { .sweep::after, .blipOne, .blipTwo, .blipThree { animation: none; } }
+
+
+/* Choose Your Frequency experience */
+.signal { margin: 18px auto 10px; color: var(--join-blue); font: 800 10px/1.4 ui-monospace, monospace; letter-spacing: .18em; }
+.signal span { margin-left: 8px; color: var(--join-red); }
+.hero h1 em { color: var(--join-blue-bright); font-style: normal; }
+.frequency { width: min(100%, 900px); margin: 0 auto 30px; padding: 26px; border: 1px solid #dce4f0; border-radius: 18px; background: linear-gradient(145deg,#fff 0%,#f4f7fd 100%); box-shadow: 0 12px 36px rgba(23,59,135,.07); }
+.frequencyIntro { max-width: 560px; margin: 0 auto 22px; text-align: center; }
+.frequencyIntro h2 { margin: 5px 0 7px; color: var(--join-blue); font-size: clamp(22px,4vw,30px); font-weight: 850; letter-spacing: -.04em; }
+.frequencyIntro > p:last-child { margin: 0; color: var(--join-muted); font-size: 13px; line-height: 1.65; }
+.radarStage { display: grid; grid-template-columns: minmax(210px, .9fr) minmax(250px,1.1fr); align-items: center; gap: 24px; max-width: 680px; margin: 0 auto; }
+.radarGraphic { position: relative; width: min(100%,260px); aspect-ratio: 1; margin: auto; border-radius: 50%; background: radial-gradient(circle,rgba(36,87,197,.09) 0 2%,transparent 2.5% 100%); }
+.radarRing { position: absolute; inset: 0; border: 1px solid rgba(23,59,135,.22); border-radius: 50%; }
+.radarRing:nth-child(2) { inset: 16%; border-color: rgba(36,87,197,.3); }
+.radarRing:nth-child(3) { inset: 32%; border-color: rgba(23,59,135,.34); }
+.radarSweep { position: absolute; inset: 0; overflow: hidden; border-radius: 50%; }
+.radarSweep::after { content: ""; position: absolute; inset: 0; border-radius: 50%; background: conic-gradient(from 0deg,transparent 0 300deg,rgba(36,87,197,.18) 340deg,transparent 360deg); animation: join-spin 7s linear infinite; }
+.radarCore { position: absolute; top: 50%; left: 50%; display: grid; width: 44px; height: 44px; place-items: center; border: 1px solid rgba(230,57,70,.45); border-radius: 50%; color: var(--join-blue); background: #fff; box-shadow: 0 0 0 7px rgba(230,57,70,.06); font-size: 12px; font-weight: 900; transform: translate(-50%,-50%); }
+.radarDot { position: absolute; top: 50%; left: 50%; width: 9px; height: 9px; border: 2px solid #fff; border-radius: 50%; background: var(--join-red); box-shadow: 0 0 0 4px rgba(230,57,70,.12); transform: rotate(var(--angle)) translateY(-124px); }
+.frequencyPoints { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.frequencyPoint { display: flex; min-height: 48px; align-items: center; gap: 9px; padding: 10px; border: 1px solid #dce4f0; border-radius: 9px; color: var(--join-text); background: #fff; text-align: left; font-size: 12px; font-weight: 750; transition: .15s ease; }
+.frequencyPoint:hover,.frequencyPointActive { border-color: var(--join-blue-bright); background: #edf3ff; color: var(--join-blue); }
+.pointIndex { color: #8b9ab3; font: 700 9px ui-monospace,monospace; }
+.pointCheck { margin-left: auto; color: var(--join-red); }
+.teamDetail { display: flex; align-items: center; justify-content: space-between; gap: 18px; max-width: 680px; margin: 22px auto 0; padding: 18px 20px; border-left: 3px solid var(--join-red); border-radius: 0 10px 10px 0; background: #edf3ff; }
+.detailEyebrow { margin: 0 0 4px; color: var(--join-blue-bright); font: 800 9px ui-monospace,monospace; letter-spacing: .13em; }
+.teamDetail h3 { margin: 0; color: var(--join-blue); font-size: 19px; font-weight: 850; }
+.teamDetail p:last-child { margin: 4px 0 0; color: var(--join-muted); font-size: 12px; line-height: 1.5; }
+.selectFrequency { flex: 0 0 auto; padding: 10px 13px; border: 1px solid rgba(23,59,135,.25); border-radius: 999px; color: var(--join-blue); background: #fff; font-size: 11px; font-weight: 800; }
+.selectFrequency:hover { color: #fff; background: var(--join-blue); }
+@media (max-width: 620px) { .frequency { padding: 19px 14px; } .radarStage { grid-template-columns: 1fr; gap: 18px; } .radarGraphic { width: 210px; } .radarDot { transform: rotate(var(--angle)) translateY(-100px); } .teamDetail { align-items: flex-start; flex-direction: column; } }
+@media (prefers-reduced-motion: reduce) { .radarSweep::after { animation: none; } }
