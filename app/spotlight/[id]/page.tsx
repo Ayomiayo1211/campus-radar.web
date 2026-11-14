@@ -9,6 +9,9 @@ import { ArticleEngagement } from '@/components/ArticleEngagement';
 
 export const dynamic = 'force-dynamic';
 
+const SITE_URL = 'https://www.campusradarfunaab.com.ng';
+const DEFAULT_SOCIAL_IMAGE = '/campus-radar-og.svg';
+
 type Props = { params: Promise<{ id: string }> };
 
 async function getSpotlight(id: string) {
@@ -28,24 +31,30 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const data = await getSpotlight(id);
   if (!data) return { title: 'Spotlight | Campus Radar' };
 
-  const canonical = `https://campus-radar-v1.campusradarfunaab.workers.dev/spotlight/${data.id}`;
+  const canonical = `${SITE_URL}/spotlight/${data.id}`;
+  const description = data.excerpt || `Read ${data.title} on Campus Radar.`;
+  const image = data.image_url || DEFAULT_SOCIAL_IMAGE;
+  const imageUrl = image.startsWith('http') ? image : `${SITE_URL}${image}`;
+
   return {
     title: `${data.title} | Campus Radar Spotlight`,
-    description: data.excerpt,
+    description,
     alternates: { canonical },
     openGraph: {
       type: 'article',
       title: data.title,
-      description: data.excerpt,
+      description,
       url: canonical,
       siteName: 'Campus Radar',
-      images: data.image_url ? [{ url: data.image_url }] : undefined,
+      publishedTime: data.published_at || undefined,
+      authors: data.author_name ? [data.author_name] : undefined,
+      images: [{ url: imageUrl, width: 1200, height: 630, alt: data.title }],
     },
     twitter: {
-      card: data.image_url ? 'summary_large_image' : 'summary',
+      card: 'summary_large_image',
       title: data.title,
-      description: data.excerpt,
-      images: data.image_url ? [data.image_url] : undefined,
+      description,
+      images: [imageUrl],
     },
   };
 }
