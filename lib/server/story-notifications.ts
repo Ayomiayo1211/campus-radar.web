@@ -1,5 +1,5 @@
 import { getSupabaseAdmin } from '@/lib/server/supabase';
-import { sendGmailMessage } from '@/lib/server/gmail';
+import { sendEmail } from '@/lib/server/email';
 import { getCloudflareContext } from '@opennextjs/cloudflare';
 
 type StorySubmission = { id: string; title: string; excerpt: string; author_name: string };
@@ -29,7 +29,7 @@ export async function notifyEditorsOfStorySubmission(story: StorySubmission, req
     const title = escapeHtml(story.title);
     const reporter = escapeHtml(story.author_name);
     const excerpt = escapeHtml(story.excerpt || 'No summary was provided.');
-    const results = await Promise.allSettled(recipients.map(({ email }) => sendGmailMessage({
+    const results = await Promise.allSettled(recipients.map(({ email }) => sendEmail({
       to: email,
       subject: `New story submitted for review: ${story.title}`,
       html: `<div style="font-family:Arial,sans-serif;line-height:1.6;color:#171717;max-width:640px"><h2>New story submitted for review</h2><p>A reporter has submitted a story to the Campus Radar newsroom.</p><p><strong>Headline:</strong> ${title}<br><strong>Reporter:</strong> ${reporter}</p><p><strong>Summary</strong><br>${excerpt}</p><p><a href="${reviewUrl}" style="display:inline-block;padding:12px 18px;background:#111;color:#fff;text-decoration:none;border-radius:6px">Review story</a></p><p style="color:#666;font-size:12px">You are receiving this email because you have an active editorial account on Campus Radar.</p></div>`,

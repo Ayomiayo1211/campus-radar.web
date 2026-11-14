@@ -1,6 +1,6 @@
 import { getCloudflareContext } from '@opennextjs/cloudflare';
 import { getSupabaseAdmin } from '@/lib/server/supabase';
-import { sendGmailMessage } from '@/lib/server/gmail';
+import { sendEmail } from '@/lib/server/email';
 
 type StoryNotice = { id: string; title: string; author_name?: string | null };
 type NoticeActor = { id: string; name: string };
@@ -21,7 +21,7 @@ function mailContext() {
 
 async function sendNotice(to: string, subject: string, html: string, env: Record<string, unknown>) {
   if (!to) return;
-  await sendGmailMessage({ to, subject, html, env });
+  await sendEmail({ to, subject, html, env });
 }
 
 export async function notifyTaskAssigned(input: {

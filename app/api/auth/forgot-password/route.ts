@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getCloudflareContext } from '@opennextjs/cloudflare';
 import { getSupabaseAdmin } from '@/lib/server/supabase';
 import { hashValue, makeToken, siteOrigin } from '@/lib/server/engagement';
-import { sendGmailMessage } from '@/lib/server/gmail';
+import { sendEmail } from '@/lib/server/email';
 
 const GENERIC_MESSAGE = 'If an active account exists for that email, a password reset link will be sent shortly.';
 
@@ -51,7 +51,7 @@ export async function POST(request: NextRequest) {
   try {
     const env = getCloudflareContext().env as unknown as Record<string, unknown>;
     const resetUrl = `${siteOrigin(request.nextUrl.origin)}/admin/reset-password?token=${encodeURIComponent(token)}`;
-    await sendGmailMessage({
+    await sendEmail({
       to: user.email,
       subject: 'Reset your Campus Radar newsroom password',
       html: `<div style="font-family:Arial,sans-serif;line-height:1.6;max-width:600px"><p>Campus Radar</p><h2>Password reset request</h2><p>We received a request to reset the password for your newsroom account.</p><p><a href="${resetUrl}" style="display:inline-block;padding:12px 18px;background:#111;color:#fff;text-decoration:none;border-radius:6px">Reset password</a></p><p>This link expires in 30 minutes and can only be used once.</p><p>If you did not request this, you can ignore this email. Your password will not change.</p></div>`,
