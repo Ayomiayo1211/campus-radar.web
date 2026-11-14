@@ -12,8 +12,7 @@ function requiredEnv(name: string, cloudflareEnv?: Record<string, unknown>): str
 }
 
 export async function sendEmail(
-  { to, subject, html }: ResendEmailInput & { env?: Record<string, unknown> },
-  env?: Record<string, unknown>,
+  { to, subject, html, env }: ResendEmailInput & { env?: Record<string, unknown> },
 ) {
   const apiKey = requiredEnv('RESEND_API_KEY', env);
   const response = await fetch('https://api.resend.com/emails', {
