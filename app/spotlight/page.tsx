@@ -6,7 +6,7 @@ import { ArticleShare } from '@/components/ArticleShare';
 import { ArticleEngagement } from '@/components/ArticleEngagement';
 export const dynamic='force-dynamic';
 export default async function SpotlightPublicPage(){
- const {data}=await (getSupabaseAdmin() as any).from('spotlights').select('id,title,excerpt,body,image_url,author_name,published_at').eq('status','PUBLISHED').eq('is_current',true).maybeSingle();
+ const {data}=await (getSupabaseAdmin() as any).from('spotlights').select('id,title,excerpt,body,image_url,author_name,published_at').eq('status','PUBLISHED').eq('is_current',true).gt('expires_at',new Date().toISOString()).maybeSingle();
  return <><Header/><main className="container min-h-screen max-w-4xl py-8">
  <Link href="/news" className="spotlight-back text-sm font-bold hover:underline">← Back to Latest News</Link>
  {!data?<div className="py-20"><p className="spotlight-page-muted text-xs font-bold uppercase tracking-widest">Campus Radar</p><h1 className="mt-3 text-3xl font-bold">Nothing on our radar just yet.</h1></div>:
