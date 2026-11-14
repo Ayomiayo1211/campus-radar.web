@@ -7,7 +7,7 @@ export const metadata: Metadata = {
   alternates: { canonical: '/terms' },
 };
 
-const updated = '13 November 2026';
+const updated = '14 November 2026';
 
 export default function TermsPage() {
   return (
@@ -63,7 +63,7 @@ export default function TermsPage() {
         </section>
         <section>
           <h2>11. Contact</h2>
-          <p>Questions about these Terms can be sent to <a href="mailto:campusradarfunaab@gmail.com">campusradarfunaab@gmail.com</a>.</p>
+          <p>Questions about these Terms can be sent to <a href="mailto:hello@campusradarfunaab.com.ng">hello@campusradarfunaab.com.ng</a>.</p>
         </section>
       </div>
     </main>
