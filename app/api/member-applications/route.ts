@@ -39,7 +39,7 @@ export async function POST(request: NextRequest) {
 
   const value = parsed.data;
   const email = value.email.toLowerCase();
-  const db = getSupabaseAdmin();
+  const db = getSupabaseAdmin() as any;
   const recentCutoff = new Date(Date.now() - 15 * 60 * 1000).toISOString();
 
   const { data: recent, error: duplicateError } = await db
