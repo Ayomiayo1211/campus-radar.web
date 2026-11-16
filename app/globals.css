@@ -671,3 +671,140 @@ summary::-webkit-details-marker {
 .dark .today-radar-feature { border-color: rgba(255,102,114,.38); background: linear-gradient(125deg, rgba(230,57,70,.2), rgba(36,87,197,.13) 58%, rgba(230,57,70,.1)); }
 .dark .today-radar-footer { color: #ff8992; }
 .dark .today-radar-list-item.is-featured { box-shadow: inset 3px 0 0 #ff6672; }
+
+
+/* Persistent Campus Radar social discovery banner */
+.social-discovery {
+  position: fixed;
+  left: max(18px, env(safe-area-inset-left));
+  bottom: max(18px, env(safe-area-inset-bottom));
+  z-index: 75;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  max-width: min(760px, calc(100vw - 36px));
+  padding: 9px 12px;
+  border: 1px solid rgba(23, 59, 135, .18);
+  border-radius: 999px;
+  color: #101828;
+  background: rgba(255, 255, 255, .96);
+  box-shadow: 0 10px 32px rgba(16, 24, 40, .14);
+  backdrop-filter: blur(16px);
+  animation: social-discovery-float 5s ease-in-out infinite;
+}
+.social-discovery-label {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 7px;
+  padding-right: 11px;
+  border-right: 1px solid #e4e7ec;
+  color: #173b87;
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: .075em;
+  line-height: 1.2;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.social-discovery-pulse {
+  width: 7px;
+  height: 7px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  background: #e63946;
+  box-shadow: 0 0 0 3px rgba(230, 57, 70, .12);
+}
+.social-discovery-links {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  min-width: 0;
+}
+.social-discovery-link {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 5px;
+  min-height: 34px;
+  padding: 4px 7px;
+  border-radius: 999px;
+  color: #344054;
+  font-size: 10px;
+  font-weight: 750;
+  transition: background-color .18s ease, transform .18s ease, color .18s ease;
+}
+.social-discovery-link:hover {
+  color: #173b87;
+  background: #f2f5fb;
+  transform: translateY(-1px);
+}
+.social-discovery-mark {
+  display: grid;
+  width: 21px;
+  height: 21px;
+  flex: 0 0 auto;
+  place-items: center;
+  border-radius: 50%;
+  color: #fff;
+  background: #173b87;
+  font-size: 10px;
+  font-weight: 900;
+  line-height: 1;
+}
+.social-discovery-mark-instagram { background: #c13584; }
+.social-discovery-mark-facebook { background: #1877f2; font-family: Arial, sans-serif; font-size: 14px; }
+.social-discovery-mark-x { background: #111; }
+.social-discovery-mark-tiktok { background: #111; }
+.social-discovery-mark-youtube { background: #e62117; font-size: 9px; }
+.social-discovery-mark-spotify { background: #16833b; font-size: 15px; }
+.social-discovery-mark-apple { background: #8055b8; }
+.social-discovery-mark-substack { background: #f26b35; }
+.dark .social-discovery {
+  border-color: rgba(131, 168, 255, .28);
+  color: var(--ink);
+  background: rgba(25, 35, 52, .96);
+  box-shadow: 0 10px 32px rgba(0, 0, 0, .32);
+}
+.dark .social-discovery-label { color: #b6cbff; border-color: #39475c; }
+.dark .social-discovery-link { color: #e5ebf5; }
+.dark .social-discovery-link:hover { color: #fff; background: #26364e; }
+@keyframes social-discovery-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+@media (max-width: 640px) {
+  .social-discovery {
+    left: max(10px, env(safe-area-inset-left));
+    right: max(10px, env(safe-area-inset-right));
+    bottom: max(10px, env(safe-area-inset-bottom));
+    max-width: none;
+    gap: 8px;
+    padding: 7px 9px;
+    border-radius: 16px;
+  }
+  .social-discovery-label {
+    gap: 6px;
+    padding-right: 8px;
+    font-size: 8px;
+    letter-spacing: .045em;
+  }
+  .social-discovery-links {
+    flex: 1 1 auto;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+  .social-discovery-links::-webkit-scrollbar { display: none; }
+  .social-discovery-link {
+    min-height: 32px;
+    padding: 4px;
+  }
+  .social-discovery-name { display: none; }
+  .social-discovery-mark { width: 25px; height: 25px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .social-discovery { animation: none; }
+  .social-discovery-link { transition: none; }
+}
