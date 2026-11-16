@@ -7,6 +7,7 @@ import { ThemeProvider } from '@/components/ThemeProvider';
 import { OpportunityDeadlineNudge } from '@/components/OpportunityDeadlineNudge';
 import { TodayRadarFeed } from '@/components/TodayRadarFeed';
 import { RecruitmentNudge } from '@/components/RecruitmentNudge';
+import { SocialDiscoveryBanner } from '@/components/SocialDiscoveryBanner';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -55,6 +56,16 @@ const siteStructuredData = {
       },
       description:
         'Student-focused media and information platform for the Federal University of Agriculture, Abeokuta.',
+      sameAs: [
+        'https://www.instagram.com/campusradar.funaab/',
+        'https://web.facebook.com/profile.php?id=100064085701446',
+        'https://x.com/campusradar_f',
+        'https://www.tiktok.com/@campusradar.funaab',
+        'https://www.youtube.com/@campusradarfunaabtv',
+        'https://open.spotify.com/show/3Swzh3CTZBFkkhvF3s5RqE',
+        'https://podcasts.apple.com/podcast/campus-radar/id1541717342',
+        'https://campusradarfunaab.substack.com/',
+      ],
     },
     {
       '@type': 'WebSite',
@@ -101,6 +112,7 @@ export default async function RootLayout({
           <OpportunityDeadlineNudge />
           <TodayRadarFeed />
           <RecruitmentNudge />
+          <SocialDiscoveryBanner />
         </ThemeProvider>
       </body>
     </html>
