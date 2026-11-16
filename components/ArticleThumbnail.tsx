@@ -122,7 +122,7 @@ export default function ArticleThumbnail({ title, excerpt, coverImage, contentTy
       ctx.strokeStyle = BLUE; ctx.lineWidth = 2.8; ctx.beginPath(); ctx.roundRect(840, cy - 12, 24, 24, 6); ctx.stroke();
       ctx.beginPath(); ctx.arc(852, cy, 5.5, 0, Math.PI * 2); ctx.stroke();
       ctx.beginPath(); ctx.arc(859, cy - 7, 1.4, 0, Math.PI * 2); ctx.fill();
-      ctx.textAlign = 'left'; ctx.font = '400 19px Arial, sans-serif'; ctx.fillText('@campusradarfunaab', 878, 1162);
+      ctx.fillStyle = BLUE; ctx.textAlign = 'left'; ctx.font = '400 19px Arial, sans-serif'; ctx.fillText('@campusradarfunaab', 878, 1162);
 
       const blob = await new Promise<Blob>((resolve, reject) => canvas.toBlob(value => value ? resolve(value) : reject(new Error('Could not export the thumbnail.')), 'image/png'));
       const url = URL.createObjectURL(blob), anchor = document.createElement('a');
