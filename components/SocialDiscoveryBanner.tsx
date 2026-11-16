@@ -21,7 +21,7 @@ export function SocialDiscoveryBanner() {
   if (pathname.startsWith('/admin')) return null;
 
   return (
-    <aside className={\`cr-social-dock\${isOpen ? ' is-open' : ''}\`} aria-label="Find Campus Radar on other platforms">
+    <aside className={'cr-social-dock' + (isOpen ? ' is-open' : '')} aria-label="Find Campus Radar on other platforms">
       <div className="cr-social-dock-head">
         <span className="cr-social-dock-mark" aria-hidden="true">CR<span>.</span></span>
         <div className="cr-social-dock-copy">
@@ -49,9 +49,9 @@ export function SocialDiscoveryBanner() {
               href={platform.href}
               target="_blank"
               rel="noopener noreferrer"
-              aria-label={\`Campus Radar on \${platform.name} (opens in a new tab)\`}
+              aria-label={'Campus Radar on ' + platform.name + ' (opens in a new tab)'}
             >
-              <span className={\`cr-social-dock-icon cr-social-dock-icon-\${platform.tone}\`} aria-hidden="true">
+              <span className={'cr-social-dock-icon cr-social-dock-icon-' + platform.tone} aria-hidden="true">
                 {platform.mark}
               </span>
               <span>{platform.name}</span>
