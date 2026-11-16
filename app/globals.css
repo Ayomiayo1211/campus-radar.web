@@ -776,9 +776,10 @@ summary::-webkit-details-marker {
 @media (max-width: 640px) {
   .social-discovery {
     left: max(10px, env(safe-area-inset-left));
-    right: max(10px, env(safe-area-inset-right));
+    right: max(96px, calc(env(safe-area-inset-right) + 88px));
     bottom: max(10px, env(safe-area-inset-bottom));
     max-width: none;
+    z-index: 69;
     gap: 8px;
     padding: 7px 9px;
     border-radius: 16px;
