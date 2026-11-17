@@ -1021,3 +1021,35 @@ summary::-webkit-details-marker {
     max-height: min(68vh, 620px);
   }
 }
+
+
+/* Mobile floating prompts take turns instead of occupying the screen together. */
+@media (max-width: 640px) {
+  .mobile-promo-item {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transform: translateY(12px) scale(.97);
+    transition: opacity 260ms ease, transform 260ms ease, visibility 260ms ease;
+  }
+  .mobile-promo-item[data-mobile-active="true"] {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    transform: translateY(0) scale(1);
+  }
+  .cr-social-dock {
+    left: max(10px, env(safe-area-inset-left));
+    right: max(10px, env(safe-area-inset-right));
+    bottom: max(10px, env(safe-area-inset-bottom));
+    width: min(330px, calc(100vw - 20px));
+  }
+  .today-radar-root {
+    top: auto;
+    right: max(10px, env(safe-area-inset-right));
+    bottom: max(10px, env(safe-area-inset-bottom));
+    transform: none;
+  }
+  .today-radar-panel { width: min(340px, calc(100vw - 20px)); max-height: min(68vh, 620px); }
+}
+@media (prefers-reduced-motion: reduce) { .mobile-promo-item { transition: none; } }
