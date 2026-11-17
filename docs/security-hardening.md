@@ -20,7 +20,7 @@
 ## Supabase migration and deployment order
 
 1. Review and merge the security pull request.
-2. Apply `supabase/migrations/20261117180000_add_api_rate_limits.sql` to the production Supabase project.
+2. Apply `supabase/migrations/20261117165257_add_api_rate_limits_and_session_revocation.sql` to the production Supabase project.
 3. Confirm the `api_rate_limits` table and `consume_api_rate_limit` function exist, and that the function is executable only by `service_role`.
 4. Deploy the application code.
 5. Test login, password recovery, session invalidation, invitation acceptance, public forms, comments, and both upload flows.
