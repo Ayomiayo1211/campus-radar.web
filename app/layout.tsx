@@ -8,6 +8,7 @@ import { OpportunityDeadlineNudge } from '@/components/OpportunityDeadlineNudge'
 import { TodayRadarFeed } from '@/components/TodayRadarFeed';
 import { RecruitmentNudge } from '@/components/RecruitmentNudge';
 import { SocialDiscoveryBanner } from '@/components/SocialDiscoveryBanner';
+import { MobilePromoProvider } from '@/components/MobilePromoCycle';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -110,9 +111,11 @@ export default async function RootLayout({
           {children}
           <EditorialSpotlight />
           <OpportunityDeadlineNudge />
-          <TodayRadarFeed />
           <RecruitmentNudge />
-          <SocialDiscoveryBanner />
+          <MobilePromoProvider>
+            <TodayRadarFeed />
+            <SocialDiscoveryBanner />
+          </MobilePromoProvider>
         </ThemeProvider>
       </body>
     </html>
