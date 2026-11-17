@@ -29,6 +29,7 @@ jobs:
           DB_SECRET: ${{ secrets.SUPABASE_SECRET_KEY }}
           RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
           EMAIL_FROM: ${{ secrets.EMAIL_FROM }}
+          AUTOMATION_TOKEN: ${{ secrets.CAMPUS_RADAR_AUTOMATION_TOKEN }}
         run: |
           test -n "$CLOUDFLARE_API_TOKEN"
           test -n "$CLOUDFLARE_ACCOUNT_ID"
@@ -36,3 +37,4 @@ jobs:
           printf '%s' "$DB_SECRET" | npx wrangler secret put SUPABASE_SECRET_KEY
           if [ -n "$RESEND_API_KEY" ]; then printf '%s' "$RESEND_API_KEY" | npx wrangler secret put RESEND_API_KEY; fi
           if [ -n "$EMAIL_FROM" ]; then printf '%s' "$EMAIL_FROM" | npx wrangler secret put EMAIL_FROM; fi
+          if [ -n "$AUTOMATION_TOKEN" ]; then printf '%s' "$AUTOMATION_TOKEN" | npx wrangler secret put CAMPUS_RADAR_AUTOMATION_TOKEN; fi
