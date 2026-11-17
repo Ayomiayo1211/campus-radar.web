@@ -1,11 +1,15 @@
 import {NextRequest,NextResponse} from 'next/server';
 import {getSupabaseAdmin} from '@/lib/server/supabase';
 import {hashValue,makeToken,sendNewsletterConfirmation} from '@/lib/server/engagement';
+import {enforceRateLimit} from '@/lib/server/rate-limit';
 export async function POST(request:NextRequest){
  let body:any;try{body=await request.json()}catch{return NextResponse.json({error:'Invalid request'},{status:400})}
+ if(!body||typeof body!=='object'||Array.isArray(body))return NextResponse.json({error:'Invalid request'},{status:400});
  const email=String(body.email||'').trim().toLowerCase();
  if(!body.consent)return NextResponse.json({error:'Please confirm that you want to receive Campus Radar updates.'},{status:400});
  if(email.length>254||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))return NextResponse.json({error:'Enter a valid email address.'},{status:400});
+ const ipLimit=await enforceRateLimit(request,'newsletter-ip',5,60*60);if(!ipLimit.allowed)return ipLimit.response!;
+ const emailLimit=await enforceRateLimit(request,'newsletter-email',3,60*60,email);if(!emailLimit.allowed)return NextResponse.json({error:'Too many subscription attempts. Please try again later.'},{status:429});
  const db=getSupabaseAdmin() as any,confirmation=makeToken(),unsubscribe=makeToken();
  const {data:existing}=await db.from('newsletter_subscribers').select('id,status').eq('email_normalized',email).maybeSingle();
  if(existing?.status==='ACTIVE')return NextResponse.json({message:'This email is already subscribed.'});

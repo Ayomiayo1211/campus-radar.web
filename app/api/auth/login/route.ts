@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
 import { getSupabaseAdmin } from '@/lib/server/supabase';
 import { createSession } from '@/lib/server/auth';
+import { enforceRateLimit } from '@/lib/server/rate-limit';
 
 function describeError(error: unknown) {
   if (error instanceof Error) {
@@ -37,13 +38,18 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Invalid email or password' }, { status: 401 });
     }
 
+    const ipLimit = await enforceRateLimit(request, 'admin-login-ip', 10, 15 * 60);
+    if (!ipLimit.allowed) return ipLimit.response!;
+    const accountLimit = await enforceRateLimit(request, 'admin-login-account', 5, 15 * 60, email);
+    if (!accountLimit.allowed) return accountLimit.response!;
+
     phase = 'Supabase client initialization';
     const supabase = getSupabaseAdmin();
 
     phase = 'Supabase user lookup';
     const { data: user, error } = await supabase
       .from('users')
-      .select('id,name,email,password_hash,role,is_active')
+      .select('id,name,email,password_hash,role,is_active,session_version')
       .eq('email', email)
       .maybeSingle();
 
@@ -67,7 +73,7 @@ export async function POST(request: NextRequest) {
     }
 
     phase = 'session creation';
-    await createSession(user.id, user.role);
+    await createSession(user.id, user.role, user.session_version ?? 0);
 
     return NextResponse.json({
       message: 'Login successful',
@@ -75,12 +81,6 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     console.error('Admin login failed', JSON.stringify({ phase, ...describeError(error) }));
-    const diagnostic = error instanceof Error
-      ? { phase, name: error.name, message: error.message }
-      : { phase, name: typeof error, message: String(error) };
-    return NextResponse.json({
-      error: 'Login service is temporarily unavailable. Please retry.',
-      diagnostic,
-    }, { status: 500 });
+    return NextResponse.json({ error: 'Login service is temporarily unavailable. Please retry.' }, { status: 503, headers: { 'Cache-Control': 'no-store' } });
   }
 }

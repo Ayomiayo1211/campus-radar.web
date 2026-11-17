@@ -4,7 +4,12 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import AdminNav from './AdminNav';
 
-const PUBLIC_ADMIN_PATHS = ['/admin/login', '/admin/accept-invitation'];
+const PUBLIC_ADMIN_PATHS = [
+  '/admin/login',
+  '/admin/accept-invitation',
+  '/admin/forgot-password',
+  '/admin/reset-password',
+];
 
 export default function AdminSessionGuard({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();

@@ -1,9 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/server/supabase';
+import { enforceRateLimit } from '@/lib/server/rate-limit';
 
 type RouteContext = { params: Promise<{ id: string }> };
 
 export async function POST(request: NextRequest, { params }: RouteContext) {
+  const limit = await enforceRateLimit(request, 'story-read-tracking', 60, 60);
+  if (!limit.allowed) return limit.response!;
   const { id } = await params;
   if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(id)) {
     return NextResponse.json({ error: 'Invalid article' }, { status: 400 });

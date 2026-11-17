@@ -1019,6 +1019,7 @@ export type Database = {
           name: string
           password_hash: string
           role: string
+          session_version: number
           updated_at: string
         }
         Insert: {
@@ -1029,6 +1030,7 @@ export type Database = {
           name: string
           password_hash: string
           role?: string
+          session_version?: number
           updated_at?: string
         }
         Update: {
@@ -1039,6 +1041,7 @@ export type Database = {
           name?: string
           password_hash?: string
           role?: string
+          session_version?: number
           updated_at?: string
         }
         Relationships: []
@@ -1048,6 +1051,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      consume_api_rate_limit: {
+        Args: { p_max_requests: number; p_rate_key: string; p_window_seconds: number }
+        Returns: boolean
+      }
       accept_admin_invitation: {
         Args: { p_name: string; p_password_hash: string; p_token_hash: string }
         Returns: string

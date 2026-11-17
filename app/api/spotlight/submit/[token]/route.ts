@@ -1,9 +1,11 @@
 import { NextRequest,NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/server/supabase';
+import { enforceRateLimit } from '@/lib/server/rate-limit';
 async function hash(value:string){const bytes=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(value));return Array.from(new Uint8Array(bytes)).map(x=>x.toString(16).padStart(2,'0')).join('');}
 type Ctx={params:Promise<{token:string}>};
 export async function POST(request:NextRequest,{params}:Ctx){
  const {token}=await params;if(!/^[a-f0-9-]{60,80}$/i.test(token))return NextResponse.json({error:'Invalid link'},{status:404});
+ const limit=await enforceRateLimit(request,'spotlight-submission',5,60*60);if(!limit.allowed)return limit.response!;
  let b:any;try{b=await request.json();}catch{return NextResponse.json({error:'Invalid submission'},{status:400});}
  const title=String(b.title||'').trim(),excerpt=String(b.excerpt||'').trim(),body=String(b.body||'').trim(),author=String(b.authorName||'').trim(),image=typeof b.imageUrl==='string'?b.imageUrl:null;
  if(title.length<3||title.length>180||excerpt.length<10||excerpt.length>500||body.length<20||author.length<2)return NextResponse.json({error:'Please complete all required fields.'},{status:400});
