@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
 import { getSupabaseAdmin } from '@/lib/server/supabase';
 import { createSession } from '@/lib/server/auth';
+import { enforceRateLimit } from '@/lib/server/rate-limit';
 
 function describeError(error: unknown) {
   if (error instanceof Error) {
@@ -36,6 +37,11 @@ export async function POST(request: NextRequest) {
     if (!email || !password || email.length > 254 || password.length > 1024) {
       return NextResponse.json({ error: 'Invalid email or password' }, { status: 401 });
     }
+
+    const ipLimit = await enforceRateLimit(request, 'admin-login-ip', 10, 15 * 60);
+    if (!ipLimit.allowed) return ipLimit.response!;
+    const accountLimit = await enforceRateLimit(request, 'admin-login-account', 5, 15 * 60, email);
+    if (!accountLimit.allowed) return accountLimit.response!;
 
     phase = 'Supabase client initialization';
     const supabase = getSupabaseAdmin();
@@ -75,12 +81,6 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     console.error('Admin login failed', JSON.stringify({ phase, ...describeError(error) }));
-    const diagnostic = error instanceof Error
-      ? { phase, name: error.name, message: error.message }
-      : { phase, name: typeof error, message: String(error) };
-    return NextResponse.json({
-      error: 'Login service is temporarily unavailable. Please retry.',
-      diagnostic,
-    }, { status: 500 });
+    return NextResponse.json({ error: 'Login service is temporarily unavailable. Please retry.' }, { status: 503, headers: { 'Cache-Control': 'no-store' } });
   }
 }
