@@ -13,7 +13,7 @@ function makeRateKey(request: Request, scope: string, subject?: string) {
   const secret = process.env.AUTH_SECRET;
   if (!secret || secret.length < 32) throw new Error('AUTH_SECRET is unavailable');
   return createHash('sha256')
-     .update(`${secret}|${scope}|${clientAddress(request)}|${subject ?? ''}`)
+      .update(`${secret}|${scope}|${subject ? `subject:${subject}` : `ip:${clientAddress(request)}`}`)
     .digest('hex');
 }
 
