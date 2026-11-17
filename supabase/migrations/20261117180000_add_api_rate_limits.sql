@@ -45,6 +45,11 @@ begin
         updated_at = now()
   returning request_count into current_count;
 
+  if extract(minute from now())::integer = 0 then
+    delete from public.api_rate_limits
+    where updated_at < now() - interval '2 days';
+  end if;
+
   return current_count <= p_max_requests;
 end;
 $$;
