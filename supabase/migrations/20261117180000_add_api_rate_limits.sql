@@ -24,8 +24,8 @@ declare
   current_count integer;
 begin
   if p_rate_key is null or length(p_rate_key) <> 64
-     or p_max_requests < 1 or p_max_requests > 10000
-     or p_window_seconds < 1 or p_window_seconds > 86400 then
+     or p_max_requests is null or p_max_requests < 1 or p_max_requests > 10000
+     or p_window_seconds is null or p_window_seconds < 1 or p_window_seconds > 86400 then
     raise exception 'Invalid rate limit parameters';
   end if;
 
