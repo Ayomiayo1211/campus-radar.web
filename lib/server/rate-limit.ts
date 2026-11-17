@@ -9,11 +9,11 @@ function clientAddress(request: Request) {
   return request.headers.get('cf-connecting-ip')?.trim() || 'unknown';
 }
 
-function makeRateKey(request: Request, scope: string) {
+function makeRateKey(request: Request, scope: string, subject?: string) {
   const secret = process.env.AUTH_SECRET;
   if (!secret || secret.length < 32) throw new Error('AUTH_SECRET is unavailable');
   return createHash('sha256')
-    .update(`${secret}|${scope}|${clientAddress(request)}`)
+     .update(`${secret}|${scope}|${clientAddress(request)}|${subject ?? ''}`)
     .digest('hex');
 }
 
@@ -22,9 +22,10 @@ export async function enforceRateLimit(
   scope: string,
   maxRequests: number,
   windowSeconds: number,
+  subject?: string,
 ): Promise<RateLimitResult> {
   try {
-    const rateKey = makeRateKey(request, scope);
+    const rateKey = makeRateKey(request, scope, subject);
     const { data, error } = await (getSupabaseAdmin() as any).rpc('consume_api_rate_limit', {
       p_rate_key: rateKey,
       p_max_requests: maxRequests,
