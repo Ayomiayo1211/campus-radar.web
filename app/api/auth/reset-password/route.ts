@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
 import { getSupabaseAdmin } from '@/lib/server/supabase';
 import { hashValue } from '@/lib/server/engagement';
+import { enforceRateLimit } from '@/lib/server/rate-limit';
 
 export async function POST(request: NextRequest) {
   let body: unknown;
@@ -12,6 +13,9 @@ export async function POST(request: NextRequest) {
   const password = typeof body === 'object' && body !== null && 'password' in body && typeof body.password === 'string' ? body.password : '';
   if (!/^[a-f0-9]{64}$/i.test(token)) return NextResponse.json({ error: 'This reset link is invalid or has expired. Request a new one.' }, { status: 400 });
   if (password.length < 12 || password.length > 128) return NextResponse.json({ error: 'Use a password between 12 and 128 characters.' }, { status: 400 });
+
+  const limit = await enforceRateLimit(request, 'reset-password', 10, 60 * 60);
+  if (!limit.allowed) return limit.response!;
 
   const passwordHash = await bcrypt.hash(password, 12);
   const { data, error } = await (getSupabaseAdmin() as any).rpc('reset_user_password', {
