@@ -60,8 +60,7 @@ grant execute on function public.consume_api_rate_limit(text, integer, integer) 
 create index if not exists api_rate_limits_updated_at_idx
   on public.api_rate_limits(updated_at);
 
--- Expired keys are pruned by the application maintenance job or a scheduled
--- cleanup; retaining only hashes avoids storing raw IP addresses.
+-- Expired keys are pruned opportunistically; only keyed hashes are stored.
 
 -- Incrementing this value invalidates every previously issued session for a user.
 alter table public.users
