@@ -3,6 +3,7 @@ import { getCloudflareContext } from '@opennextjs/cloudflare';
 import { getSupabaseAdmin } from '@/lib/server/supabase';
 import { hashValue, makeToken, siteOrigin } from '@/lib/server/engagement';
 import { sendEmail } from '@/lib/server/email';
+import { enforceRateLimit } from '@/lib/server/rate-limit';
 
 const GENERIC_MESSAGE = 'If an active account exists for that email, a password reset link will be sent shortly.';
 
@@ -21,6 +22,11 @@ export async function POST(request: NextRequest) {
   if (!email || email.length > 254 || !/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email)) {
     return NextResponse.json({ error: 'Enter a valid email address.' }, { status: 400 });
   }
+
+  const ipLimit = await enforceRateLimit(request, 'forgot-password-ip', 5, 15 * 60);
+  if (!ipLimit.allowed) return NextResponse.json({ message: GENERIC_MESSAGE }, { status: 200 });
+  const accountLimit = await enforceRateLimit(request, 'forgot-password-account', 3, 60 * 60, email);
+  if (!accountLimit.allowed) return NextResponse.json({ message: GENERIC_MESSAGE }, { status: 200 });
 
   // Keep account-existence responses identical, but log each server-side failure
   // with a one-way email fingerprint so failures can be correlated without
