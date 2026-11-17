@@ -1,6 +1,7 @@
 import {NextRequest,NextResponse} from 'next/server';
 import {getSupabaseAdmin,toCamelCase} from '@/lib/server/supabase';
 import {requireRole} from '@/lib/server/auth';
+import {enforceRateLimit} from '@/lib/server/rate-limit';
 const MAX_FILE_SIZE=10*1024*1024;
 const ALLOWED_TYPES:Record<string,string>={'image/jpeg':'jpg','image/png':'png','image/webp':'webp','image/gif':'gif'};
 function detectImageFormat(bytes:Uint8Array):string|null{
@@ -12,6 +13,7 @@ function detectImageFormat(bytes:Uint8Array):string|null{
 }
 export async function POST(request:NextRequest){
  try{await requireRole(['SUPER_ADMIN','SENIOR_EDITOR','EDITOR','REPORTER']);}catch(error){const forbidden=error instanceof Error&&error.message==='Forbidden';return NextResponse.json({error:forbidden?'You do not have permission to upload media':'Authentication required'},{status:forbidden?403:401});}
+ const limit=await enforceRateLimit(request,'newsroom-media-upload',30,60*60);if(!limit.allowed)return limit.response!;
  const form=await request.formData();const file=form.get('file');
  if(!(file instanceof File))return NextResponse.json({error:'No image file provided'},{status:400});
  if(!file.size)return NextResponse.json({error:'The image file is empty'},{status:400});
