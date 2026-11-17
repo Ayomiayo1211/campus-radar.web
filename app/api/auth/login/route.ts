@@ -49,7 +49,7 @@ export async function POST(request: NextRequest) {
     phase = 'Supabase user lookup';
     const { data: user, error } = await supabase
       .from('users')
-      .select('id,name,email,password_hash,role,is_active')
+      .select('id,name,email,password_hash,role,is_active,session_version')
       .eq('email', email)
       .maybeSingle();
 
@@ -73,7 +73,7 @@ export async function POST(request: NextRequest) {
     }
 
     phase = 'session creation';
-    await createSession(user.id, user.role);
+    await createSession(user.id, user.role, user.session_version ?? 0);
 
     return NextResponse.json({
       message: 'Login successful',
