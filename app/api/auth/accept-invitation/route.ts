@@ -13,7 +13,7 @@ export async function POST(request:NextRequest) {
  const tokenHash=createHash('sha256').update(token).digest('hex'),passwordHash=await bcrypt.hash(password,12);
  const {data,error}=await (getSupabaseAdmin() as any).rpc('accept_admin_invitation',{p_token_hash:tokenHash,p_name:name,p_password_hash:passwordHash});
  if(error||typeof data!=='string')return NextResponse.json({error:error?.code === '23505'?'An account with this email already exists.':'This invitation is invalid, expired, or has already been used.'},{status:400});
- const {data:user}=await getSupabaseAdmin().from('users').select('role').eq('id',data).single();
- await createSession(data,user?.role??'REPORTER');
+ const {data:user}=await getSupabaseAdmin().from('users').select('role,session_version').eq('id',data).single();
+ await createSession(data,user?.role??'REPORTER',user?.session_version??0);
  return NextResponse.json({message:'Account created successfully.'});
 }
