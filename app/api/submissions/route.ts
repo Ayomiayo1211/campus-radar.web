@@ -2,6 +2,7 @@ import { NextRequest,NextResponse } from 'next/server';
 import { getSupabaseAdmin, toCamelCase } from '@/lib/server/supabase';
 import { requireRole } from '@/lib/server/auth';
 import { submissionSchema } from '@/lib/validation/content';
+import { enforceRateLimit } from '@/lib/server/rate-limit';
 const REVIEW_ROLES=['SUPER_ADMIN','SENIOR_EDITOR','EDITOR'] as const;
 export async function GET(request:NextRequest){
  try{await requireRole([...REVIEW_ROLES]);}catch{return NextResponse.json({error:'Unauthorized'},{status:401});}
@@ -10,6 +11,7 @@ export async function GET(request:NextRequest){
  const {data,error}=await q;if(error)return NextResponse.json({error:'Could not load submissions'},{status:500});return NextResponse.json({data:toCamelCase(data??[])});
 }
 export async function POST(request:NextRequest){
+ const limit=await enforceRateLimit(request,'public-submissions',5,60*60);if(!limit.allowed)return limit.response!;
  let body:unknown;try{body=await request.json();}catch{return NextResponse.json({error:'Invalid JSON body'},{status:400});}
  const parsed=submissionSchema.safeParse(body);if(!parsed.success)return NextResponse.json({error:'Invalid submission',details:parsed.error.flatten()},{status:400});
  const d=parsed.data;const {data,error}=await getSupabaseAdmin().from('submissions').insert({type:d.type,name:d.name??null,contact:d.contact??null,title:d.title??null,body:d.body,status:'PENDING',source:'WEBSITE'}).select('id,status').single();
