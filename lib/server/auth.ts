@@ -4,7 +4,7 @@ import { jwtVerify, SignJWT } from 'jose';
 import { getSupabaseAdmin } from '@/lib/server/supabase';
 
 const SESSION_COOKIE = 'campus_radar_session';
-const SESSION_DURATION = 60 * 60 * 24 * 7;
+const SESSION_DURATION = 60 * 60 * 12;
 
 type SessionPayload = { userId: string; role: string };
 
@@ -20,7 +20,7 @@ function getSecret() {
 
 export async function createSession(userId: string, role: string) {
   const token = await new SignJWT({ userId, role })
-    .setProtectedHeader({ alg: 'HS256' }).setIssuedAt().setExpirationTime('7d').sign(getSecret());
+    .setProtectedHeader({ alg: 'HS256' }).setIssuedAt().setExpirationTime('12h').sign(getSecret());
   (await cookies()).set(SESSION_COOKIE, token, {
     httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'lax', path: '/', maxAge: SESSION_DURATION,
   });
