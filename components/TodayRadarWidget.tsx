@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import { useMobilePromo } from '@/components/MobilePromoCycle';
 
 export type TodayRadarItem = {
   title: string;
@@ -30,6 +31,7 @@ export function TodayRadar({ items }: { items: TodayRadarItem[] }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const [featured, setFeatured] = useState(0);
+  const activePromo = useMobilePromo();
 
   useEffect(() => {
     if (items.length < 2) return;
@@ -48,7 +50,7 @@ export function TodayRadar({ items }: { items: TodayRadarItem[] }) {
   const current = items[featured % items.length];
 
   return (
-    <aside className="today-radar-root" aria-label="Today's Radar">
+    <aside className="today-radar-root mobile-promo-item" data-mobile-promo="radar" data-mobile-active={activePromo === "radar" || open ? "true" : "false"} aria-label="Today's Radar">
       {open && (
         <section className="today-radar-panel" aria-label="Activities happening today">
           <div className="today-radar-panel-head">
