@@ -1,4 +1,4 @@
-import { createHash } from 'node:crypto';
+import { createHmac } from 'node:crypto';
 import { getSupabaseAdmin } from '@/lib/server/supabase';
 
 type RateLimitResult = { allowed: boolean; response?: Response };
@@ -12,8 +12,8 @@ function clientAddress(request: Request) {
 function makeRateKey(request: Request, scope: string, subject?: string) {
   const secret = process.env.AUTH_SECRET;
   if (!secret || secret.length < 32) throw new Error('AUTH_SECRET is unavailable');
-  return createHash('sha256')
-      .update(`${secret}|${scope}|${subject ? `subject:${subject}` : `ip:${clientAddress(request)}`}`)
+  return createHmac('sha256', secret)
+    .update(`${scope}|${subject ? `subject:${subject}` : `ip:${clientAddress(request)}`}`)
     .digest('hex');
 }
 
