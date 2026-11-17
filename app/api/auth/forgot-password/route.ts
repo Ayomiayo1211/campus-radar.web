@@ -24,9 +24,9 @@ export async function POST(request: NextRequest) {
   }
 
   const ipLimit = await enforceRateLimit(request, 'forgot-password-ip', 5, 15 * 60);
-  if (!ipLimit.allowed) return NextResponse.json({ message: GENERIC_MESSAGE }, { status: 200 });
+  if (!ipLimit.allowed) return ipLimit.response?.status === 429 ? NextResponse.json({ message: GENERIC_MESSAGE }) : ipLimit.response!;
   const accountLimit = await enforceRateLimit(request, 'forgot-password-account', 3, 60 * 60, email);
-  if (!accountLimit.allowed) return NextResponse.json({ message: GENERIC_MESSAGE }, { status: 200 });
+  if (!accountLimit.allowed) return accountLimit.response?.status === 429 ? NextResponse.json({ message: GENERIC_MESSAGE }) : accountLimit.response!;
 
   // Keep account-existence responses identical, but log each server-side failure
   // with a one-way email fingerprint so failures can be correlated without
