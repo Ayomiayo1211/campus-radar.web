@@ -15,6 +15,9 @@ type Spotlight = {
 
 type SpotlightResponse = { data?: Spotlight | null; error?: string };
 
+const SPOTLIGHT_COOLDOWN_KEY = 'campus-radar-spotlight-last-shown';
+const SPOTLIGHT_COOLDOWN_MS = 7 * 24 * 60 * 60 * 1000;
+
 export function EditorialSpotlight() {
   const pathname = usePathname();
   const [item, setItem] = useState<Spotlight | null>(null);
@@ -35,7 +38,22 @@ export function EditorialSpotlight() {
   useEffect(() => {
     setVisible(false);
     if (!item || pathname.startsWith('/admin') || pathname === '/spotlight' || pathname.startsWith('/spotlight/')) return;
-    const timer = window.setTimeout(() => setVisible(true), 10000);
+
+    try {
+      const lastShown = Number(window.localStorage.getItem(SPOTLIGHT_COOLDOWN_KEY) || 0);
+      if (lastShown > 0 && Date.now() - lastShown < SPOTLIGHT_COOLDOWN_MS) return;
+    } catch {
+      // Continue without persistence if browser storage is unavailable.
+    }
+
+    const timer = window.setTimeout(() => {
+      try {
+        window.localStorage.setItem(SPOTLIGHT_COOLDOWN_KEY, String(Date.now()));
+      } catch {
+        // The spotlight can still be shown for this visit without storage.
+      }
+      setVisible(true);
+    }, 10000);
     return () => window.clearTimeout(timer);
   }, [pathname, item]);
 
