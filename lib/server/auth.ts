@@ -6,7 +6,7 @@ import { getSupabaseAdmin } from '@/lib/server/supabase';
 const SESSION_COOKIE = 'campus_radar_session';
 const SESSION_DURATION = 60 * 60 * 12;
 
-type SessionPayload = { userId: string; role: string };
+type SessionPayload = { userId: string; role: string; sessionVersion: number };
 
 function getSecret() {
   const secret = process.env.AUTH_SECRET;
@@ -18,8 +18,8 @@ function getSecret() {
   return new TextEncoder().encode(secret);
 }
 
-export async function createSession(userId: string, role: string) {
-  const token = await new SignJWT({ userId, role })
+export async function createSession(userId: string, role: string, sessionVersion = 0) {
+  const token = await new SignJWT({ userId, role, sessionVersion })
     .setProtectedHeader({ alg: 'HS256' }).setIssuedAt().setExpirationTime('12h').sign(getSecret());
   (await cookies()).set(SESSION_COOKIE, token, {
     httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'lax', path: '/', maxAge: SESSION_DURATION,
@@ -32,7 +32,8 @@ export async function getSession(): Promise<SessionPayload | null> {
   try {
     const { payload } = await jwtVerify(token, getSecret());
     if (typeof payload.userId !== 'string' || typeof payload.role !== 'string') return null;
-    return { userId: payload.userId, role: payload.role };
+    const sessionVersion = typeof payload.sessionVersion === 'number' ? payload.sessionVersion : 0;
+    return { userId: payload.userId, role: payload.role, sessionVersion };
   } catch { return null; }
 }
 
@@ -41,10 +42,10 @@ export async function requireRole(allowedRoles: string[]) {
   if (!session) throw new Error('Unauthorized');
 
   const { data: user, error } = await getSupabaseAdmin()
-    .from('users').select('id,name,email,role,is_active')
+    .from('users').select('id,name,email,role,is_active,session_version')
     .eq('id', session.userId).maybeSingle();
 
-  if (error || !user || !user.is_active) throw new Error('Unauthorized');
+  if (error || !user || !user.is_active || (user.session_version ?? 0) !== session.sessionVersion) throw new Error('Unauthorized');
   if (!allowedRoles.includes(user.role)) throw new Error('Forbidden');
   return { ...user, isActive: user.is_active };
 }
