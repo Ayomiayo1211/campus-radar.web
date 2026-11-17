@@ -992,3 +992,32 @@ summary::-webkit-details-marker {
 @media (prefers-reduced-motion: reduce) {
   .cr-social-dock, .cr-social-dock-link, .cr-social-dock-toggle { transition: none; }
 }
+
+
+/* Mobile floating controls: keep the social dock at the bottom and move
+   Today's Radar launcher to the vertical centre so the two never compete. */
+.cr-social-dock-logo {
+  display: block;
+  width: 39px;
+  height: 39px;
+  object-fit: cover;
+  object-position: center;
+}
+@media (max-width: 640px) {
+  .cr-social-dock {
+    left: max(10px, env(safe-area-inset-left));
+    right: auto;
+    bottom: max(10px, env(safe-area-inset-bottom));
+    width: min(330px, calc(100vw - 20px));
+  }
+  .today-radar-root {
+    top: 50%;
+    right: max(10px, env(safe-area-inset-right));
+    bottom: auto;
+    transform: translateY(-50%);
+  }
+  .today-radar-panel {
+    width: min(340px, calc(100vw - 20px));
+    max-height: min(68vh, 620px);
+  }
+}

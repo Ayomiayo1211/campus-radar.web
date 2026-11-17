@@ -171,30 +171,6 @@ export default async function Home() {
           )}
         </section>
 
-        {/* The Radar */}
-        <section className="container py-6">
-          <div className="mb-4 flex items-end justify-between border-b border-[var(--line)] pb-2">
-            <div>
-              <p className="kicker text-[#173B87]">Quick updates</p>
-              <h2 className="text-xl font-black">The Radar</h2>
-            </div>
-            <Link
-              href="/radar"
-              className="text-sm font-bold text-[#173B87] underline underline-offset-4"
-            >
-              View all
-            </Link>
-          </div>
-
-          {radarItems.length > 0 ? (
-            <RadarBanner items={radarItems} />
-          ) : (
-            <p className="rounded-lg border border-[var(--line)] bg-[var(--surface)] px-5 py-6 text-sm text-[var(--muted)]">
-              Campus updates, announcements and events will appear here as they are published.
-            </p>
-          )}
-        </section>
-
         <RecruitmentFrequencyBanner />
 
         {/* Opportunities */}
@@ -229,6 +205,30 @@ export default async function Home() {
               <p className="rounded-lg border border-[var(--line)] bg-[var(--surface)] px-5 py-6 text-sm text-[var(--muted)]">New scholarships, fellowships, competitions and other opportunities will appear here when published.</p>
             )}
           </div>
+        </section>
+
+        {/* The Radar */}
+        <section className="container py-6">
+          <div className="mb-4 flex items-end justify-between border-b border-[var(--line)] pb-2">
+            <div>
+              <p className="kicker text-[#173B87]">Quick updates</p>
+              <h2 className="text-xl font-black">The Radar</h2>
+            </div>
+            <Link
+              href="/radar"
+              className="text-sm font-bold text-[#173B87] underline underline-offset-4"
+            >
+              View all
+            </Link>
+          </div>
+
+          {radarItems.length > 0 ? (
+            <RadarBanner items={radarItems} />
+          ) : (
+            <p className="rounded-lg border border-[var(--line)] bg-[var(--surface)] px-5 py-6 text-sm text-[var(--muted)]">
+              Campus updates, announcements and events will appear here as they are published.
+            </p>
+          )}
         </section>
 
         {/* External publishing feeds */}
