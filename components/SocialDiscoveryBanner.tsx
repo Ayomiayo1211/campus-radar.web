@@ -3,6 +3,7 @@
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { useState } from 'react';
+import { useMobilePromo } from '@/components/MobilePromoCycle';
 
 const platforms = [
   { name: 'Instagram', mark: '◎', href: 'https://www.instagram.com/campusradar.funaab/', tone: 'instagram' },
@@ -18,11 +19,14 @@ const platforms = [
 export function SocialDiscoveryBanner() {
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
+  const activePromo = useMobilePromo();
 
   if (pathname.startsWith('/admin')) return null;
 
   return (
-    <aside className={'cr-social-dock' + (isOpen ? ' is-open' : '')} aria-label="Find Campus Radar on other platforms">
+    <aside className={'cr-social-dock mobile-promo-item' + (isOpen ? ' is-open' : '')}
+      data-mobile-promo="social"
+      data-mobile-active={activePromo === 'social' || isOpen ? 'true' : 'false'} aria-label="Find Campus Radar on other platforms">
       <div className="cr-social-dock-head">
         <span className="cr-social-dock-mark" aria-hidden="true"><Image src="/campusradar.svg" alt="" width={39} height={39} className="cr-social-dock-logo" /></span>
         <div className="cr-social-dock-copy">
