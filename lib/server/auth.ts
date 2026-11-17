@@ -31,6 +31,8 @@ export async function getSession(): Promise<SessionPayload | null> {
   if (!token) return null;
   try {
     const { payload } = await jwtVerify(token, getSecret());
+    const now = Math.floor(Date.now() / 1000);
+    if (typeof payload.iat !== 'number' || payload.iat > now + 60 || now - payload.iat > SESSION_DURATION) return null;
     if (typeof payload.userId !== 'string' || typeof payload.role !== 'string') return null;
     const sessionVersion = typeof payload.sessionVersion === 'number' ? payload.sessionVersion : 0;
     return { userId: payload.userId, role: payload.role, sessionVersion };
