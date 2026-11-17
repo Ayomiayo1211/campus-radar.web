@@ -4,6 +4,7 @@ import {hashValue,makeToken,sendNewsletterConfirmation} from '@/lib/server/engag
 import {enforceRateLimit} from '@/lib/server/rate-limit';
 export async function POST(request:NextRequest){
  let body:any;try{body=await request.json()}catch{return NextResponse.json({error:'Invalid request'},{status:400})}
+ if(!body||typeof body!=='object'||Array.isArray(body))return NextResponse.json({error:'Invalid request'},{status:400});
  const email=String(body.email||'').trim().toLowerCase();
  if(!body.consent)return NextResponse.json({error:'Please confirm that you want to receive Campus Radar updates.'},{status:400});
  if(email.length>254||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))return NextResponse.json({error:'Enter a valid email address.'},{status:400});
