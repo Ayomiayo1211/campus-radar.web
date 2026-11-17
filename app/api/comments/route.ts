@@ -5,6 +5,7 @@ import {enforceRateLimit} from '@/lib/server/rate-limit';
 
 function validId(value:string){return /^[0-9a-f-]{36}$/i.test(value)}
 export async function GET(request:NextRequest) {
+  const limit=await enforceRateLimit(request,'public-comments-read',60,60);if(!limit.allowed)return limit.response!;
   const storyId=request.nextUrl.searchParams.get('storyId')||'';
   const spotlightId=request.nextUrl.searchParams.get('spotlightId')||'';
   if((!storyId&&!spotlightId)||(storyId&&spotlightId)||((storyId||spotlightId)&&!validId(storyId||spotlightId))) return NextResponse.json({error:'Invalid comment destination'},{status:400});
