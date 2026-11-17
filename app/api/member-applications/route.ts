@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { getSupabaseAdmin } from '@/lib/server/supabase';
 import { sendEmail } from '@/lib/server/email';
 import { getCloudflareContext } from '@opennextjs/cloudflare';
+import { enforceRateLimit } from '@/lib/server/rate-limit';
 
 export const runtime = 'nodejs';
 
@@ -133,6 +134,9 @@ async function notifyTrackEditors(value: z.infer<typeof applicationSchema>) {
 }
 
 export async function POST(request: NextRequest) {
+  const limit = await enforceRateLimit(request, 'member-application', 3, 60 * 60);
+  if (!limit.allowed) return limit.response!;
+
   let body: unknown;
   try {
     body = await request.json();
