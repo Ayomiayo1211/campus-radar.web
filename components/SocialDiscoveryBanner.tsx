@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { useState } from 'react';
 
@@ -23,7 +24,7 @@ export function SocialDiscoveryBanner() {
   return (
     <aside className={'cr-social-dock' + (isOpen ? ' is-open' : '')} aria-label="Find Campus Radar on other platforms">
       <div className="cr-social-dock-head">
-        <span className="cr-social-dock-mark" aria-hidden="true">CR<span>.</span></span>
+        <span className="cr-social-dock-mark" aria-hidden="true"><Image src="/campusradar.svg" alt="" width={39} height={39} className="cr-social-dock-logo" /></span>
         <div className="cr-social-dock-copy">
           <span className="cr-social-dock-title">Campus Radar</span>
           <span className="cr-social-dock-subtitle">Find us beyond the website</span>
