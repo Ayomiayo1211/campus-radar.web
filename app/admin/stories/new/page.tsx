@@ -66,6 +66,7 @@ export default function NewStoryPage() {
   const [mediaLoading, setMediaLoading] =
     useState(false);
   const [error, setError] = useState('');
+  const [showSubmitConfirm, setShowSubmitConfirm] = useState(false);
 
   const imageInputRef = useRef<HTMLInputElement>(null);
   const galleryInputRef = useRef<HTMLInputElement>(null);
@@ -331,30 +332,27 @@ export default function NewStoryPage() {
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (currentUserRole === 'REPORTER') {
+      setShowSubmitConfirm(true);
+      return;
+    }
+    await createStory(status);
+  }
 
+  async function createStory(nextStatus: string) {
+    setShowSubmitConfirm(false);
     setLoading(true);
     setError('');
-
     try {
       const response = await fetch('/api/stories', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          title,
-          excerpt,
-          body,
-          contentType,
-          origin,
-          commercialStatus,
-          status,
-          featured,
-          authorName,
+          title, excerpt, body, contentType, origin, commercialStatus,
+          status: nextStatus, featured, authorName,
           coverImage: coverImage || undefined,
           galleryImages: galleryImages.map((image, index) => ({
-            url: image.url,
-            mediaId: image.mediaId,
+            url: image.url, mediaId: image.mediaId,
             altText: image.altText || undefined,
             caption: image.caption || undefined,
             photographer: image.photographer || undefined,
@@ -362,26 +360,16 @@ export default function NewStoryPage() {
           })),
         }),
       });
-
       const result = await response.json();
-
       if (!response.ok) {
-        const message =
-          result &&
-          typeof result === 'object' &&
-          'error' in result &&
-          typeof result.error === 'string'
-            ? result.error
-            : 'Failed to create story';
+        const message = result && typeof result === 'object' && 'error' in result && typeof result.error === 'string'
+          ? result.error : 'Failed to create story';
         throw new Error(message);
       }
-
       router.push('/admin/stories');
       router.refresh();
     } catch (err) {
-      setError(
-        err instanceof Error ? err.message : 'Something went wrong'
-      );
+      setError(err instanceof Error ? err.message : 'Something went wrong');
     } finally {
       setLoading(false);
     }
@@ -833,6 +821,21 @@ export default function NewStoryPage() {
           </div>
         </form>
       </div>
+
+      {showSubmitConfirm && currentUserRole === 'REPORTER' && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 p-5" role="dialog" aria-modal="true" aria-labelledby="submit-story-title">
+          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl">
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#173B87]">Campus Radar newsroom</p>
+            <h2 id="submit-story-title" className="mt-2 text-xl font-semibold text-gray-950">What would you like to do with this story?</h2>
+            <p className="mt-2 text-sm leading-6 text-gray-600">Save it privately as a draft, or send it to the Editors and Senior Editors for review. Submitting for review does not publish the story.</p>
+            <div className="mt-6 grid gap-3">
+              <button type="button" disabled={busy} onClick={() => void createStory('REVIEW')} className="rounded-lg bg-[#173B87] px-4 py-3 text-sm font-semibold text-white hover:bg-[#102d68] disabled:opacity-50">{loading ? 'Sending...' : 'Submit for Editorial Review'}</button>
+              <button type="button" disabled={busy} onClick={() => void createStory('DRAFT')} className="rounded-lg border border-gray-300 px-4 py-3 text-sm font-semibold text-gray-800 hover:bg-gray-50 disabled:opacity-50">Save as Draft</button>
+              <button type="button" disabled={busy} onClick={() => setShowSubmitConfirm(false)} className="px-4 py-2 text-sm text-gray-500 hover:text-gray-800">Cancel</button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {showMediaLibrary && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-6">
