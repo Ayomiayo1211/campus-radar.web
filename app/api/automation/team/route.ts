@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getCloudflareContext } from '@opennextjs/cloudflare';
 import { getSupabaseAdmin } from '@/lib/server/supabase';
 
-export const runtime = 'edge';
 
 const ALLOWED_ROLES = new Set(['REPORTER', 'EDITOR', 'SENIOR_EDITOR']);
 
