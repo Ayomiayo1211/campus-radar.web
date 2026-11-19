@@ -56,8 +56,6 @@ export async function GET(request: NextRequest) {
   const db = getSupabaseAdmin() as any;
 
   try {
-    // Match the admin dashboard's account source: every row in public.users.
-    // Include all roles, account states and team memberships.
     const [users, memberships] = await Promise.all([
       fetchAllRows(() => db.from('users')
         .select('id,name,email,role,is_active,created_at')
@@ -77,7 +75,11 @@ export async function GET(request: NextRequest) {
       teamsByUserId.set(membership.user_id, current);
     }
 
-    const team = users.map((user: any) => ({
+    // Sync every registered newsroom account. The system SUPER_ADMIN account
+    // is intentionally excluded; role, team and active status do not filter staff.
+    const newsroomUsers = users.filter((user: any) => user.role !== 'SUPER_ADMIN');
+
+    const team = newsroomUsers.map((user: any) => ({
       id: user.id,
       name: user.name,
       email: user.email,
