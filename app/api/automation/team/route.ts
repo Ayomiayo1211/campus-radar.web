@@ -2,8 +2,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getCloudflareContext } from '@opennextjs/cloudflare';
 import { getSupabaseAdmin } from '@/lib/server/supabase';
 
-const REPORTER_ROLE = 'REPORTER';
-
 async function matchesToken(provided: string, expected: string): Promise<boolean> {
   if (!provided || !expected) return false;
 
@@ -18,6 +16,24 @@ async function matchesToken(provided: string, expected: string): Promise<boolean
   let difference = 0;
   for (let i = 0; i < a.length; i++) difference |= a[i] ^ b[i];
   return difference === 0;
+}
+
+async function fetchAllRows(queryFactory: () => any): Promise<any[]> {
+  const rows: any[] = [];
+  const pageSize = 1000;
+
+  for (let offset = 0; ; offset += pageSize) {
+    const { data, error } = await queryFactory().range(offset, offset + pageSize - 1);
+
+    if (error) throw error;
+
+    const page = data ?? [];
+    rows.push(...page);
+
+    if (page.length < pageSize) break;
+  }
+
+  return rows;
 }
 
 export async function GET(request: NextRequest) {
@@ -40,32 +56,59 @@ export async function GET(request: NextRequest) {
 
   const db = getSupabaseAdmin() as any;
 
-  // Include every account whose role is REPORTER, regardless of team membership
-  // or account activation state. The isActive field is preserved for the sheet.
-  const { data: users, error } = await db.from('users')
-    .select('id,name,email,role,is_active,created_at')
-    .eq('role', REPORTER_ROLE)
-    .order('created_at', { ascending: true });
+  try {
+    // Fetch every account and every team membership, including inactive accounts.
+    // Pagination avoids silently stopping at Supabase's 1,000-row response limit.
+    const [users, memberships] = await Promise.all([
+      fetchAllRows(() => db.from('users')
+        .select('id,name,email,role,is_active,created_at')
+        .order('created_at', { ascending: true })
+        .order('id', { ascending: true })),
+      fetchAllRows(() => db.from('user_teams')
+        .select('user_id,team')
+        .order('user_id', { ascending: true })
+        .order('team', { ascending: true })),
+    ]);
 
-  if (error) {
-    console.error('[automation team] Database lookup failed:', error.message);
+    const teamsByUserId = new Map<string, string[]>();
+
+    for (const membership of memberships) {
+      const current = teamsByUserId.get(membership.user_id) ?? [];
+      current.push(membership.team);
+      teamsByUserId.set(membership.user_id, current);
+    }
+
+    // Include all Editorial team accounts, regardless of role/status,
+    // plus all Reporter accounts even if they have no team assignment.
+    const newsroomUsers = users.filter((user: any) =>
+      user.role === 'REPORTER' ||
+      (teamsByUserId.get(user.id) ?? []).includes('EDITORIAL')
+    );
+
+    const team = newsroomUsers.map((user: any) => ({
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      isActive: user.is_active,
+      teams: teamsByUserId.get(user.id) ?? [],
+    }));
+
     return NextResponse.json(
-      { error: 'Could not load reporter accounts.' },
+      {
+        team,
+        count: team.length,
+        generatedAt: new Date().toISOString(),
+      },
+      { headers: { 'Cache-Control': 'no-store, max-age=0' } },
+    );
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Unknown database error';
+    console.error('[automation team] Database lookup failed:', message);
+
+    return NextResponse.json(
+      { error: 'Could not load newsroom accounts.' },
       { status: 500, headers: { 'Cache-Control': 'no-store' } },
     );
   }
-
-  const team = (users ?? []).map((user: any) => ({
-    id: user.id,
-    name: user.name,
-    email: user.email,
-    role: user.role,
-    isActive: user.is_active,
-    teams: ['EDITORIAL'],
-  }));
-
-  return NextResponse.json(
-    { team, count: team.length, generatedAt: new Date().toISOString() },
-    { headers: { 'Cache-Control': 'no-store, max-age=0' } },
-  );
 }
