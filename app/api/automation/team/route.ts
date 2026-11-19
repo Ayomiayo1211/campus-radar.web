@@ -2,8 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getCloudflareContext } from '@opennextjs/cloudflare';
 import { getSupabaseAdmin } from '@/lib/server/supabase';
 
-
-const ALLOWED_ROLES = new Set(['REPORTER', 'EDITOR', 'SENIOR_EDITOR']);
+const REPORTER_ROLE = 'REPORTER';
 
 async function matchesToken(provided: string, expected: string): Promise<boolean> {
   if (!provided || !expected) return false;
@@ -41,38 +40,29 @@ export async function GET(request: NextRequest) {
 
   const db = getSupabaseAdmin() as any;
 
-  const [{ data: users, error: usersError }, { data: memberships, error: membershipsError }] =
-    await Promise.all([
-      db.from('users')
-        .select('id,name,email,role,is_active,created_at')
-        .eq('is_active', true)
-        .in('role', [...ALLOWED_ROLES])
-        .order('created_at', { ascending: true }),
-      db.from('user_teams')
-        .select('user_id,team')
-        .eq('team', 'EDITORIAL'),
-    ]);
+  // Include every account whose role is REPORTER, regardless of team membership
+  // or account activation state. The isActive field is preserved for the sheet.
+  const { data: users, error } = await db.from('users')
+    .select('id,name,email,role,is_active,created_at')
+    .eq('role', REPORTER_ROLE)
+    .order('created_at', { ascending: true });
 
-  if (usersError || membershipsError) {
-    console.error('[automation team] Database lookup failed:', usersError?.message || membershipsError?.message);
+  if (error) {
+    console.error('[automation team] Database lookup failed:', error.message);
     return NextResponse.json(
-      { error: 'Could not load editorial team.' },
+      { error: 'Could not load reporter accounts.' },
       { status: 500, headers: { 'Cache-Control': 'no-store' } },
     );
   }
 
-  const editorialUserIds = new Set((memberships ?? []).map((membership: { user_id: string }) => membership.user_id));
-
-  const team = (users ?? [])
-    .filter((user: any) => editorialUserIds.has(user.id))
-    .map((user: any) => ({
-      id: user.id,
-      name: user.name,
-      email: user.email,
-      role: user.role,
-      isActive: user.is_active,
-      teams: ['EDITORIAL'],
-    }));
+  const team = (users ?? []).map((user: any) => ({
+    id: user.id,
+    name: user.name,
+    email: user.email,
+    role: user.role,
+    isActive: user.is_active,
+    teams: ['EDITORIAL'],
+  }));
 
   return NextResponse.json(
     { team, count: team.length, generatedAt: new Date().toISOString() },
