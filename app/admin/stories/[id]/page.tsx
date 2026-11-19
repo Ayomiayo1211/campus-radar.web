@@ -308,7 +308,7 @@ export default function EditStoryPage() {
   }
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (story?.currentUserRole === 'REPORTER' && story.status !== 'REVIEW' && status !== 'REVIEW') {
+    if (story?.currentUserRole === 'REPORTER' && story.status !== 'REVIEW') {
       setShowSubmitConfirm(true);
       return;
     }
