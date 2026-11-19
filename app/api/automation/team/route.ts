@@ -24,7 +24,6 @@ async function fetchAllRows(queryFactory: () => any): Promise<any[]> {
 
   for (let offset = 0; ; offset += pageSize) {
     const { data, error } = await queryFactory().range(offset, offset + pageSize - 1);
-
     if (error) throw error;
 
     const page = data ?? [];
@@ -57,8 +56,8 @@ export async function GET(request: NextRequest) {
   const db = getSupabaseAdmin() as any;
 
   try {
-    // Fetch every account and every team membership, including inactive accounts.
-    // Pagination avoids silently stopping at Supabase's 1,000-row response limit.
+    // Match the admin dashboard's account source: every row in public.users.
+    // Include all roles, account states and team memberships.
     const [users, memberships] = await Promise.all([
       fetchAllRows(() => db.from('users')
         .select('id,name,email,role,is_active,created_at')
@@ -78,14 +77,7 @@ export async function GET(request: NextRequest) {
       teamsByUserId.set(membership.user_id, current);
     }
 
-    // Include all Editorial team accounts, regardless of role/status,
-    // plus all Reporter accounts even if they have no team assignment.
-    const newsroomUsers = users.filter((user: any) =>
-      user.role === 'REPORTER' ||
-      (teamsByUserId.get(user.id) ?? []).includes('EDITORIAL')
-    );
-
-    const team = newsroomUsers.map((user: any) => ({
+    const team = users.map((user: any) => ({
       id: user.id,
       name: user.name,
       email: user.email,
@@ -94,10 +86,17 @@ export async function GET(request: NextRequest) {
       teams: teamsByUserId.get(user.id) ?? [],
     }));
 
+    const roleCounts: Record<string, number> = {};
+    for (const user of team) {
+      const role = String(user.role || 'UNASSIGNED');
+      roleCounts[role] = (roleCounts[role] ?? 0) + 1;
+    }
+
     return NextResponse.json(
       {
         team,
         count: team.length,
+        roleCounts,
         generatedAt: new Date().toISOString(),
       },
       { headers: { 'Cache-Control': 'no-store, max-age=0' } },
@@ -107,7 +106,7 @@ export async function GET(request: NextRequest) {
     console.error('[automation team] Database lookup failed:', message);
 
     return NextResponse.json(
-      { error: 'Could not load newsroom accounts.' },
+      { error: 'Could not load account records.' },
       { status: 500, headers: { 'Cache-Control': 'no-store' } },
     );
   }
