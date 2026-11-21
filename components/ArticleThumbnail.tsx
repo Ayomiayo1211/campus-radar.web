@@ -163,6 +163,7 @@ export default function ArticleThumbnail({ title, excerpt, coverImage, contentTy
           </div>
         </div>
       </div>
+      }
       {!coverImage && <p className="mt-3 text-xs text-amber-700">Select a cover image to enable PNG download.</p>}
       {downloadError && <p className="mt-3 text-sm text-red-600">{downloadError}</p>}
     </section>
