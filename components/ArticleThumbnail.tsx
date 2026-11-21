@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { Facebook, Instagram, Music2 } from 'lucide-react';
 
-type Props = { title: string; excerpt: string; coverImage: string; contentType: string; authorName: string; date?: string | null };
+type Props = { title: string; excerpt: string; coverImage: string; contentType: string; authorName: string; date?: string | null; showPreview?: boolean };
 const SIZE = 1200, BLUE = '#2C51D2', NAVY = '#233F9E', DOMAIN = 'campusradarfunaab.com.ng';
 
 function labelFor(type: string) {
@@ -54,7 +54,7 @@ function drawCover(ctx: CanvasRenderingContext2D, image: HTMLImageElement) {
   ctx.drawImage(image, (SIZE - width) / 2, (SIZE - height) / 2, width, height); ctx.restore();
 }
 
-export default function ArticleThumbnail({ title, excerpt, coverImage, contentType, authorName, date }: Props) {
+export default function ArticleThumbnail({ title, excerpt, coverImage, contentType, authorName, date, showPreview = true }: Props) {
   const [downloading, setDownloading] = useState(false);
   const [downloadError, setDownloadError] = useState('');
 
@@ -139,7 +139,7 @@ export default function ArticleThumbnail({ title, excerpt, coverImage, contentTy
         <div><h2 className="text-lg font-semibold text-black">Campus Radar Thumbnail</h2><p className="mt-1 text-sm text-gray-600">Live preview using the article details above.</p></div>
         <button type="button" onClick={downloadThumbnail} disabled={downloading || !coverImage} className="rounded-lg bg-[#2C51D2] px-4 py-2.5 text-sm font-semibold text-white hover:bg-[#233F9E] disabled:cursor-not-allowed disabled:opacity-50">{downloading ? 'Preparing PNG…' : 'Download PNG'}</button>
       </div>
-      <div className="mx-auto aspect-square w-full max-w-[520px] overflow-hidden bg-white text-white shadow-sm">
+      {showPreview && <div className="mx-auto aspect-square w-full max-w-[520px] overflow-hidden bg-white text-white shadow-sm">
         <div className="relative h-full w-full">
           {coverImage ? <img src={coverImage} alt="" className="absolute inset-0 h-full w-full object-cover" /> : <div className="absolute inset-0 bg-[#2C51D2]" />}
           <div className="absolute left-[4.33%] top-[4.33%] h-[6.92%] w-[18.67%] overflow-hidden bg-[#FAF8F2]"><img src="/campusradar.svg" alt="Campus Radar" className="absolute left-[7.75%] top-[-93.63%] h-[286.5%] w-[84.27%] max-w-none" /></div>
@@ -163,6 +163,7 @@ export default function ArticleThumbnail({ title, excerpt, coverImage, contentTy
           </div>
         </div>
       </div>
+      </div>}
       {!coverImage && <p className="mt-3 text-xs text-amber-700">Select a cover image to enable PNG download.</p>}
       {downloadError && <p className="mt-3 text-sm text-red-600">{downloadError}</p>}
     </section>
