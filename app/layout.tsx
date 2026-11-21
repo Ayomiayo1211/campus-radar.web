@@ -22,9 +22,9 @@ export const metadata: Metadata = {
     'Student-focused media and information platform for the Federal University of Agriculture, Abeokuta.',
   metadataBase: new URL('https://www.campusradarfunaab.com.ng'),
   icons: {
-    icon: [{ url: '/campusradar.svg', type: 'image/svg+xml' }],
-    shortcut: ['/campusradar.svg'],
-    apple: [{ url: '/campusradar.svg', type: 'image/svg+xml' }],
+    icon: [{ url: '/favicon.svg', type: 'image/svg+xml', sizes: 'any' }],
+    shortcut: ['/favicon.svg'],
+    apple: [{ url: '/favicon.svg', type: 'image/svg+xml' }],
   },
   openGraph: {
     type: 'website',
