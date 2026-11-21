@@ -2,6 +2,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import ArticleThumbnail from '@/components/ArticleThumbnail';
 import Link from 'next/link';
 
 type Story = {
@@ -10,6 +11,7 @@ type Story = {
   shortCode: string | null;
   title: string;
   excerpt: string;
+  coverImage: string | null;
   contentType: string;
   status: string;
   featured: boolean;
@@ -169,7 +171,7 @@ export default function StoriesPage() {
                       </div>
                     </div>
 
-                    <div className="flex shrink-0 flex-wrap gap-2">
+                    <div className="flex shrink-0 flex-wrap items-start gap-2">
                       {story.status === 'PUBLISHED' && (
                         <button
                           type="button"
@@ -188,6 +190,7 @@ export default function StoriesPage() {
                           {copiedStoryId === story.id ? 'Link copied' : 'Copy share link'}
                         </button>
                       )}
+                      {story.coverImage && <ArticleThumbnail title={story.title} excerpt={story.excerpt || ''} coverImage={story.coverImage} contentType={story.contentType} authorName={story.authorName} date={story.publishedAt || story.createdAt} showPreview={false} />}
                       <Link
                         href={`/admin/stories/${story.id}`}
                         className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium hover:bg-gray-50"
